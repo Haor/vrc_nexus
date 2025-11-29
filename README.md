@@ -2,7 +2,7 @@
 
 A visualization tool for analyzing mutual friend relationships based on VRCX data.
 
-![Screenshot](https://github.com/user-attachments/assets/537dcf59-595d-4889-b0e8-e1dbfee9d0b6)
+![Screenshot](https://github.com/user-attachments/assets/0ca803af-7f25-49e3-9fd8-0fbd6976d42c)
 
 ## Features
 

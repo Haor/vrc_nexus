@@ -1782,6 +1782,7 @@
                 this.highlightedNodes = new Set();
                 this.currentGexfContent = null;  // 保存当前的 GEXF 内容用于导出
                 this.currentFileName = null;     // 当前文件名
+                this.isDragging = false;         // 是否正在拖动节点
 
                 this.init();
             }
@@ -2285,6 +2286,7 @@
             drag() {
                 return d3.drag()
                     .on('start', (event, d) => {
+                        this.isDragging = true;
                         if (!event.active) this.simulation.alphaTarget(0.3).restart();
                         d.fx = d.x;
                         d.fy = d.y;
@@ -2294,6 +2296,7 @@
                         d.fy = event.y;
                     })
                     .on('end', (event, d) => {
+                        this.isDragging = false;
                         if (!event.active) this.simulation.alphaTarget(0);
                         if (!this.frozen) {
                             d.fx = null;
@@ -2303,6 +2306,9 @@
             }
 
             handleMouseOver(event, d) {
+                // 拖动过程中不处理悬停事件，防止闪烁
+                if (this.isDragging) return;
+                
                 const tooltip = document.getElementById('tooltip');
                 tooltip.querySelector('.tooltip-name').textContent = d.label;
                 
@@ -2321,6 +2327,9 @@
             }
 
             handleMouseOut(event, d) {
+                // 拖动过程中不处理悬停事件，防止闪烁
+                if (this.isDragging) return;
+                
                 const tooltip = document.getElementById('tooltip');
                 tooltip.classList.remove('visible');
                 

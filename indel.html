@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mutual Friends Network</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f0f14'/><line x1='50' y1='25' x2='25' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='50' y1='25' x2='75' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='75' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='75' y2='50' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><line x1='50' y1='25' x2='50' y2='75' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><circle cx='50' cy='25' r='10' fill='%238b6cba' opacity='0.9'/><circle cx='25' cy='50' r='8' fill='%236b6b78' opacity='0.9'/><circle cx='75' cy='50' r='8' fill='%234a8fb8' opacity='0.9'/><circle cx='50' cy='75' r='12' fill='%23ea2864'/><circle cx='50' cy='50' r='6' fill='%238b6cba' opacity='0.85'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f0f14'/><line x1='50' y1='25' x2='25' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='50' y1='25' x2='75' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='75' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='75' y2='50' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><line x1='50' y1='25' x2='50' y2='75' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><circle cx='50' cy='25' r='10' fill='%23c75a80' opacity='0.9'/><circle cx='25' cy='50' r='8' fill='%235e6575' opacity='0.9'/><circle cx='75' cy='50' r='8' fill='%238f7585' opacity='0.9'/><circle cx='50' cy='75' r='12' fill='%23ea2864'/><circle cx='50' cy='50' r='6' fill='%23c75a80' opacity='0.85'/></svg>">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -634,22 +634,22 @@
         }
 
         .ranking-item.top-2 {
-            background: linear-gradient(135deg, rgba(139, 108, 186, 0.15), rgba(139, 108, 186, 0.05));
-            border-color: rgba(139, 108, 186, 0.3);
+            background: linear-gradient(135deg, rgba(199, 90, 128, 0.15), rgba(199, 90, 128, 0.05));
+            border-color: rgba(199, 90, 128, 0.3);
         }
 
         .ranking-item.top-2 .ranking-position {
-            background: linear-gradient(135deg, #8b6cba, #7359a3);
+            background: linear-gradient(135deg, #c75a80, #a84d6d);
             color: #fff;
         }
 
         .ranking-item.top-3 {
-            background: linear-gradient(135deg, rgba(74, 143, 184, 0.15), rgba(74, 143, 184, 0.05));
-            border-color: rgba(74, 143, 184, 0.3);
+            background: linear-gradient(135deg, rgba(143, 117, 133, 0.15), rgba(143, 117, 133, 0.05));
+            border-color: rgba(143, 117, 133, 0.3);
         }
 
         .ranking-item.top-3 .ranking-position {
-            background: linear-gradient(135deg, #4a8fb8, #3d7a9e);
+            background: linear-gradient(135deg, #8f7585, #7a6472);
             color: #fff;
         }
 
@@ -1414,12 +1414,12 @@
                             <line x1="75" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2" opacity="0.6"/>
                             <line x1="25" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
                             <line x1="50" y1="25" x2="50" y2="75" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-                            <!-- 节点 - 展示配色方案 -->
-                            <circle cx="50" cy="25" r="10" fill="#8b6cba" opacity="0.9"/>
-                            <circle cx="25" cy="50" r="8" fill="#6b6b78" opacity="0.9"/>
-                            <circle cx="75" cy="50" r="8" fill="#4a8fb8" opacity="0.9"/>
+                            <!-- 节点 - 灰粉渐变配色 -->
+                            <circle cx="50" cy="25" r="10" fill="#c75a80" opacity="0.9"/>
+                            <circle cx="25" cy="50" r="8" fill="#5e6575" opacity="0.9"/>
+                            <circle cx="75" cy="50" r="8" fill="#8f7585" opacity="0.9"/>
                             <circle cx="50" cy="75" r="12" fill="#ea2864"/>
-                            <circle cx="50" cy="50" r="6" fill="#8b6cba" opacity="0.85"/>
+                            <circle cx="50" cy="50" r="6" fill="#c75a80" opacity="0.85"/>
                             <!-- 外圈光晕 -->
                             <circle cx="50" cy="75" r="16" stroke="#ea2864" stroke-width="1" fill="none" opacity="0.3"/>
                         </svg>
@@ -1472,15 +1472,15 @@
             <div class="legend">
                 <div class="legend-title" data-i18n="legendTitle">共同好友数量</div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #6b6b78; box-shadow: 0 0 10px rgba(107, 107, 120, 0.4);"></div>
+                    <div class="legend-circle" style="background: #5e6575; box-shadow: 0 0 10px rgba(94, 101, 117, 0.4);"></div>
                     <span class="legend-label" data-i18n="legendLow">少量连接</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #4a8fb8; box-shadow: 0 0 10px rgba(74, 143, 184, 0.5);"></div>
+                    <div class="legend-circle" style="background: #8f7585; box-shadow: 0 0 10px rgba(143, 117, 133, 0.45);"></div>
                     <span class="legend-label" data-i18n="legendMid">一般连接</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #8b6cba; box-shadow: 0 0 10px rgba(139, 108, 186, 0.5);"></div>
+                    <div class="legend-circle" style="background: #c75a80; box-shadow: 0 0 10px rgba(199, 90, 128, 0.5);"></div>
                     <span class="legend-label" data-i18n="legendHigh">较多连接</span>
                 </div>
                 <div class="legend-item">
@@ -2171,13 +2171,13 @@
                 // 使用缓存的最大连接数
                 const ratio = d.connections / (this.maxConnections || 1);
                 
-                // 从灰色到主色渐变，增强辨识度
+                // 灰色到粉色的和谐渐变（饱和度递增 + 色相偏移）
                 if (ratio < 0.25) {
-                    return '#6b6b78'; // 灰色 - 少量连接
+                    return '#5e6575'; // 冷灰蓝 - 少量连接
                 } else if (ratio < 0.5) {
-                    return '#4a8fb8'; // 青蓝色 - 一般连接
+                    return '#8f7585'; // 灰玫瑰 - 一般连接
                 } else if (ratio < 0.75) {
-                    return '#8b6cba'; // 紫罗兰 - 较多连接
+                    return '#c75a80'; // 玫瑰粉 - 较多连接
                 } else {
                     return '#ea2864'; // 主色调粉红 - 社交中心
                 }

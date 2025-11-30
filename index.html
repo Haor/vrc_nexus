@@ -2287,6 +2287,8 @@
                 return d3.drag()
                     .on('start', (event, d) => {
                         this.isDragging = true;
+                        // 拖动开始时隐藏 tooltip
+                        document.getElementById('tooltip').classList.remove('visible');
                         if (!event.active) this.simulation.alphaTarget(0.3).restart();
                         d.fx = d.x;
                         d.fy = d.y;

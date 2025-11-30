@@ -27,6 +27,10 @@
             --border-color: #2a2832;
             --glow-primary: 0 0 20px rgba(234, 40, 100, 0.4);
             --glow-soft: 0 0 30px rgba(234, 40, 100, 0.2);
+            --mobile-header-icon-top: 30px;
+            --menu-btn-size: 36px;
+            --menu-icon-size: 24px;
+            --mobile-logo-padding-h: 52px;
         }
 
         * {
@@ -121,12 +125,13 @@
         }
 
         .logo-section {
-            padding: 24px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             background: linear-gradient(135deg, rgba(234, 40, 100, 0.05) 0%, transparent 100%);
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
+            gap: 12px;
         }
 
         .logo-content {
@@ -158,22 +163,22 @@
         }
 
         .lang-btn {
-            width: 36px;
-            height: 36px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-card);
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
             color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: color 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
         }
 
         .lang-btn svg {
+            width: 22px;
+            height: 22px;
             stroke: var(--text-secondary);
             transition: stroke 0.2s ease;
         }
@@ -183,7 +188,6 @@
         }
 
         .lang-btn:hover {
-            border-color: var(--accent-primary);
             color: var(--accent-primary);
         }
 
@@ -961,6 +965,7 @@
             border-radius: 12px;
             padding: 16px;
             backdrop-filter: blur(10px);
+            display: none;
         }
 
         .legend-title {
@@ -999,7 +1004,7 @@
             position: absolute;
             bottom: 24px;
             right: 24px;
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 8px;
         }
@@ -1240,19 +1245,251 @@
             }
         }
 
+        /* 浮动菜单按钮（带动画效果：三条横杠 ↔ X） */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            z-index: 250;
+            width: var(--menu-btn-size);
+            height: var(--menu-btn-size);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .menu-toggle svg {
+            width: var(--menu-icon-size);
+            height: var(--menu-icon-size);
+            stroke: currentColor;
+            stroke-width: 2.4;
+            fill: none;
+        }
+
+        .menu-toggle-line {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform-origin: 12px 12px;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+
+        .line-top { transform: translateY(-5px); }
+        .line-middle { transform: translateY(0); }
+        .line-bottom { transform: translateY(5px); }
+
+        .menu-toggle:hover { color: var(--accent-primary); }
+
+        /* 打开状态 - 变成 X */
+        .menu-toggle.active .line-top {
+            transform: translateY(0) rotate(45deg);
+        }
+
+        .menu-toggle.active .line-middle {
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+
+        .menu-toggle.active .line-bottom {
+            transform: translateY(0) rotate(-45deg);
+        }
+
+        /* 侧边栏遮罩层 */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 140;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
         @media (max-width: 900px) {
+            html, body {
+                overflow: hidden;
+                height: 100%;
+            }
+
             .container {
                 flex-direction: column;
+                height: 100vh;
+                z-index: auto;
+            }
+
+            /* 移动端 logo-section - 保持原有高度 */
+            .logo-section {
+                padding: 20px 52px;
+            }
+
+            /* 显示菜单按钮 - 使用变量让图标与 logo 区块垂直居中 */
+            .menu-toggle {
+                display: flex;
+                top: var(--mobile-header-icon-top);
+                left: calc((var(--mobile-logo-padding-h) - var(--menu-btn-size)) / 2);
+            }
+
+            /* 移动端语言选择器 - 固定定位，同样对齐 */
+            .lang-selector {
+                position: fixed;
+                top: var(--mobile-header-icon-top);
+                right: 16px;
+                z-index: 250;
+            }
+
+            /* 侧边栏抽屉式 - 需要脱离 container 的层叠上下文 */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 85%;
+                max-width: 320px;
+                height: 100vh;
+                max-height: 100vh;
+                z-index: 200;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: 1px solid var(--border-color);
+                background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            /* 图表区域全屏 */
+            .graph-area {
+                width: 100%;
+                height: 100vh;
+                flex: 1;
+            }
+
+            /* 欢迎界面调整 */
+            .welcome-content {
+                max-width: 90%;
+                padding: 24px 20px;
+                margin: 16px;
+            }
+
+            .welcome-icon svg {
+                width: 60px;
+                height: 60px;
+            }
+
+            .welcome-title {
+                font-size: 20px;
+            }
+
+            .welcome-desc {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+
+            .welcome-btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .welcome-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+
+            .welcome-tip {
+                font-size: 11px;
+            }
+
+            .vrcx-tip {
+                padding: 12px;
+            }
+
+            .vrcx-tip-title {
+                font-size: 11px;
+            }
+
+            .vrcx-tip ol {
+                font-size: 10px;
+            }
+
+            /* 图例和控制按钮调整 */
+            .legend {
+                top: auto;
+                bottom: 70px;
+                left: 12px;
+                right: auto;
+                padding: 10px;
+            }
+
+            .legend-title {
+                font-size: 10px;
+            }
+
+            .legend-circle {
+                width: 10px;
+                height: 10px;
+            }
+
+            .legend-label {
+                font-size: 10px;
+            }
+
+            .zoom-controls {
+                bottom: 12px;
+                right: 12px;
+                gap: 6px;
+            }
+
+            .zoom-btn {
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        /* 小屏手机 */
+        @media (max-width: 480px) {
+            :root {
+                --mobile-header-icon-top: 26px;
+                --mobile-logo-padding-h: 44px;
             }
 
             .sidebar {
                 width: 100%;
-                height: auto;
-                max-height: 40vh;
+                max-width: none;
             }
 
-            .graph-area {
-                height: 60vh;
+            .logo-section {
+                padding: 16px 44px;
+            }
+
+            /* 更紧凑屏幕下：通过变量下调图标位置，保持与桌面语言按钮居中 */
+            .menu-toggle {
+                left: 12px;
+            }
+
+            .lang-selector {
+                right: 12px;
+            }
+
+            .welcome-content {
+                padding: 20px 16px;
+            }
+
+            .welcome-title {
+                font-size: 18px;
             }
         }
     </style>
@@ -1260,6 +1497,18 @@
 <body>
     <div class="bg-pattern"></div>
     <div class="grid-overlay"></div>
+
+    <!-- 浮动菜单按钮 -->
+    <button class="menu-toggle" id="menuToggle" title="Menu" aria-label="Menu">
+        <svg viewBox="0 0 24 24">
+            <line class="menu-toggle-line line-top" x1="5" y1="12" x2="19" y2="12"></line>
+            <line class="menu-toggle-line line-middle" x1="5" y1="12" x2="19" y2="12"></line>
+            <line class="menu-toggle-line line-bottom" x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <!-- 侧边栏遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="container">
         <aside class="sidebar">
@@ -1285,8 +1534,8 @@
             </div>
 
             <div class="file-section">
-                <input type="file" id="fileInput" accept=".gexf,.xml" style="display: none;">
-                <input type="file" id="dbFileInput" accept=".sqlite3,.db" style="display: none;">
+                <input type="file" id="fileInput" accept=".gexf,.xml,text/xml,application/xml,application/octet-stream" style="display: none;">
+                <input type="file" id="dbFileInput" accept=".sqlite3,.db,.sqlite,application/x-sqlite3,application/octet-stream" style="display: none;">
                 <div class="file-btn-group">
                     <button class="file-btn" id="btnLoadFile">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1789,21 +2038,27 @@
 
             async init() {
                 this.updateDimensions();
-                window.addEventListener('resize', () => this.updateDimensions());
-                
-                // 不自动加载数据，等待用户选择文件
-                this.setupControls();
-                this.showWelcome();
-            }
+            window.addEventListener('resize', () => this.updateDimensions());
+            
+            // 不自动加载数据，等待用户选择文件
+            this.setupControls();
+            this.showWelcome();
+        }
 
             showWelcome() {
                 // 隐藏加载动画，显示欢迎界面
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('welcomeScreen').style.display = 'flex';
+                // 隐藏图例和控制按钮
+                document.querySelector('.legend').style.display = 'none';
+                document.querySelector('.zoom-controls').style.display = 'none';
             }
 
             hideWelcome() {
                 document.getElementById('welcomeScreen').style.display = 'none';
+                // 显示图例和控制按钮
+                document.querySelector('.legend').style.display = 'block';
+                document.querySelector('.zoom-controls').style.display = 'flex';
             }
 
             updateDimensions() {
@@ -2073,6 +2328,13 @@
                 
                 // 显示排名列表
                 this.showRankingList();
+                
+                // 移动端加载成功后自动隐藏侧边栏
+                if (window.innerWidth <= 900) {
+                    document.querySelector('.sidebar').classList.remove('visible');
+                    document.getElementById('sidebarOverlay').classList.remove('visible');
+                    document.getElementById('menuToggle').classList.remove('active');
+                }
                 
                 // 重置搜索框
                 document.getElementById('searchInput').value = '';
@@ -2809,9 +3071,70 @@
                 });
             });
 
+            // 移动端侧边栏控制
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            let isMobile = window.innerWidth <= 900;
+
+            function updateMenuTogglePosition() {
+                if (!menuToggle) return;
+                if (window.innerWidth > 900) {
+                    menuToggle.style.left = '';
+                    return;
+                }
+                const logoSection = document.querySelector('.logo-section');
+                if (!logoSection) return;
+                const paddingLeft = parseFloat(getComputedStyle(logoSection).paddingLeft) || 0;
+                const btnWidth = parseFloat(getComputedStyle(menuToggle).width) || 0;
+                const offset = Math.max(6, (paddingLeft - btnWidth) / 2);
+                menuToggle.style.left = `${offset}px`;
+            }
+
+            function showSidebar() {
+                sidebar.classList.add('visible');
+                sidebarOverlay.classList.add('visible');
+                menuToggle.classList.add('active');
+            }
+
+            function hideSidebar() {
+                sidebar.classList.remove('visible');
+                sidebarOverlay.classList.remove('visible');
+                menuToggle.classList.remove('active');
+            }
+
+            // 菜单按钮点击
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    if (sidebar.classList.contains('visible')) {
+                        hideSidebar();
+                    } else {
+                        showSidebar();
+                    }
+                });
+                updateMenuTogglePosition();
+            }
+
+            // 遮罩点击关闭
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', hideSidebar);
+            }
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', () => {
+                const wasMobile = isMobile;
+                isMobile = window.innerWidth <= 900;
+                
+                // 从移动端切换到桌面端时，移除移动端样式
+                if (wasMobile && !isMobile) {
+                    sidebar.classList.remove('visible');
+                    sidebarOverlay.classList.remove('visible');
+                }
+                updateMenuTogglePosition();
+            });
+
             window.networkViz = new NetworkVisualization();
         });
     </script>
 </body>
 </html>
-

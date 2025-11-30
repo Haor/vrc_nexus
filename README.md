@@ -1,6 +1,6 @@
 # VRChat Mutual Friends Network
 
-A visualization tool for analyzing mutual friend relationships based on VRCX data.
+A visualization tool for analyzing mutual friend relationships based on [VRCX](https://github.com/vrcx-team/VRCX) data.
 
 ![Screenshot](https://github.com/user-attachments/assets/0ca803af-7f25-49e3-9fd8-0fbd6976d42c)
 

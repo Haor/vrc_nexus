@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mutual Friends Network</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f0f14'/><line x1='50' y1='25' x2='25' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='50' y1='25' x2='75' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='75' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='75' y2='50' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><line x1='50' y1='25' x2='50' y2='75' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><circle cx='50' cy='25' r='10' fill='%23c75a80' opacity='0.9'/><circle cx='25' cy='50' r='8' fill='%235e6575' opacity='0.9'/><circle cx='75' cy='50' r='8' fill='%238f7585' opacity='0.9'/><circle cx='50' cy='75' r='12' fill='%23ea2864'/><circle cx='50' cy='50' r='6' fill='%23c75a80' opacity='0.85'/></svg>">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f0f14'/><line x1='50' y1='25' x2='25' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='50' y1='25' x2='75' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='75' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='75' y2='50' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><line x1='50' y1='25' x2='50' y2='75' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><circle cx='50' cy='25' r='10' fill='%23c75a80' opacity='0.9'/><circle cx='25' cy='50' r='8' fill='%235e6575' opacity='0.9'/><circle cx='75' cy='50' r='8' fill='%238f7585' opacity='0.9'/><circle cx='50' cy='75' r='12' fill='%23ea2864'/><circle cx='50' cy='50' r='6' fill='%23c75a80' opacity='0.85'/></svg>">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             /* 基于参考配色卡 - Black Color Palettes */
@@ -54,7 +58,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(ellipse at 30% 70%, rgba(234, 40, 100, 0.08) 0%, transparent 50%),
                 radial-gradient(ellipse at 70% 30%, rgba(234, 40, 100, 0.05) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 50%, rgba(45, 42, 53, 0.3) 0%, transparent 70%);
@@ -68,7 +72,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(234, 40, 100, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(234, 40, 100, 0.02) 1px, transparent 1px);
             background-size: 60px 60px;
@@ -703,6 +707,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1094,8 +1099,17 @@
         }
 
         @keyframes networkPulse {
-            0%, 100% { opacity: 0.7; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.08); }
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
         }
 
         .welcome-title {
@@ -1277,11 +1291,21 @@
             transition: transform 0.25s ease, opacity 0.2s ease;
         }
 
-        .line-top { transform: translateY(-5px); }
-        .line-middle { transform: translateY(0); }
-        .line-bottom { transform: translateY(5px); }
+        .line-top {
+            transform: translateY(-5px);
+        }
 
-        .menu-toggle:hover { color: var(--accent-primary); }
+        .line-middle {
+            transform: translateY(0);
+        }
+
+        .line-bottom {
+            transform: translateY(5px);
+        }
+
+        .menu-toggle:hover {
+            color: var(--accent-primary);
+        }
 
         /* 打开状态 - 变成 X */
         .menu-toggle.active .line-top {
@@ -1317,7 +1341,9 @@
         }
 
         @media (max-width: 900px) {
-            html, body {
+
+            html,
+            body {
                 overflow: hidden;
                 height: 100%;
             }
@@ -1494,6 +1520,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-pattern"></div>
     <div class="grid-overlay"></div>
@@ -1519,10 +1546,13 @@
                 </div>
                 <div class="lang-selector">
                     <button class="lang-btn" id="langBtn" title="Language / 语言 / 言語">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="2" y1="12" x2="22" y2="12"></line>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
                         </svg>
                     </button>
                     <div class="lang-dropdown" id="langDropdown">
@@ -1534,18 +1564,22 @@
             </div>
 
             <div class="file-section">
-                <input type="file" id="fileInput" accept=".gexf,.xml,text/xml,application/xml,application/octet-stream" style="display: none;">
-                <input type="file" id="dbFileInput" accept=".sqlite3,.db,.sqlite,application/x-sqlite3,application/octet-stream" style="display: none;">
+                <input type="file" id="fileInput" accept=".gexf,.xml,text/xml,application/xml,application/octet-stream"
+                    style="display: none;">
+                <input type="file" id="dbFileInput"
+                    accept=".sqlite3,.db,.sqlite,application/x-sqlite3,application/octet-stream" style="display: none;">
                 <div class="file-btn-group">
                     <button class="file-btn" id="btnLoadFile">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                         </svg>
                         <span data-i18n="loadGexf">选择 GEXF</span>
                     </button>
                     <button class="file-btn file-btn-db" id="btnLoadDB">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
                             <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                             <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
@@ -1556,7 +1590,8 @@
                 <div class="file-info">
                     <span class="file-name" id="fileName" data-i18n="selectFile">请选择文件</span>
                     <button class="export-btn" id="btnExportGexf" style="display: none;" title="导出为 GEXF 文件">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -1567,11 +1602,13 @@
 
             <div class="search-section">
                 <div class="search-wrapper">
-                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="M21 21l-4.35-4.35"></path>
                     </svg>
-                    <input type="text" class="search-input" id="searchInput" placeholder="搜索好友..." data-i18n-placeholder="search">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索好友..."
+                        data-i18n-placeholder="search">
                 </div>
             </div>
 
@@ -1614,7 +1651,8 @@
                 </div>
                 <div class="btn-group">
                     <button class="btn active" id="btnShowLabels">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M4 7V4h16v3"></path>
                             <path d="M9 20h6"></path>
                             <path d="M12 4v16"></path>
@@ -1622,14 +1660,16 @@
                         <span data-i18n="showLabels">显示标签</span>
                     </button>
                     <button class="btn" id="btnReset">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                             <path d="M3 3v5h5"></path>
                         </svg>
                         <span data-i18n="resetView">重置视图</span>
                     </button>
                     <button class="btn" id="btnFreeze">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <rect x="6" y="4" width="4" height="16"></rect>
                             <rect x="14" y="4" width="4" height="16"></rect>
                         </svg>
@@ -1651,40 +1691,49 @@
                 <div class="loading-spinner"></div>
                 <div class="loading-text" data-i18n="loading">正在加载网络数据...</div>
             </div>
-            
+
             <div class="welcome-screen" id="welcomeScreen">
                 <div class="welcome-content">
                     <div class="welcome-icon">
                         <svg width="90" height="90" viewBox="0 0 100 100" fill="none">
                             <!-- 连接线 -->
-                            <line x1="50" y1="25" x2="25" y2="50" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                            <line x1="50" y1="25" x2="75" y2="50" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                            <line x1="25" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                            <line x1="75" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                            <line x1="25" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
-                            <line x1="50" y1="25" x2="50" y2="75" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+                            <line x1="50" y1="25" x2="25" y2="50" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="50" y1="25" x2="75" y2="50" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="25" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="75" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="25" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="1.5"
+                                opacity="0.4" />
+                            <line x1="50" y1="25" x2="50" y2="75" stroke="currentColor" stroke-width="1.5"
+                                opacity="0.4" />
                             <!-- 节点 - 灰粉渐变配色 -->
-                            <circle cx="50" cy="25" r="10" fill="#c75a80" opacity="0.9"/>
-                            <circle cx="25" cy="50" r="8" fill="#5e6575" opacity="0.9"/>
-                            <circle cx="75" cy="50" r="8" fill="#8f7585" opacity="0.9"/>
-                            <circle cx="50" cy="75" r="12" fill="#ea2864"/>
-                            <circle cx="50" cy="50" r="6" fill="#c75a80" opacity="0.85"/>
+                            <circle cx="50" cy="25" r="10" fill="#c75a80" opacity="0.9" />
+                            <circle cx="25" cy="50" r="8" fill="#5e6575" opacity="0.9" />
+                            <circle cx="75" cy="50" r="8" fill="#8f7585" opacity="0.9" />
+                            <circle cx="50" cy="75" r="12" fill="#ea2864" />
+                            <circle cx="50" cy="50" r="6" fill="#c75a80" opacity="0.85" />
                             <!-- 外圈光晕 -->
-                            <circle cx="50" cy="75" r="16" stroke="#ea2864" stroke-width="1" fill="none" opacity="0.3"/>
+                            <circle cx="50" cy="75" r="16" stroke="#ea2864" stroke-width="1" fill="none"
+                                opacity="0.3" />
                         </svg>
                     </div>
                     <h2 class="welcome-title" data-i18n="welcomeTitle">共同好友网络分析</h2>
                     <p class="welcome-desc" data-i18n="welcomeDesc">上传文件可视化分析你的社交网络</p>
                     <div class="welcome-btn-group">
                         <button class="welcome-btn" id="welcomeUploadBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
                             <span data-i18n="loadGexf">选择 GEXF</span>
                         </button>
                         <button class="welcome-btn welcome-btn-db" id="welcomeUploadDBBtn">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
                                 <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
                                 <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
@@ -1695,16 +1744,22 @@
                     <div class="welcome-hint" data-i18n="fileHint">支持 .gexf 文件 或 VRCX.sqlite3 数据库</div>
                     <div class="welcome-note">
                         <div class="welcome-note-title">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
-                            <span data-i18n="vrcxNote">使用 VRCX 数据库前</span>
+                            <span class="control-value" data-i18n="vrcxNote">使用 VRCX 数据库前</span>
                         </div>
                         <ol class="welcome-note-list" id="welcomeNoteList">
-                            <li><span data-i18n="vrcxStep1">在VRCX的设置中，切换至</span> <strong data-i18n="vrcxNightly">Nightly</strong> <span data-i18n="vrcxVersion">版本</span></li>
-                            <li><span data-i18n="vrcxStep2">在 VRCX「图表」选项卡执行</span> <strong>Fetch Mutual Friends</strong></li>
+                            <li><span data-i18n="vrcxStep1">在设置中检查更新，确保使用</span> <strong class="control-value"
+                                    data-i18n="vrcxMinVersion">Stable 2025.12.06+</strong> <span
+                                    data-i18n="vrcxVersion">或更新版本（旧版数据库结构不兼容）</span>
+                            </li>
+                            <li><span data-i18n="vrcxStep2">打开 VRCX「图表」，在 Mutual Friend Network 下执行</span> <strong
+                                    class="control-value" data-i18n="vrcxFetch">Start Fetch</strong>
+                            </li>
                             <li data-i18n="vrcxStep3">解析完成后可下载 GEXF 文件</li>
                         </ol>
                         <div class="welcome-note-local" data-i18n="vrcxLocal">* 数据库解析在本地浏览器中进行，不会上传至服务器</div>
@@ -1715,25 +1770,29 @@
                     </div>
                 </div>
             </div>
-            
+
             <svg id="graph"></svg>
 
             <div class="legend">
                 <div class="legend-title" data-i18n="legendTitle">共同好友数量</div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #5e6575; box-shadow: 0 0 10px rgba(94, 101, 117, 0.4);"></div>
+                    <div class="legend-circle"
+                        style="background: #5e6575; box-shadow: 0 0 10px rgba(94, 101, 117, 0.4);"></div>
                     <span class="legend-label" data-i18n="legendLow">少量连接</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #8f7585; box-shadow: 0 0 10px rgba(143, 117, 133, 0.45);"></div>
+                    <div class="legend-circle"
+                        style="background: #8f7585; box-shadow: 0 0 10px rgba(143, 117, 133, 0.45);"></div>
                     <span class="legend-label" data-i18n="legendMid">一般连接</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #c75a80; box-shadow: 0 0 10px rgba(199, 90, 128, 0.5);"></div>
+                    <div class="legend-circle"
+                        style="background: #c75a80; box-shadow: 0 0 10px rgba(199, 90, 128, 0.5);"></div>
                     <span class="legend-label" data-i18n="legendHigh">较多连接</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-circle" style="background: #ea2864; box-shadow: 0 0 10px rgba(234, 40, 100, 0.6);"></div>
+                    <div class="legend-circle"
+                        style="background: #ea2864; box-shadow: 0 0 10px rgba(234, 40, 100, 0.6);"></div>
                     <span class="legend-label" data-i18n="legendTop">社交中心</span>
                 </div>
             </div>
@@ -1786,11 +1845,11 @@
                 welcomeDesc: '上传文件可视化分析你的社交网络',
                 fileHint: '支持 .gexf 文件 或 VRCX.sqlite3 数据库',
                 vrcxNote: '使用 VRCX 数据库前',
-                vrcxStep1: '在VRCX的设置中，切换至',
-                vrcxNightly: 'Nightly',
-                vrcxVersion: '版本',
-                vrcxStep2: '在 VRCX「图表」选项卡执行',
-                vrcxFetch: 'Fetch Mutual Friends',
+                vrcxStep1: '在设置中检查更新，确保使用',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: '或更新版本（旧版数据库结构不兼容）',
+                vrcxStep2: '打开 VRCX「图表」，在 Mutual Friend Network 下执行',
+                vrcxFetch: 'Start Fetch',
                 vrcxStep3: '解析完成后可下载 GEXF 文件',
                 vrcxLocal: '* 数据库解析在本地浏览器中进行，不会上传至服务器',
                 vrcxPathLabel: 'Windows 默认路径：',
@@ -1833,11 +1892,11 @@
                 welcomeDesc: 'Upload a file to visualize your social network',
                 fileHint: 'Supports .gexf files or VRCX.sqlite3 database',
                 vrcxNote: 'Before using VRCX database',
-                vrcxStep1: 'Switch VRCX to',
-                vrcxNightly: 'Nightly',
-                vrcxVersion: 'version',
-                vrcxStep2: 'Execute in VRCX "Graph" tab',
-                vrcxFetch: 'Fetch Mutual Friends',
+                vrcxStep1: 'Check for updates and ensure using',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: 'or newer (older versions are incompatible)',
+                vrcxStep2: 'Open VRCX "Chart", under Mutual Friend Network execute',
+                vrcxFetch: 'Start Fetch',
                 vrcxStep3: 'Download GEXF file after parsing',
                 vrcxLocal: '* Parsing is done locally in your browser, data is never uploaded',
                 vrcxPathLabel: 'Windows default path:',
@@ -1880,11 +1939,11 @@
                 welcomeDesc: 'ファイルをアップロードしてソーシャルネットワークを可視化',
                 fileHint: '.gexf ファイル または VRCX.sqlite3 データベース対応',
                 vrcxNote: 'VRCXデータベース使用前に',
-                vrcxStep1: 'VRCXを',
-                vrcxNightly: 'Nightly',
-                vrcxVersion: 'バージョンに切替',
-                vrcxStep2: 'VRCX「グラフ」タブで実行',
-                vrcxFetch: 'Fetch Mutual Friends',
+                vrcxStep1: '設定で更新を確認し、',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: '以降を使用してください（旧形式は非対応）',
+                vrcxStep2: 'VRCX「チャート」を開き、Mutual Friend Network で実行',
+                vrcxFetch: 'Start Fetch',
                 vrcxStep3: '解析後に GEXF ファイルをダウンロード',
                 vrcxLocal: '* 解析はブラウザ内でローカルに行われ、サーバーにアップロードされません',
                 vrcxPathLabel: 'Windows デフォルトパス：',
@@ -1902,7 +1961,7 @@
         function updateLanguage(lang) {
             currentLang = lang;
             const texts = i18n[lang];
-            
+
             // 更新所有带 data-i18n 属性的元素
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -1956,7 +2015,7 @@
             static parse(xmlString) {
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(xmlString, 'text/xml');
-                
+
                 const nodes = [];
                 const edges = [];
                 const nodeMap = new Map();
@@ -1966,10 +2025,10 @@
                 nodeElements.forEach(node => {
                     const id = node.getAttribute('id');
                     const label = node.getAttribute('label');
-                    
+
                     let type = 'friend';
                     let displayName = label;
-                    
+
                     const attvalues = node.querySelectorAll('attvalue');
                     attvalues.forEach(attr => {
                         const forAttr = attr.getAttribute('for');
@@ -1984,7 +2043,7 @@
                         type,
                         connections: 0
                     };
-                    
+
                     nodes.push(nodeData);
                     nodeMap.set(id, nodeData);
                 });
@@ -2038,12 +2097,12 @@
 
             async init() {
                 this.updateDimensions();
-            window.addEventListener('resize', () => this.updateDimensions());
-            
-            // 不自动加载数据，等待用户选择文件
-            this.setupControls();
-            this.showWelcome();
-        }
+                window.addEventListener('resize', () => this.updateDimensions());
+
+                // 不自动加载数据，等待用户选择文件
+                this.setupControls();
+                this.showWelcome();
+            }
 
             showWelcome() {
                 // 隐藏加载动画，显示欢迎界面
@@ -2065,7 +2124,7 @@
                 const container = document.querySelector('.graph-area');
                 this.width = container.clientWidth;
                 this.height = container.clientHeight;
-                
+
                 this.svg
                     .attr('width', this.width)
                     .attr('height', this.height);
@@ -2080,13 +2139,13 @@
                         const response = await fetch('mutual_graph.gexf');
                         text = await response.text();
                     }
-                    
+
                     const data = GEXFParser.parse(text);
-                    
+
                     this.nodes = data.nodes;
                     this.edges = data.edges;
                     this.nodeMap.clear();
-                    
+
                     this.nodes.forEach(node => {
                         this.nodeMap.set(node.id, node);
                     });
@@ -2138,10 +2197,10 @@
 
                     // 加载显示名称
                     const displayNames = this.loadVRCXDisplayNames(db, prefix);
-                    
+
                     // 加载好友 ID
                     const friendIds = this.loadVRCXFriendIds(db, prefix);
-                    
+
                     // 加载边
                     const edges = this.loadVRCXEdges(db, prefix);
 
@@ -2166,7 +2225,7 @@
             detectVRCXPrefix(db) {
                 const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%mutual_graph_links'");
                 if (!result.length || !result[0].values.length) return null;
-                
+
                 const tableName = result[0].values[0][0];
                 return tableName.replace('_mutual_graph_links', '');
             }
@@ -2198,11 +2257,11 @@
                 const excludedIds = new Set(['usr_00000000-0000-0000-0000-000000000000']);
                 const result = db.exec(`SELECT friend_id, mutual_id FROM ${prefix}_mutual_graph_links`);
                 if (!result.length) return [];
-                
+
                 return result[0].values
-                    .filter(([friendId, mutualId]) => 
-                        friendId && mutualId && 
-                        !excludedIds.has(friendId) && 
+                    .filter(([friendId, mutualId]) =>
+                        friendId && mutualId &&
+                        !excludedIds.has(friendId) &&
                         !excludedIds.has(mutualId)
                     )
                     .map(([friendId, mutualId]) => ({ source: friendId, target: mutualId }));
@@ -2212,7 +2271,7 @@
                 const friendSet = new Set(friendIds);
                 const nodeIds = new Set(friendIds);
                 const excludedIds = new Set(['usr_00000000-0000-0000-0000-000000000000']);
-                
+
                 // 收集所有节点 ID
                 edges.forEach(edge => {
                     if (edge.target && !excludedIds.has(edge.target)) {
@@ -2283,7 +2342,7 @@
             async reloadGraph(fileContent, fileName, isFromDatabase = false) {
                 // 隐藏欢迎界面
                 this.hideWelcome();
-                
+
                 // 显示加载动画
                 const loading = document.getElementById('loading');
                 loading.style.display = 'flex';
@@ -2296,28 +2355,28 @@
                 if (this.container) {
                     this.container.selectAll('*').remove();
                 }
-                
+
                 // 重置状态
                 this.selectedNode = null;
                 this.highlightedNodes.clear();
                 this.frozen = false;
                 document.getElementById('btnFreeze').classList.remove('active');
-                
+
                 // 保存 GEXF 内容用于导出
                 this.currentGexfContent = fileContent;
                 this.currentFileName = fileName;
-                
+
                 // 加载新数据
                 await this.loadData(fileContent);
-                
+
                 // 重新设置模拟和渲染
                 this.setupSimulation();
                 this.render();
-                
+
                 // 更新文件名显示（使用当前语言）
                 const texts = i18n[currentLang];
                 document.getElementById('fileName').textContent = `${texts.currentFile}: ${fileName}`;
-                
+
                 // 如果是从数据库导入的，显示导出按钮
                 const exportBtn = document.getElementById('btnExportGexf');
                 if (isFromDatabase) {
@@ -2325,20 +2384,20 @@
                 } else {
                     exportBtn.style.display = 'none';
                 }
-                
+
                 // 显示排名列表
                 this.showRankingList();
-                
+
                 // 移动端加载成功后自动隐藏侧边栏
                 if (window.innerWidth <= 900) {
                     document.querySelector('.sidebar').classList.remove('visible');
                     document.getElementById('sidebarOverlay').classList.remove('visible');
                     document.getElementById('menuToggle').classList.remove('active');
                 }
-                
+
                 // 重置搜索框
                 document.getElementById('searchInput').value = '';
-                
+
                 // 隐藏加载动画
                 this.hideLoading();
             }
@@ -2347,7 +2406,7 @@
                 // 按连接数排序
                 const sortedNodes = [...this.nodes].sort((a, b) => b.connections - a.connections);
                 const texts = i18n[currentLang];
-                
+
                 const detailSection = document.getElementById('detailSection');
                 detailSection.innerHTML = `
                     <div class="ranking-card">
@@ -2400,7 +2459,7 @@
 
                 // 缓存最大连接数，避免重复计算
                 this.maxConnections = Math.max(...this.nodes.map(n => n.connections), 1);
-                
+
                 // 预计算节点排名
                 this.nodeRanks = new Map();
                 const sorted = [...this.nodes].sort((a, b) => b.connections - a.connections);
@@ -2432,7 +2491,7 @@
             getNodeColor(d) {
                 // 使用缓存的最大连接数
                 const ratio = d.connections / (this.maxConnections || 1);
-                
+
                 // 灰色到粉色的和谐渐变（饱和度递增 + 色相偏移）
                 if (ratio < 0.25) {
                     return '#5e6575'; // 冷灰蓝 - 少量连接
@@ -2511,7 +2570,7 @@
 
                 // 模拟更新
                 this.simulation.on('tick', () => this.tick());
-                
+
                 // 重新启动模拟以确保动画效果
                 this.simulation.alpha(1).restart();
             }
@@ -2528,10 +2587,10 @@
 
             updateLabelsVisibility(zoomLevel) {
                 if (!this.labels || !this.showLabels) return;
-                
+
                 this.currentZoom = zoomLevel;
                 const nodeCount = this.nodes.length;
-                
+
                 // 节点数量多时，只在缩放足够大时显示标签
                 if (nodeCount > 200) {
                     // 节点多时，缩放 > 0.8 才显示标签
@@ -2572,16 +2631,16 @@
             handleMouseOver(event, d) {
                 // 拖动过程中不处理悬停事件，防止闪烁
                 if (this.isDragging) return;
-                
+
                 const tooltip = document.getElementById('tooltip');
                 tooltip.querySelector('.tooltip-name').textContent = d.label;
-                
+
                 // 使用预计算的排名
                 const rank = this.nodeRanks ? this.nodeRanks.get(d.id) : '?';
-                
-                tooltip.querySelector('.tooltip-info').textContent = 
+
+                tooltip.querySelector('.tooltip-info').textContent =
                     `共同好友: ${d.connections} | 排名: #${rank}`;
-                
+
                 tooltip.style.left = (event.pageX + 15) + 'px';
                 tooltip.style.top = (event.pageY - 10) + 'px';
                 tooltip.classList.add('visible');
@@ -2596,10 +2655,10 @@
             handleMouseOut(event, d) {
                 // 拖动过程中不处理悬停事件，防止闪烁
                 if (this.isDragging) return;
-                
+
                 const tooltip = document.getElementById('tooltip');
                 tooltip.classList.remove('visible');
-                
+
                 // 已选中节点时保持高亮，未选中时清除
                 if (!this.selectedNode) {
                     this.clearHighlights();
@@ -2621,7 +2680,7 @@
                 this.edges.forEach(edge => {
                     const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
                     const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
-                    
+
                     if (sourceId === node.id) {
                         connectedIds.add(targetId);
                         this.highlightedNodes.add(targetId);
@@ -2644,7 +2703,7 @@
                         return sourceId !== node.id && targetId !== node.id;
                     });
 
-                this.nodeElements.style('opacity', d => 
+                this.nodeElements.style('opacity', d =>
                     this.highlightedNodes.has(d.id) ? 1 : 0.2
                 );
             }
@@ -2659,11 +2718,11 @@
                 // 使用 Set 去重，避免重复好友
                 const connectionSet = new Set();
                 const connections = [];
-                
+
                 this.edges.forEach(edge => {
                     const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
                     const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
-                    
+
                     if (sourceId === node.id && this.nodeMap.has(targetId) && !connectionSet.has(targetId)) {
                         connectionSet.add(targetId);
                         connections.push(this.nodeMap.get(targetId));
@@ -2757,7 +2816,7 @@
                 // 从节点数组中移除
                 const nodeIndex = this.nodes.findIndex(n => n.id === nodeId);
                 if (nodeIndex === -1) return;
-                
+
                 const removedNode = this.nodes[nodeIndex];
                 this.nodes.splice(nodeIndex, 1);
                 this.nodeMap.delete(nodeId);
@@ -2804,7 +2863,7 @@
                 const scale = 1.5;
                 const x = this.width / 2 - node.x * scale;
                 const y = this.height / 2 - node.y * scale;
-                
+
                 this.svg.transition()
                     .duration(750)
                     .call(this.zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
@@ -2815,12 +2874,12 @@
                 const fileInput = document.getElementById('fileInput');
                 const btnLoadFile = document.getElementById('btnLoadFile');
                 const welcomeUploadBtn = document.getElementById('welcomeUploadBtn');
-                
+
                 const triggerFileInput = () => fileInput.click();
-                
+
                 btnLoadFile.addEventListener('click', triggerFileInput);
                 welcomeUploadBtn.addEventListener('click', triggerFileInput);
-                
+
                 fileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (file) {
@@ -2839,12 +2898,12 @@
                 const dbFileInput = document.getElementById('dbFileInput');
                 const btnLoadDB = document.getElementById('btnLoadDB');
                 const welcomeUploadDBBtn = document.getElementById('welcomeUploadDBBtn');
-                
+
                 const triggerDBInput = () => dbFileInput.click();
-                
+
                 btnLoadDB.addEventListener('click', triggerDBInput);
                 welcomeUploadDBBtn.addEventListener('click', triggerDBInput);
-                
+
                 dbFileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (file) {
@@ -2925,7 +2984,7 @@
                     if (!this.simulation) return;
                     this.frozen = !this.frozen;
                     btnFreeze.classList.toggle('active', this.frozen);
-                    
+
                     if (this.frozen) {
                         this.simulation.stop();
                         this.nodes.forEach(n => {
@@ -2965,9 +3024,9 @@
 
             handleSearch(query) {
                 if (!this.nodeElements || !this.links) return;
-                
+
                 const normalizedQuery = query.toLowerCase().trim();
-                
+
                 if (!normalizedQuery) {
                     this.nodeElements.style('opacity', 1);
                     this.links.style('opacity', 0.4);
@@ -2981,7 +3040,7 @@
                     }
                 });
 
-                this.nodeElements.style('opacity', d => 
+                this.nodeElements.style('opacity', d =>
                     matchingNodes.has(d.id) ? 1 : 0.1
                 );
 
@@ -3006,16 +3065,16 @@
             fitToView() {
                 const bounds = this.container.node().getBBox();
                 const padding = 50;
-                
+
                 const scale = Math.min(
                     (this.width - padding * 2) / bounds.width,
                     (this.height - padding * 2) / bounds.height,
                     2
                 );
-                
+
                 const x = this.width / 2 - (bounds.x + bounds.width / 2) * scale;
                 const y = this.height / 2 - (bounds.y + bounds.height / 2) * scale;
-                
+
                 this.svg.transition()
                     .duration(750)
                     .call(this.zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
@@ -3031,7 +3090,7 @@
 
             exportGexf() {
                 if (!this.currentGexfContent) return;
-                
+
                 // 创建导出文件名
                 let exportFileName = this.currentFileName || 'mutual_graph';
                 if (exportFileName.endsWith('.sqlite3') || exportFileName.endsWith('.db')) {
@@ -3039,7 +3098,7 @@
                 } else if (!exportFileName.endsWith('.gexf')) {
                     exportFileName += '.gexf';
                 }
-                
+
                 // 创建 Blob 并下载
                 const blob = new Blob([this.currentGexfContent], { type: 'application/xml' });
                 const url = URL.createObjectURL(blob);
@@ -3058,11 +3117,11 @@
             // 初始化语言选择器
             const langBtn = document.getElementById('langBtn');
             const langDropdown = document.getElementById('langDropdown');
-            
+
             // 从 localStorage 读取语言偏好
             const savedLang = localStorage.getItem('preferredLang') || 'zh';
             updateLanguage(savedLang);
-            
+
             // 语言切换点击事件
             langDropdown.querySelectorAll('.lang-option').forEach(option => {
                 option.addEventListener('click', () => {
@@ -3124,7 +3183,7 @@
             window.addEventListener('resize', () => {
                 const wasMobile = isMobile;
                 isMobile = window.innerWidth <= 900;
-                
+
                 // 从移动端切换到桌面端时，移除移动端样式
                 if (wasMobile && !isMobile) {
                     sidebar.classList.remove('visible');
@@ -3137,4 +3196,5 @@
         });
     </script>
 </body>
+
 </html>

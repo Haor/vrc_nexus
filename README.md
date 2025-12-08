@@ -40,7 +40,7 @@ Open `index.html` in a browser. Two data sources are supported:
 1. **GEXF File** - Load a pre-exported graph file
 2. **VRCX Database** - Directly read `VRCX.sqlite3` file (parsed locally in browser, no data uploaded)
 
-> **Prerequisite**: You must use VRCX **Nightly version** and run `Fetch Mutual Friends` in the Graph tab before using this tool.
+> **Prerequisite**: You must use VRCX **Stable 2025.12.06 or later** and run `Start Fetch` in the Mutual Friend Network section of the Chart tab before using this tool.
 
 ### Python Script (`vrcx_to_gexf.py`)
 

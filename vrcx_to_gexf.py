@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
 Export the cached VRCX mutual friend network into a GEXF graph file.
+Windows default database path: %APPDATA%\\VRCX\\VRCX.sqlite3  
+Note: Relies on the VRCX local database. Requires VRCX Stable 2025.12.06 or later. Manually execute "Start Fetch" under "Mutual Friend Network" on the client's Chart page before exporting.
 Windows 默认数据库路径：%APPDATA%\\VRCX\\VRCX.sqlite3
-注意：依托 VRCX 本地数据库，需使用 VRCX nightly 并手动在客户端执行 Fetch Mutual Friends 后再导出。
+注意：依托 VRCX 本地数据库，需使用 VRCX Stable 2025.12.06 或更高版本 并手动在客户端 Chart 页面的 Mutual Friend Network 下执行 Start Fetch 后再导出。
 """
 
 from __future__ import annotations

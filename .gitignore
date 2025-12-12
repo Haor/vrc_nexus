@@ -9,5 +9,10 @@
 # 允许 .gitignore 自己被跟踪
 !.gitignore
 
+# 关系分析工具和文档
+!RELATIONSHIP_ANALYSIS/
+!RELATIONSHIP_ANALYSIS/analyze_relationships.py
+!RELATIONSHIP_ANALYSIS/ALGORITHM_DESIGN.md
+
 # 部署时需要的 Cloudflare Analytics 配置（不提交）
 cloudflare-analytics.html

@@ -60,6 +60,32 @@ python vrcx_to_gexf.py --win
 python vrcx_to_gexf.py --output my_network.gexf
 ```
 
+### Relationship Analysis Script (`analyze_relationships.py`)
+
+Advanced relationship strength and recent intimacy analysis with adaptive decay mechanism:
+
+```bash
+# Basic analysis
+python RELATIONSHIP_ANALYSIS/analyze_relationships.py --db /path/to/VRCX.sqlite3
+
+# Export rankings to CSV
+python RELATIONSHIP_ANALYSIS/analyze_relationships.py --db VRCX.sqlite3 -r
+
+# Custom half-life and recent window
+python RELATIONSHIP_ANALYSIS/analyze_relationships.py --db VRCX.sqlite3 --halflife 180 --recent 60
+
+# Adaptive mode (recommended)
+python RELATIONSHIP_ANALYSIS/analyze_relationships.py --db VRCX.sqlite3 --halflife auto --recent auto
+```
+
+**Features:**
+- **Relationship Strength**: Long-term accumulated relationship depth with decay mechanism
+- **Recent Intimacy**: Recent interaction intensity (configurable time window)
+- **Adaptive Parameters**: Auto-adjusts half-life (90-180 days) and recent window (30-60 days) based on user activity
+- **CSV Export**: Generate ranking files for both metrics
+
+See `RELATIONSHIP_ANALYSIS/ALGORITHM_DESIGN.md` for detailed algorithm design philosophy.
+
 ## VRCX Database Path
 
 - **Windows**: `%APPDATA%\VRCX\VRCX.sqlite3`

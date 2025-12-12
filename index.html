@@ -1,0 +1,3202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mutual Friends Network</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f0f14'/><line x1='50' y1='25' x2='25' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='50' y1='25' x2='75' y2='50' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='75' y1='50' x2='50' y2='75' stroke='%23ea2864' stroke-width='2' opacity='0.6'/><line x1='25' y1='50' x2='75' y2='50' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><line x1='50' y1='25' x2='50' y2='75' stroke='%23ea2864' stroke-width='1.5' opacity='0.4'/><circle cx='50' cy='25' r='10' fill='%23c75a80' opacity='0.9'/><circle cx='25' cy='50' r='8' fill='%235e6575' opacity='0.9'/><circle cx='75' cy='50' r='8' fill='%238f7585' opacity='0.9'/><circle cx='50' cy='75' r='12' fill='%23ea2864'/><circle cx='50' cy='50' r='6' fill='%23c75a80' opacity='0.85'/></svg>">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* 基于参考配色卡 - Black Color Palettes */
+            --bg-primary: #0f0f14;
+            --bg-secondary: #16141c;
+            --bg-card: #1b1e26;
+            --bg-hover: #252830;
+            --accent-primary: #ea2864;
+            --accent-light: #ff4d7f;
+            --accent-dark: #c41e52;
+            --accent-secondary: #2d2a35;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a8a8b3;
+            --text-muted: #6b6b78;
+            --border-color: #2a2832;
+            --glow-primary: 0 0 20px rgba(234, 40, 100, 0.4);
+            --glow-soft: 0 0 30px rgba(234, 40, 100, 0.2);
+            --mobile-header-icon-top: 30px;
+            --menu-btn-size: 36px;
+            --menu-icon-size: 24px;
+            --mobile-logo-padding-h: 52px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* 背景动画 */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 30% 70%, rgba(234, 40, 100, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, rgba(234, 40, 100, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(45, 42, 53, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(234, 40, 100, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(234, 40, 100, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 主容器 */
+        .container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 400px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-primary), var(--accent-dark), var(--bg-card));
+            opacity: 0.6;
+        }
+
+        .logo-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(234, 40, 100, 0.05) 0%, transparent 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-content {
+            flex: 1;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 3px;
+        }
+
+        /* 语言选择 */
+        .lang-selector {
+            position: relative;
+        }
+
+        .lang-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .lang-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--text-secondary);
+            transition: stroke 0.2s ease;
+        }
+
+        .lang-btn:hover svg {
+            stroke: var(--accent-primary);
+        }
+
+        .lang-btn:hover {
+            color: var(--accent-primary);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            min-width: 100px;
+        }
+
+        .lang-selector:hover .lang-dropdown,
+        .lang-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .lang-option {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-option:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .lang-option.active {
+            background: rgba(234, 40, 100, 0.1);
+            color: var(--accent-primary);
+        }
+
+        /* 文件选择 */
+        .file-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .file-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(234, 40, 100, 0.08);
+            border: 1px dashed rgba(234, 40, 100, 0.4);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .file-btn:hover {
+            background: rgba(234, 40, 100, 0.15);
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-soft);
+        }
+
+        .file-btn svg {
+            stroke: var(--accent-primary);
+        }
+
+        .file-btn-db {
+            background: rgba(45, 42, 53, 0.5);
+            border-color: var(--accent-secondary);
+        }
+
+        .file-btn-db svg {
+            stroke: var(--text-secondary);
+        }
+
+        .file-btn-db:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-soft);
+        }
+
+        .file-btn-db:hover svg {
+            stroke: var(--accent-primary);
+        }
+
+        .file-info {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .file-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 280px;
+        }
+
+        .export-btn {
+            width: 22px;
+            height: 22px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .export-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 245, 255, 0.1);
+        }
+
+        .export-btn svg {
+            stroke: currentColor;
+        }
+
+        /* 搜索框 */
+        .search-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: var(--glow-soft);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        /* 统计卡片 */
+        .stats-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stats-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-dark));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            line-height: 1;
+        }
+
+        .stat-card:nth-child(2) .stat-value {
+            color: var(--accent-light);
+        }
+
+        .stat-card:nth-child(3) .stat-value {
+            color: var(--accent-primary);
+        }
+
+        .stat-card:nth-child(4) .stat-value {
+            color: var(--accent-light);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* 控制面板 */
+        .controls-section {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-value {
+            color: var(--accent-primary);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-hover);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            box-shadow: var(--glow-primary);
+            transition: all 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* 按钮组 */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .btn.active {
+            background: rgba(234, 40, 100, 0.15);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* 节点详情 */
+        .detail-section {
+            padding: 20px 24px;
+            min-height: 300px;
+        }
+
+        .detail-header {
+            margin-bottom: 20px;
+        }
+
+        .detail-placeholder {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .detail-placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* 排行榜样式 */
+        .ranking-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .ranking-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .ranking-header svg {
+            stroke: var(--accent-primary);
+        }
+
+        .ranking-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .ranking-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .ranking-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .ranking-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .ranking-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .ranking-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-color);
+            transform: translateX(4px);
+        }
+
+        .ranking-item.top-1 {
+            background: linear-gradient(135deg, rgba(234, 40, 100, 0.18), rgba(234, 40, 100, 0.05));
+            border-color: rgba(234, 40, 100, 0.35);
+        }
+
+        .ranking-item.top-1 .ranking-position {
+            background: linear-gradient(135deg, #ea2864, #c41e52);
+            color: #fff;
+        }
+
+        .ranking-item.top-2 {
+            background: linear-gradient(135deg, rgba(199, 90, 128, 0.15), rgba(199, 90, 128, 0.05));
+            border-color: rgba(199, 90, 128, 0.3);
+        }
+
+        .ranking-item.top-2 .ranking-position {
+            background: linear-gradient(135deg, #c75a80, #a84d6d);
+            color: #fff;
+        }
+
+        .ranking-item.top-3 {
+            background: linear-gradient(135deg, rgba(143, 117, 133, 0.15), rgba(143, 117, 133, 0.05));
+            border-color: rgba(143, 117, 133, 0.3);
+        }
+
+        .ranking-item.top-3 .ranking-position {
+            background: linear-gradient(135deg, #8f7585, #7a6472);
+            color: #fff;
+        }
+
+        .ranking-position {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .ranking-name {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ranking-score {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-left: 10px;
+        }
+
+        .detail-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .detail-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--accent-primary);
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .remove-node-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        .remove-node-btn:hover {
+            opacity: 1;
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(234, 40, 100, 0.15);
+        }
+
+        .remove-node-btn svg {
+            stroke: currentColor;
+        }
+
+        .detail-rank {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(234, 40, 100, 0.15);
+            color: var(--accent-primary);
+            border: 1px solid rgba(234, 40, 100, 0.3);
+        }
+
+        .rank-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .detail-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .detail-stat {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .detail-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: var(--accent-primary);
+        }
+
+        .detail-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .detail-stat.full-width {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+
+        .connections-list {
+            margin-top: 16px;
+            max-height: none;
+        }
+
+        .connections-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .connections-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .connections-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .connections-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .connections-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-item {
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+        }
+
+        .connection-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-color);
+            transform: translateX(4px);
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+        }
+
+        .connection-name {
+            font-size: 13px;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .connection-count {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-card);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* 图形区域 */
+        .graph-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .node:hover {
+            filter: brightness(1.3);
+        }
+
+        .link {
+            stroke-opacity: 0.4;
+            transition: stroke-opacity 0.2s ease;
+        }
+
+        .link.highlighted {
+            stroke-opacity: 1;
+            stroke-width: 2px;
+        }
+
+        .link.dimmed {
+            stroke-opacity: 0.1;
+        }
+
+        .node-label {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 11px;
+            fill: var(--text-primary);
+            pointer-events: none;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: fixed;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            box-shadow: var(--glow-soft);
+            box-shadow: var(--glow-cyan);
+            max-width: 250px;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-name {
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 4px;
+        }
+
+        .tooltip-info {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* 图例 */
+        .legend {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: rgba(22, 20, 28, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .legend-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+
+        .legend-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 缩放控制 */
+        .zoom-controls {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(26, 34, 52, 0.9);
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* 加载动画 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+        }
+
+        /* 欢迎界面 */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(234, 40, 100, 0.04) 0%, transparent 70%);
+            z-index: 100;
+        }
+
+        .welcome-content {
+            text-align: center;
+            padding: 60px;
+            background: rgba(22, 20, 28, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .welcome-icon {
+            margin-bottom: 24px;
+            color: var(--accent-primary);
+            animation: networkPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes networkPulse {
+
+            0%,
+            100% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .welcome-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .welcome-btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .welcome-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-dark));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 20px rgba(234, 40, 100, 0.3);
+        }
+
+        .welcome-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(234, 40, 100, 0.5);
+        }
+
+        .welcome-btn svg {
+            stroke: #fff;
+        }
+
+        .welcome-btn-db {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            box-shadow: none;
+        }
+
+        .welcome-btn-db svg {
+            stroke: var(--text-secondary);
+        }
+
+        .welcome-btn-db:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: var(--glow-soft);
+        }
+
+        .welcome-btn-db:hover svg {
+            stroke: var(--accent-primary);
+        }
+
+        .welcome-hint {
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .welcome-note {
+            margin-top: 24px;
+            padding: 16px;
+            background: rgba(234, 40, 100, 0.08);
+            border: 1px solid rgba(234, 40, 100, 0.2);
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .welcome-note-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-note-title svg {
+            stroke: var(--accent-primary);
+            flex-shrink: 0;
+        }
+
+        .welcome-note-list {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .welcome-note-list strong {
+            color: var(--accent-primary);
+        }
+
+        .welcome-note-local {
+            margin-top: 10px;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .welcome-note-path {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(234, 40, 100, 0.2);
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .welcome-note-path code {
+            display: block;
+            margin-top: 4px;
+            padding: 6px 10px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 10px;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 320px;
+            }
+        }
+
+        /* 浮动菜单按钮（带动画效果：三条横杠 ↔ X） */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            z-index: 250;
+            width: var(--menu-btn-size);
+            height: var(--menu-btn-size);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .menu-toggle svg {
+            width: var(--menu-icon-size);
+            height: var(--menu-icon-size);
+            stroke: currentColor;
+            stroke-width: 2.4;
+            fill: none;
+        }
+
+        .menu-toggle-line {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transform-origin: 12px 12px;
+            transition: transform 0.25s ease, opacity 0.2s ease;
+        }
+
+        .line-top {
+            transform: translateY(-5px);
+        }
+
+        .line-middle {
+            transform: translateY(0);
+        }
+
+        .line-bottom {
+            transform: translateY(5px);
+        }
+
+        .menu-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        /* 打开状态 - 变成 X */
+        .menu-toggle.active .line-top {
+            transform: translateY(0) rotate(45deg);
+        }
+
+        .menu-toggle.active .line-middle {
+            opacity: 0;
+            transform: translateX(-8px);
+        }
+
+        .menu-toggle.active .line-bottom {
+            transform: translateY(0) rotate(-45deg);
+        }
+
+        /* 侧边栏遮罩层 */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 140;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 900px) {
+
+            html,
+            body {
+                overflow: hidden;
+                height: 100%;
+            }
+
+            .container {
+                flex-direction: column;
+                height: 100vh;
+                z-index: auto;
+            }
+
+            /* 移动端 logo-section - 保持原有高度 */
+            .logo-section {
+                padding: 20px 52px;
+            }
+
+            /* 显示菜单按钮 - 使用变量让图标与 logo 区块垂直居中 */
+            .menu-toggle {
+                display: flex;
+                top: var(--mobile-header-icon-top);
+                left: calc((var(--mobile-logo-padding-h) - var(--menu-btn-size)) / 2);
+            }
+
+            /* 移动端语言选择器 - 固定定位，同样对齐 */
+            .lang-selector {
+                position: fixed;
+                top: var(--mobile-header-icon-top);
+                right: 16px;
+                z-index: 250;
+            }
+
+            /* 侧边栏抽屉式 - 需要脱离 container 的层叠上下文 */
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 85%;
+                max-width: 320px;
+                height: 100vh;
+                max-height: 100vh;
+                z-index: 200;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: 1px solid var(--border-color);
+                background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .sidebar.visible {
+                transform: translateX(0);
+            }
+
+            /* 图表区域全屏 */
+            .graph-area {
+                width: 100%;
+                height: 100vh;
+                flex: 1;
+            }
+
+            /* 欢迎界面调整 */
+            .welcome-content {
+                max-width: 90%;
+                padding: 24px 20px;
+                margin: 16px;
+            }
+
+            .welcome-icon svg {
+                width: 60px;
+                height: 60px;
+            }
+
+            .welcome-title {
+                font-size: 20px;
+            }
+
+            .welcome-desc {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+
+            .welcome-btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .welcome-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+
+            .welcome-tip {
+                font-size: 11px;
+            }
+
+            .vrcx-tip {
+                padding: 12px;
+            }
+
+            .vrcx-tip-title {
+                font-size: 11px;
+            }
+
+            .vrcx-tip ol {
+                font-size: 10px;
+            }
+
+            /* 图例和控制按钮调整 */
+            .legend {
+                top: auto;
+                bottom: 70px;
+                left: 12px;
+                right: auto;
+                padding: 10px;
+            }
+
+            .legend-title {
+                font-size: 10px;
+            }
+
+            .legend-circle {
+                width: 10px;
+                height: 10px;
+            }
+
+            .legend-label {
+                font-size: 10px;
+            }
+
+            .zoom-controls {
+                bottom: 12px;
+                right: 12px;
+                gap: 6px;
+            }
+
+            .zoom-btn {
+                width: 38px;
+                height: 38px;
+            }
+        }
+
+        /* 小屏手机 */
+        @media (max-width: 480px) {
+            :root {
+                --mobile-header-icon-top: 26px;
+                --mobile-logo-padding-h: 44px;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-width: none;
+            }
+
+            .logo-section {
+                padding: 16px 44px;
+            }
+
+            /* 更紧凑屏幕下：通过变量下调图标位置，保持与桌面语言按钮居中 */
+            .menu-toggle {
+                left: 12px;
+            }
+
+            .lang-selector {
+                right: 12px;
+            }
+
+            .welcome-content {
+                padding: 20px 16px;
+            }
+
+            .welcome-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-pattern"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- 浮动菜单按钮 -->
+    <button class="menu-toggle" id="menuToggle" title="Menu" aria-label="Menu">
+        <svg viewBox="0 0 24 24">
+            <line class="menu-toggle-line line-top" x1="5" y1="12" x2="19" y2="12"></line>
+            <line class="menu-toggle-line line-middle" x1="5" y1="12" x2="19" y2="12"></line>
+            <line class="menu-toggle-line line-bottom" x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
+    <!-- 侧边栏遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-content">
+                    <div class="logo">NEXUS</div>
+                    <div class="logo-subtitle" data-i18n="subtitle">共同好友网络分析</div>
+                </div>
+                <div class="lang-selector">
+                    <button class="lang-btn" id="langBtn" title="Language / 语言 / 言語">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                            </path>
+                        </svg>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option active" data-lang="zh">中文</div>
+                        <div class="lang-option" data-lang="en">English</div>
+                        <div class="lang-option" data-lang="ja">日本語</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-section">
+                <input type="file" id="fileInput" accept=".gexf,.xml,text/xml,application/xml,application/octet-stream"
+                    style="display: none;">
+                <input type="file" id="dbFileInput"
+                    accept=".sqlite3,.db,.sqlite,application/x-sqlite3,application/octet-stream" style="display: none;">
+                <div class="file-btn-group">
+                    <button class="file-btn" id="btnLoadFile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span data-i18n="loadGexf">选择 GEXF</span>
+                    </button>
+                    <button class="file-btn file-btn-db" id="btnLoadDB">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                        </svg>
+                        <span data-i18n="loadVrcx">选择 VRCX</span>
+                    </button>
+                </div>
+                <div class="file-info">
+                    <span class="file-name" id="fileName" data-i18n="selectFile">请选择文件</span>
+                    <button class="export-btn" id="btnExportGexf" style="display: none;" title="导出为 GEXF 文件">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-wrapper">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索好友..."
+                        data-i18n-placeholder="search">
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats-title" data-i18n="networkStats">网络统计</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="nodeCount">--</div>
+                        <div class="stat-label" data-i18n="totalFriends">好友总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="edgeCount">--</div>
+                        <div class="stat-label" data-i18n="totalConnections">连接总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDegree">--</div>
+                        <div class="stat-label" data-i18n="avgConnections">平均连接</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="density">--</div>
+                        <div class="stat-label" data-i18n="networkDensity">网络密度</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="control-group">
+                    <div class="control-label">
+                        <span data-i18n="repulsion">斥力强度</span>
+                        <span class="control-value" id="forceValue">-300</span>
+                    </div>
+                    <input type="range" class="slider" id="forceSlider" min="-800" max="-50" value="-300">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">
+                        <span data-i18n="linkStrength">连接强度</span>
+                        <span class="control-value" id="distanceValue">80</span>
+                    </div>
+                    <input type="range" class="slider" id="distanceSlider" min="30" max="200" value="80">
+                </div>
+                <div class="btn-group">
+                    <button class="btn active" id="btnShowLabels">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 7V4h16v3"></path>
+                            <path d="M9 20h6"></path>
+                            <path d="M12 4v16"></path>
+                        </svg>
+                        <span data-i18n="showLabels">显示标签</span>
+                    </button>
+                    <button class="btn" id="btnReset">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg>
+                        <span data-i18n="resetView">重置视图</span>
+                    </button>
+                    <button class="btn" id="btnFreeze">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                        </svg>
+                        <span data-i18n="freezeLayout">冻结</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="detail-section" id="detailSection">
+                <div class="detail-placeholder">
+                    <div class="detail-placeholder-icon">🔍</div>
+                    <p data-i18n="clickToView">点击节点查看详细信息</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="graph-area">
+            <div class="loading" id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" data-i18n="loading">正在加载网络数据...</div>
+            </div>
+
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <svg width="90" height="90" viewBox="0 0 100 100" fill="none">
+                            <!-- 连接线 -->
+                            <line x1="50" y1="25" x2="25" y2="50" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="50" y1="25" x2="75" y2="50" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="25" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="75" y1="50" x2="50" y2="75" stroke="currentColor" stroke-width="2"
+                                opacity="0.6" />
+                            <line x1="25" y1="50" x2="75" y2="50" stroke="currentColor" stroke-width="1.5"
+                                opacity="0.4" />
+                            <line x1="50" y1="25" x2="50" y2="75" stroke="currentColor" stroke-width="1.5"
+                                opacity="0.4" />
+                            <!-- 节点 - 灰粉渐变配色 -->
+                            <circle cx="50" cy="25" r="10" fill="#c75a80" opacity="0.9" />
+                            <circle cx="25" cy="50" r="8" fill="#5e6575" opacity="0.9" />
+                            <circle cx="75" cy="50" r="8" fill="#8f7585" opacity="0.9" />
+                            <circle cx="50" cy="75" r="12" fill="#ea2864" />
+                            <circle cx="50" cy="50" r="6" fill="#c75a80" opacity="0.85" />
+                            <!-- 外圈光晕 -->
+                            <circle cx="50" cy="75" r="16" stroke="#ea2864" stroke-width="1" fill="none"
+                                opacity="0.3" />
+                        </svg>
+                    </div>
+                    <h2 class="welcome-title" data-i18n="welcomeTitle">共同好友网络分析</h2>
+                    <p class="welcome-desc" data-i18n="welcomeDesc">上传文件可视化分析你的社交网络</p>
+                    <div class="welcome-btn-group">
+                        <button class="welcome-btn" id="welcomeUploadBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                            </svg>
+                            <span data-i18n="loadGexf">选择 GEXF</span>
+                        </button>
+                        <button class="welcome-btn welcome-btn-db" id="welcomeUploadDBBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                            </svg>
+                            <span data-i18n="loadVrcx">选择 VRCX</span>
+                        </button>
+                    </div>
+                    <div class="welcome-hint" data-i18n="fileHint">支持 .gexf 文件 或 VRCX.sqlite3 数据库</div>
+                    <div class="welcome-note">
+                        <div class="welcome-note-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span class="control-value" data-i18n="vrcxNote">使用 VRCX 数据库前</span>
+                        </div>
+                        <ol class="welcome-note-list" id="welcomeNoteList">
+                            <li><span data-i18n="vrcxStep1">在设置中检查更新，确保使用</span> <strong class="control-value"
+                                    data-i18n="vrcxMinVersion">Stable 2025.12.06+</strong> <span
+                                    data-i18n="vrcxVersion">或更新版本（旧版数据库结构不兼容）</span>
+                            </li>
+                            <li><span data-i18n="vrcxStep2">打开 VRCX「图表」，在 Mutual Friend Network 下执行</span> <strong
+                                    class="control-value" data-i18n="vrcxFetch">Start Fetch</strong>
+                            </li>
+                            <li data-i18n="vrcxStep3">解析完成后可下载 GEXF 文件</li>
+                        </ol>
+                        <div class="welcome-note-local" data-i18n="vrcxLocal">* 数据库解析在本地浏览器中进行，不会上传至服务器</div>
+                        <div class="welcome-note-path">
+                            <span data-i18n="vrcxPathLabel">Windows 默认路径：</span>
+                            <code>%APPDATA%\VRCX\VRCX.sqlite3</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <svg id="graph"></svg>
+
+            <div class="legend">
+
+                <div class="legend-item">
+                    <div class="legend-circle"
+                        style="background: #5e6575; box-shadow: 0 0 10px rgba(94, 101, 117, 0.4);"></div>
+                    <span class="legend-label" data-i18n="legendLow">少量连接</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-circle"
+                        style="background: #8f7585; box-shadow: 0 0 10px rgba(143, 117, 133, 0.45);"></div>
+                    <span class="legend-label" data-i18n="legendMid">一般连接</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-circle"
+                        style="background: #c75a80; box-shadow: 0 0 10px rgba(199, 90, 128, 0.5);"></div>
+                    <span class="legend-label" data-i18n="legendHigh">较多连接</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-circle"
+                        style="background: #ea2864; box-shadow: 0 0 10px rgba(234, 40, 100, 0.6);"></div>
+                    <span class="legend-label" data-i18n="legendTop">社交中心</span>
+                </div>
+            </div>
+
+            <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomIn">+</button>
+                <button class="zoom-btn" id="zoomOut">−</button>
+                <button class="zoom-btn" id="zoomFit">⊡</button>
+            </div>
+        </main>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-name"></div>
+        <div class="tooltip-info"></div>
+    </div>
+
+    <script>
+        // 多语言支持
+        const i18n = {
+            zh: {
+                subtitle: '共同好友网络分析',
+                loadGexf: '选择 GEXF',
+                loadVrcx: '选择 VRCX',
+                selectFile: '请选择文件',
+                currentFile: '当前',
+                search: '搜索好友...',
+                linkStrength: '连接强度',
+                repulsion: '斥力强度',
+                showLabels: '显示标签',
+                resetView: '重置视图',
+                freezeLayout: '冻结',
+                networkStats: '网络统计',
+                totalFriends: '好友总数',
+                totalConnections: '连接总数',
+                avgConnections: '平均连接',
+                networkDensity: '网络密度',
+                nodeDetail: '节点详情',
+                clickToView: '点击节点查看详细信息',
+                mutualRanking: '共同好友排名',
+                rank: '排名',
+                total: '共',
+                people: '人',
+                mutualCount: '共同好友数',
+                mutualList: '共同好友列表',
+                loading: '正在加载网络数据...',
+                initSql: '正在初始化 SQL.js...',
+                readingDb: '正在读取数据库...',
+                welcomeTitle: '共同好友网络分析',
+                welcomeDesc: '上传文件可视化分析你的社交网络',
+                fileHint: '支持 .gexf 文件 或 VRCX.sqlite3 数据库',
+                vrcxNote: '使用 VRCX 数据库前',
+                vrcxStep1: '在设置中检查更新，确保使用',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: '或更新版本（旧版数据库结构不兼容）',
+                vrcxStep2: '打开 VRCX「图表」，在 Mutual Friend Network 下执行',
+                vrcxFetch: 'Start Fetch',
+                vrcxStep3: '解析完成后可下载 GEXF 文件',
+                vrcxLocal: '* 数据库解析在本地浏览器中进行，不会上传至服务器',
+                vrcxPathLabel: 'Windows 默认路径：',
+
+                legendLow: '少量连接',
+                legendMid: '一般连接',
+                legendHigh: '较多连接',
+                legendTop: '社交中心',
+                removeNode: '从图中移除此节点'
+            },
+            en: {
+                subtitle: 'Mutual Friends Network',
+                loadGexf: 'Load GEXF',
+                loadVrcx: 'Load VRCX',
+                selectFile: 'Select a file',
+                currentFile: 'Current',
+                search: 'Search friends...',
+                linkStrength: 'Link Strength',
+                repulsion: 'Repulsion',
+                showLabels: 'Show Labels',
+                resetView: 'Reset View',
+                freezeLayout: 'Freeze',
+                networkStats: 'Network Stats',
+                totalFriends: 'Total Friends',
+                totalConnections: 'Connections',
+                avgConnections: 'Avg Connections',
+                networkDensity: 'Density',
+                nodeDetail: 'Node Details',
+                clickToView: 'Click a node to view details',
+                mutualRanking: 'Mutual Friends Ranking',
+                rank: 'Rank',
+                total: 'of',
+                people: 'total',
+                mutualCount: 'Mutual Friends',
+                mutualList: 'Friend List',
+                loading: 'Loading network data...',
+                initSql: 'Initializing SQL.js...',
+                readingDb: 'Reading database...',
+                welcomeTitle: 'Mutual Friends Network',
+                welcomeDesc: 'Upload a file to visualize your social network',
+                fileHint: 'Supports .gexf files or VRCX.sqlite3 database',
+                vrcxNote: 'Before using VRCX database',
+                vrcxStep1: 'Check for updates and ensure using',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: 'or newer (older versions are incompatible)',
+                vrcxStep2: 'Open VRCX "Chart", under Mutual Friend Network execute',
+                vrcxFetch: 'Start Fetch',
+                vrcxStep3: 'Download GEXF file after parsing',
+                vrcxLocal: '* Parsing is done locally in your browser, data is never uploaded',
+                vrcxPathLabel: 'Windows default path:',
+
+                legendLow: 'Few',
+                legendMid: 'Average',
+                legendHigh: 'Many',
+                legendTop: 'Hub',
+                removeNode: 'Remove this node'
+            },
+            ja: {
+                subtitle: '共通フレンドネットワーク',
+                loadGexf: 'GEXF選択',
+                loadVrcx: 'VRCX選択',
+                selectFile: 'ファイルを選択',
+                currentFile: '現在',
+                search: 'フレンド検索...',
+                linkStrength: 'リンク強度',
+                repulsion: '反発力',
+                showLabels: 'ラベル表示',
+                resetView: 'リセット',
+                freezeLayout: 'フリーズ',
+                networkStats: 'ネットワーク統計',
+                totalFriends: 'フレンド数',
+                totalConnections: '接続数',
+                avgConnections: '平均接続',
+                networkDensity: 'ネットワーク密度',
+                nodeDetail: 'ノード詳細',
+                clickToView: 'ノードをクリックして詳細表示',
+                mutualRanking: '共通フレンドランキング',
+                rank: '順位',
+                total: '全',
+                people: '人中',
+                mutualCount: '共通フレンド数',
+                mutualList: 'フレンドリスト',
+                loading: 'ネットワークデータを読み込み中...',
+                initSql: 'SQL.jsを初期化中...',
+                readingDb: 'データベースを読み込み中...',
+                welcomeTitle: '共通フレンドネットワーク分析',
+                welcomeDesc: 'ファイルをアップロードしてソーシャルネットワークを可視化',
+                fileHint: '.gexf ファイル または VRCX.sqlite3 データベース対応',
+                vrcxNote: 'VRCXデータベース使用前に',
+                vrcxStep1: '設定で更新を確認し、',
+                vrcxMinVersion: 'Stable 2025.12.06+',
+                vrcxVersion: '以降を使用してください（旧形式は非対応）',
+                vrcxStep2: 'VRCX「チャート」を開き、Mutual Friend Network で実行',
+                vrcxFetch: 'Start Fetch',
+                vrcxStep3: '解析後に GEXF ファイルをダウンロード',
+                vrcxLocal: '* 解析はブラウザ内でローカルに行われ、サーバーにアップロードされません',
+                vrcxPathLabel: 'Windows デフォルトパス：',
+
+                legendLow: '少ない',
+                legendMid: '普通',
+                legendHigh: '多い',
+                legendTop: 'ハブ',
+                removeNode: 'このノードを削除'
+            }
+        };
+
+        let currentLang = 'zh';
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            const texts = i18n[lang];
+
+            // 更新所有带 data-i18n 属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (texts[key]) {
+                    el.textContent = texts[key];
+                }
+            });
+
+            // 更新输入框 placeholder
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (texts[key]) {
+                    el.placeholder = texts[key];
+                }
+            });
+
+            // 更新 title 属性
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (texts[key]) {
+                    el.title = texts[key];
+                }
+            });
+
+            // 更新下拉菜单激活状态
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+            });
+
+            // 保存语言偏好
+            localStorage.setItem('preferredLang', lang);
+
+            // 更新文件名显示（如果已加载文件）
+            if (window.networkViz && window.networkViz.currentFileName) {
+                const fileNameEl = document.getElementById('fileName');
+                fileNameEl.textContent = `${texts.currentFile}: ${window.networkViz.currentFileName}`;
+            }
+
+            // 刷新动态生成的内容（排名列表或节点详情）
+            if (window.networkViz && window.networkViz.nodes && window.networkViz.nodes.length > 0) {
+                if (window.networkViz.selectedNode) {
+                    window.networkViz.showNodeDetail(window.networkViz.selectedNode);
+                } else {
+                    window.networkViz.showRankingList();
+                }
+            }
+        }
+
+        // GEXF 解析器
+        class GEXFParser {
+            static parse(xmlString) {
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlString, 'text/xml');
+
+                const nodes = [];
+                const edges = [];
+                const nodeMap = new Map();
+
+                // 解析节点
+                const nodeElements = xml.querySelectorAll('node');
+                nodeElements.forEach(node => {
+                    const id = node.getAttribute('id');
+                    const label = node.getAttribute('label');
+
+                    let type = 'friend';
+                    let displayName = label;
+
+                    const attvalues = node.querySelectorAll('attvalue');
+                    attvalues.forEach(attr => {
+                        const forAttr = attr.getAttribute('for');
+                        const value = attr.getAttribute('value');
+                        if (forAttr === '0') type = value;
+                        if (forAttr === '1') displayName = value;
+                    });
+
+                    const nodeData = {
+                        id,
+                        label: displayName || label,
+                        type,
+                        connections: 0
+                    };
+
+                    nodes.push(nodeData);
+                    nodeMap.set(id, nodeData);
+                });
+
+                // 解析边
+                const edgeElements = xml.querySelectorAll('edge');
+                edgeElements.forEach(edge => {
+                    const source = edge.getAttribute('source');
+                    const target = edge.getAttribute('target');
+                    edges.push({ source, target });
+                });
+
+                // 正确计算每个节点的连接数（使用 Set 去重）
+                nodes.forEach(node => {
+                    const connectionSet = new Set();
+                    edges.forEach(edge => {
+                        if (edge.source === node.id && edge.target !== node.id) {
+                            connectionSet.add(edge.target);
+                        }
+                        if (edge.target === node.id && edge.source !== node.id) {
+                            connectionSet.add(edge.source);
+                        }
+                    });
+                    node.connections = connectionSet.size;
+                });
+
+                return { nodes, edges };
+            }
+        }
+
+        // 主可视化类
+        class NetworkVisualization {
+            constructor() {
+                this.svg = d3.select('#graph');
+                this.width = 0;
+                this.height = 0;
+                this.nodes = [];
+                this.edges = [];
+                this.nodeMap = new Map();
+                this.simulation = null;
+                this.showLabels = true;
+                this.frozen = false;
+                this.selectedNode = null;
+                this.highlightedNodes = new Set();
+                this.currentGexfContent = null;  // 保存当前的 GEXF 内容用于导出
+                this.currentFileName = null;     // 当前文件名
+                this.isDragging = false;         // 是否正在拖动节点
+
+                this.init();
+            }
+
+            async init() {
+                this.updateDimensions();
+                window.addEventListener('resize', () => this.updateDimensions());
+
+                // 不自动加载数据，等待用户选择文件
+                this.setupControls();
+                this.showWelcome();
+            }
+
+            showWelcome() {
+                // 隐藏加载动画，显示欢迎界面
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('welcomeScreen').style.display = 'flex';
+                // 隐藏图例和控制按钮
+                document.querySelector('.legend').style.display = 'none';
+                document.querySelector('.zoom-controls').style.display = 'none';
+            }
+
+            hideWelcome() {
+                document.getElementById('welcomeScreen').style.display = 'none';
+                // 显示图例和控制按钮
+                document.querySelector('.legend').style.display = 'block';
+                document.querySelector('.zoom-controls').style.display = 'flex';
+            }
+
+            updateDimensions() {
+                const container = document.querySelector('.graph-area');
+                this.width = container.clientWidth;
+                this.height = container.clientHeight;
+
+                this.svg
+                    .attr('width', this.width)
+                    .attr('height', this.height);
+            }
+
+            async loadData(fileContent = null) {
+                try {
+                    let text;
+                    if (fileContent) {
+                        text = fileContent;
+                    } else {
+                        const response = await fetch('mutual_graph.gexf');
+                        text = await response.text();
+                    }
+
+                    const data = GEXFParser.parse(text);
+
+                    this.nodes = data.nodes;
+                    this.edges = data.edges;
+                    this.nodeMap.clear();
+
+                    this.nodes.forEach(node => {
+                        this.nodeMap.set(node.id, node);
+                    });
+
+                    this.updateStats();
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    alert('加载文件失败，请确保文件格式正确');
+                }
+            }
+
+            async loadFromFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsText(file);
+                });
+            }
+
+            async loadFromVRCXDatabase(file) {
+                // 显示加载界面
+                this.hideWelcome();
+                const loading = document.getElementById('loading');
+                loading.style.display = 'flex';
+                loading.style.opacity = '1';
+                const texts = i18n[currentLang];
+                document.querySelector('.loading-text').textContent = texts.initSql;
+
+                try {
+                    // 初始化 sql.js
+                    const SQL = await initSqlJs({
+                        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                    });
+
+                    document.querySelector('.loading-text').textContent = texts.readingDb;
+
+                    // 读取文件为 ArrayBuffer
+                    const arrayBuffer = await file.arrayBuffer();
+                    const db = new SQL.Database(new Uint8Array(arrayBuffer));
+
+                    document.querySelector('.loading-text').textContent = '正在解析数据...';
+
+                    // 检测表前缀
+                    const prefix = this.detectVRCXPrefix(db);
+                    if (!prefix) {
+                        throw new Error('无法找到 mutual_graph 相关表，请确保已在 VRCX 中执行过 Fetch Mutual Friends');
+                    }
+
+                    // 加载显示名称
+                    const displayNames = this.loadVRCXDisplayNames(db, prefix);
+
+                    // 加载好友 ID
+                    const friendIds = this.loadVRCXFriendIds(db, prefix);
+
+                    // 加载边
+                    const edges = this.loadVRCXEdges(db, prefix);
+
+                    // 关闭数据库
+                    db.close();
+
+                    document.querySelector('.loading-text').textContent = '正在生成图形...';
+
+                    // 构建 GEXF
+                    const gexfContent = this.buildGEXFFromVRCX(friendIds, edges, displayNames);
+
+                    // 加载图形（显示原始文件名，标记为从数据库导入）
+                    await this.reloadGraph(gexfContent, file.name, true);
+
+                } catch (error) {
+                    loading.style.display = 'none';
+                    this.showWelcome();
+                    throw error;
+                }
+            }
+
+            detectVRCXPrefix(db) {
+                const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%mutual_graph_links'");
+                if (!result.length || !result[0].values.length) return null;
+
+                const tableName = result[0].values[0][0];
+                return tableName.replace('_mutual_graph_links', '');
+            }
+
+            loadVRCXDisplayNames(db, prefix) {
+                const displayNames = new Map();
+                try {
+                    const result = db.exec(`SELECT user_id, display_name FROM ${prefix}_friend_log_current`);
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([userId, displayName]) => {
+                            if (userId && displayName) {
+                                displayNames.set(userId, displayName);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载显示名称表:', e);
+                }
+                return displayNames;
+            }
+
+            loadVRCXFriendIds(db, prefix) {
+                const result = db.exec(`SELECT friend_id FROM ${prefix}_mutual_graph_friends`);
+                if (!result.length) return [];
+                return result[0].values.map(row => row[0]).filter(Boolean);
+            }
+
+            loadVRCXEdges(db, prefix) {
+                const excludedIds = new Set(['usr_00000000-0000-0000-0000-000000000000']);
+                const result = db.exec(`SELECT friend_id, mutual_id FROM ${prefix}_mutual_graph_links`);
+                if (!result.length) return [];
+
+                return result[0].values
+                    .filter(([friendId, mutualId]) =>
+                        friendId && mutualId &&
+                        !excludedIds.has(friendId) &&
+                        !excludedIds.has(mutualId)
+                    )
+                    .map(([friendId, mutualId]) => ({ source: friendId, target: mutualId }));
+            }
+
+            buildGEXFFromVRCX(friendIds, edges, displayNames) {
+                const friendSet = new Set(friendIds);
+                const nodeIds = new Set(friendIds);
+                const excludedIds = new Set(['usr_00000000-0000-0000-0000-000000000000']);
+
+                // 收集所有节点 ID
+                edges.forEach(edge => {
+                    if (edge.target && !excludedIds.has(edge.target)) {
+                        nodeIds.add(edge.target);
+                    }
+                });
+
+                // 构建节点
+                const nodes = [];
+                nodeIds.forEach(nodeId => {
+                    if (excludedIds.has(nodeId)) return;
+                    const nodeType = friendSet.has(nodeId) ? 'friend' : 'mutual';
+                    const displayName = displayNames.get(nodeId) || '';
+                    const label = displayName || nodeId;
+                    nodes.push({ id: nodeId, type: nodeType, label, displayName: displayName || label });
+                });
+
+                // 排序节点
+                nodes.sort((a, b) => a.id.localeCompare(b.id));
+
+                // 构建 GEXF XML
+                const timestamp = new Date().toISOString().split('T')[0];
+                const escapeXml = (str) => str
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&apos;');
+
+                let gexf = `<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.3draft" version="1.3">
+  <meta lastmodifieddate="${timestamp}">
+    <creator>VRCX Mutual Graph Exporter (Browser)</creator>
+    <description>Mutual friend network exported from VRCX database</description>
+  </meta>
+  <graph mode="static" defaultedgetype="undirected">
+    <attributes class="node" mode="static">
+      <attribute id="0" title="type" type="string"/>
+      <attribute id="1" title="displayName" type="string"/>
+    </attributes>
+    <nodes>
+`;
+                nodes.forEach(node => {
+                    gexf += `      <node id="${escapeXml(node.id)}" label="${escapeXml(node.label)}">
+        <attvalues>
+          <attvalue for="0" value="${escapeXml(node.type)}" />
+          <attvalue for="1" value="${escapeXml(node.displayName)}" />
+        </attvalues>
+      </node>
+`;
+                });
+
+                gexf += `    </nodes>
+    <edges>
+`;
+                edges.forEach((edge, index) => {
+                    gexf += `      <edge id="${index}" source="${escapeXml(edge.source)}" target="${escapeXml(edge.target)}" />
+`;
+                });
+
+                gexf += `    </edges>
+  </graph>
+</gexf>`;
+
+                return gexf;
+            }
+
+            async reloadGraph(fileContent, fileName, isFromDatabase = false) {
+                // 隐藏欢迎界面
+                this.hideWelcome();
+
+                // 显示加载动画
+                const loading = document.getElementById('loading');
+                loading.style.display = 'flex';
+                loading.style.opacity = '1';
+
+                // 清除旧的图形
+                if (this.simulation) {
+                    this.simulation.stop();
+                }
+                if (this.container) {
+                    this.container.selectAll('*').remove();
+                }
+
+                // 重置状态
+                this.selectedNode = null;
+                this.highlightedNodes.clear();
+                this.frozen = false;
+                document.getElementById('btnFreeze').classList.remove('active');
+
+                // 保存 GEXF 内容用于导出
+                this.currentGexfContent = fileContent;
+                this.currentFileName = fileName;
+
+                // 加载新数据
+                await this.loadData(fileContent);
+
+                // 重新设置模拟和渲染
+                this.setupSimulation();
+                this.render();
+
+                // 更新文件名显示（使用当前语言）
+                const texts = i18n[currentLang];
+                document.getElementById('fileName').textContent = `${texts.currentFile}: ${fileName}`;
+
+                // 如果是从数据库导入的，显示导出按钮
+                const exportBtn = document.getElementById('btnExportGexf');
+                if (isFromDatabase) {
+                    exportBtn.style.display = 'flex';
+                } else {
+                    exportBtn.style.display = 'none';
+                }
+
+                // 显示排名列表
+                this.showRankingList();
+
+                // 移动端加载成功后自动隐藏侧边栏
+                if (window.innerWidth <= 900) {
+                    document.querySelector('.sidebar').classList.remove('visible');
+                    document.getElementById('sidebarOverlay').classList.remove('visible');
+                    document.getElementById('menuToggle').classList.remove('active');
+                }
+
+                // 重置搜索框
+                document.getElementById('searchInput').value = '';
+
+                // 隐藏加载动画
+                this.hideLoading();
+            }
+
+            showRankingList() {
+                // 按连接数排序
+                const sortedNodes = [...this.nodes].sort((a, b) => b.connections - a.connections);
+                const texts = i18n[currentLang];
+
+                const detailSection = document.getElementById('detailSection');
+                detailSection.innerHTML = `
+                    <div class="ranking-card">
+                        <div class="ranking-header">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                            </svg>
+                            <span>${texts.mutualRanking}</span>
+                        </div>
+                        <div class="ranking-desc">${texts.clickToView}</div>
+                        <div class="ranking-list">
+                            ${sortedNodes.map((node, index) => `
+                                <div class="ranking-item ${index < 3 ? 'top-' + (index + 1) : ''}" data-id="${node.id}">
+                                    <span class="ranking-position">${index + 1}</span>
+                                    <span class="ranking-name">${node.label}</span>
+                                    <span class="ranking-score">${node.connections}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // 添加点击事件
+                detailSection.querySelectorAll('.ranking-item[data-id]').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const id = item.getAttribute('data-id');
+                        const node = this.nodeMap.get(id);
+                        if (node) {
+                            this.selectedNode = node;
+                            this.highlightConnections(node);
+                            this.showNodeDetail(node);
+                            this.centerOnNode(node);
+                        }
+                    });
+                });
+            }
+
+            updateStats() {
+                const nodeCount = this.nodes.length;
+                const edgeCount = this.edges.length;
+                const totalDegree = this.nodes.reduce((sum, n) => sum + n.connections, 0);
+                const avgDegree = nodeCount > 0 ? (totalDegree / nodeCount).toFixed(1) : '0';
+                const maxPossibleEdges = (nodeCount * (nodeCount - 1)) / 2;
+                const density = maxPossibleEdges > 0 ? (edgeCount / maxPossibleEdges * 100).toFixed(2) : '0';
+
+                document.getElementById('nodeCount').textContent = nodeCount;
+                document.getElementById('edgeCount').textContent = edgeCount;
+                document.getElementById('avgDegree').textContent = avgDegree;
+                document.getElementById('density').textContent = density + '%';
+
+                // 缓存最大连接数，避免重复计算
+                this.maxConnections = Math.max(...this.nodes.map(n => n.connections), 1);
+
+                // 预计算节点排名
+                this.nodeRanks = new Map();
+                const sorted = [...this.nodes].sort((a, b) => b.connections - a.connections);
+                sorted.forEach((node, index) => {
+                    this.nodeRanks.set(node.id, index + 1);
+                });
+            }
+
+            setupSimulation() {
+                this.simulation = d3.forceSimulation(this.nodes)
+                    .force('link', d3.forceLink(this.edges)
+                        .id(d => d.id)
+                        .distance(80))
+                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+                    .force('collision', d3.forceCollide().radius(d => this.getNodeRadius(d) + 5));
+            }
+
+            getNodeRadius(d) {
+                const minRadius = 6;
+                const maxRadius = 24;
+                const maxConn = this.maxConnections || 10;
+                const scale = d3.scaleLog()
+                    .domain([1, maxConn])
+                    .range([minRadius, maxRadius]);
+                return scale(d.connections || 1);
+            }
+
+            getNodeColor(d) {
+                // 使用缓存的最大连接数
+                const ratio = d.connections / (this.maxConnections || 1);
+
+                // 灰色到粉色的和谐渐变（饱和度递增 + 色相偏移）
+                if (ratio < 0.25) {
+                    return '#5e6575'; // 冷灰蓝 - 少量连接
+                } else if (ratio < 0.5) {
+                    return '#8f7585'; // 灰玫瑰 - 一般连接
+                } else if (ratio < 0.75) {
+                    return '#c75a80'; // 玫瑰粉 - 较多连接
+                } else {
+                    return '#ea2864'; // 主色调粉红 - 社交中心
+                }
+            }
+
+            render() {
+                // 创建容器
+                this.container = this.svg.append('g').attr('class', 'graph-container');
+
+                // 添加缩放
+                this.zoom = d3.zoom()
+                    .scaleExtent([0.1, 4])
+                    .on('zoom', (event) => {
+                        this.container.attr('transform', event.transform);
+                        // 根据缩放级别动态显示/隐藏标签（性能优化）
+                        this.updateLabelsVisibility(event.transform.k);
+                    });
+
+                this.svg.call(this.zoom);
+                this.currentZoom = 1;
+
+                // 渲染边
+                this.linkGroup = this.container.append('g').attr('class', 'links');
+                this.links = this.linkGroup.selectAll('line')
+                    .data(this.edges)
+                    .enter()
+                    .append('line')
+                    .attr('class', 'link')
+                    .attr('stroke', '#3d4f6f')
+                    .attr('stroke-width', 1);
+
+                // 渲染节点
+                this.nodeGroup = this.container.append('g').attr('class', 'nodes');
+                this.nodeElements = this.nodeGroup.selectAll('g')
+                    .data(this.nodes)
+                    .enter()
+                    .append('g')
+                    .attr('class', 'node')
+                    .call(this.drag());
+
+                // 节点光晕（使用渐变透明度代替 blur 滤镜提升性能）
+                this.nodeElements.append('circle')
+                    .attr('class', 'node-glow')
+                    .attr('r', d => this.getNodeRadius(d) + 6)
+                    .attr('fill', d => this.getNodeColor(d))
+                    .attr('opacity', 0.15);
+
+                // 节点圆圈
+                this.nodeElements.append('circle')
+                    .attr('class', 'node-circle')
+                    .attr('r', d => this.getNodeRadius(d))
+                    .attr('fill', d => this.getNodeColor(d))
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 1.5);
+
+                // 节点标签
+                this.labels = this.nodeElements.append('text')
+                    .attr('class', 'node-label')
+                    .attr('dy', d => this.getNodeRadius(d) + 14)
+                    .attr('text-anchor', 'middle')
+                    .text(d => d.label.length > 12 ? d.label.slice(0, 12) + '...' : d.label)
+                    .style('opacity', this.showLabels ? 1 : 0);
+
+                // 事件监听
+                this.nodeElements
+                    .on('mouseover', (event, d) => this.handleMouseOver(event, d))
+                    .on('mouseout', (event, d) => this.handleMouseOut(event, d))
+                    .on('click', (event, d) => this.handleClick(event, d));
+
+                // 模拟更新
+                this.simulation.on('tick', () => this.tick());
+
+                // 重新启动模拟以确保动画效果
+                this.simulation.alpha(1).restart();
+            }
+
+            tick() {
+                this.links
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                this.nodeElements.attr('transform', d => `translate(${d.x}, ${d.y})`);
+            }
+
+            updateLabelsVisibility(zoomLevel) {
+                if (!this.labels || !this.showLabels) return;
+
+                this.currentZoom = zoomLevel;
+                const nodeCount = this.nodes.length;
+
+                // 节点数量多时，只在缩放足够大时显示标签
+                if (nodeCount > 200) {
+                    // 节点多时，缩放 > 0.8 才显示标签
+                    const shouldShow = zoomLevel > 0.8;
+                    this.labels.style('opacity', shouldShow ? 1 : 0);
+                } else if (nodeCount > 100) {
+                    // 中等数量，缩放 > 0.5 显示
+                    const shouldShow = zoomLevel > 0.5;
+                    this.labels.style('opacity', shouldShow ? 1 : 0);
+                }
+                // 节点少时始终显示
+            }
+
+            drag() {
+                return d3.drag()
+                    .on('start', (event, d) => {
+                        this.isDragging = true;
+                        // 拖动开始时隐藏 tooltip
+                        document.getElementById('tooltip').classList.remove('visible');
+                        if (!event.active) this.simulation.alphaTarget(0.3).restart();
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    })
+                    .on('drag', (event, d) => {
+                        d.fx = event.x;
+                        d.fy = event.y;
+                    })
+                    .on('end', (event, d) => {
+                        this.isDragging = false;
+                        if (!event.active) this.simulation.alphaTarget(0);
+                        if (!this.frozen) {
+                            d.fx = null;
+                            d.fy = null;
+                        }
+                    });
+            }
+
+            handleMouseOver(event, d) {
+                // 拖动过程中不处理悬停事件，防止闪烁
+                if (this.isDragging) return;
+
+                const tooltip = document.getElementById('tooltip');
+                tooltip.querySelector('.tooltip-name').textContent = d.label;
+
+                // 使用预计算的排名
+                const rank = this.nodeRanks ? this.nodeRanks.get(d.id) : '?';
+
+                tooltip.querySelector('.tooltip-info').textContent =
+                    `共同好友: ${d.connections} | 排名: #${rank}`;
+
+                tooltip.style.left = (event.pageX + 15) + 'px';
+                tooltip.style.top = (event.pageY - 10) + 'px';
+                tooltip.classList.add('visible');
+
+                // 只有未选中节点时，悬停才改变高亮
+                // 已选中节点时，悬停只显示 tooltip，需点击才切换
+                if (!this.selectedNode) {
+                    this.highlightConnections(d);
+                }
+            }
+
+            handleMouseOut(event, d) {
+                // 拖动过程中不处理悬停事件，防止闪烁
+                if (this.isDragging) return;
+
+                const tooltip = document.getElementById('tooltip');
+                tooltip.classList.remove('visible');
+
+                // 已选中节点时保持高亮，未选中时清除
+                if (!this.selectedNode) {
+                    this.clearHighlights();
+                }
+            }
+
+            handleClick(event, d) {
+                event.stopPropagation();
+                this.selectedNode = d;
+                this.highlightConnections(d);
+                this.showNodeDetail(d);
+            }
+
+            highlightConnections(node) {
+                this.highlightedNodes.clear();
+                this.highlightedNodes.add(node.id);
+
+                const connectedIds = new Set();
+                this.edges.forEach(edge => {
+                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+                    if (sourceId === node.id) {
+                        connectedIds.add(targetId);
+                        this.highlightedNodes.add(targetId);
+                    }
+                    if (targetId === node.id) {
+                        connectedIds.add(sourceId);
+                        this.highlightedNodes.add(sourceId);
+                    }
+                });
+
+                this.links
+                    .classed('highlighted', d => {
+                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                        return sourceId === node.id || targetId === node.id;
+                    })
+                    .classed('dimmed', d => {
+                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                        return sourceId !== node.id && targetId !== node.id;
+                    });
+
+                this.nodeElements.style('opacity', d =>
+                    this.highlightedNodes.has(d.id) ? 1 : 0.2
+                );
+            }
+
+            clearHighlights() {
+                if (this.links) this.links.classed('highlighted', false).classed('dimmed', false);
+                if (this.nodeElements) this.nodeElements.style('opacity', 1);
+                this.highlightedNodes.clear();
+            }
+
+            showNodeDetail(node) {
+                // 使用 Set 去重，避免重复好友
+                const connectionSet = new Set();
+                const connections = [];
+
+                this.edges.forEach(edge => {
+                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+                    if (sourceId === node.id && this.nodeMap.has(targetId) && !connectionSet.has(targetId)) {
+                        connectionSet.add(targetId);
+                        connections.push(this.nodeMap.get(targetId));
+                    }
+                    if (targetId === node.id && this.nodeMap.has(sourceId) && !connectionSet.has(sourceId)) {
+                        connectionSet.add(sourceId);
+                        connections.push(this.nodeMap.get(sourceId));
+                    }
+                });
+
+                // 按连接数排序
+                connections.sort((a, b) => b.connections - a.connections);
+
+                // 使用预计算的排名
+                const rank = this.nodeRanks ? this.nodeRanks.get(node.id) : '?';
+
+                const texts = i18n[currentLang];
+                const detailSection = document.getElementById('detailSection');
+                detailSection.innerHTML = `
+                    <div class="detail-card">
+                        <div class="detail-header-row">
+                            <div class="detail-name">${node.label}</div>
+                            <button class="remove-node-btn" data-id="${node.id}" title="${texts.removeNode}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 6L6 18"></path>
+                                    <path d="M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="detail-rank">
+                            <span class="rank-badge">${texts.rank} #${rank}</span>
+                            <span class="rank-desc">${texts.total} ${this.nodes.length} ${texts.people}</span>
+                        </div>
+                        
+                        <div class="detail-stats">
+                            <div class="detail-stat full-width">
+                                <div class="detail-stat-value">${connections.length}</div>
+                                <div class="detail-stat-label">${texts.mutualCount}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="connections-list">
+                            <div class="connections-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                ${texts.mutualList} (${connections.length})
+                            </div>
+                            <div class="connections-container">
+                                ${connections.map(c => `
+                                    <div class="connection-item" data-id="${c.id}">
+                                        <div class="connection-dot" style="background: ${this.getNodeColor(c)}"></div>
+                                        <span class="connection-name">${c.label}</span>
+                                        <span class="connection-count">${c.connections}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 添加连接项点击事件
+                detailSection.querySelectorAll('.connection-item[data-id]').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const id = item.getAttribute('data-id');
+                        const targetNode = this.nodeMap.get(id);
+                        if (targetNode) {
+                            this.selectedNode = targetNode;
+                            this.highlightConnections(targetNode);
+                            this.showNodeDetail(targetNode);
+                            this.centerOnNode(targetNode);
+                        }
+                    });
+                });
+
+                // 添加移除按钮点击事件
+                const removeBtn = detailSection.querySelector('.remove-node-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const nodeId = removeBtn.getAttribute('data-id');
+                        this.removeNode(nodeId);
+                    });
+                }
+            }
+
+            removeNode(nodeId) {
+                // 从节点数组中移除
+                const nodeIndex = this.nodes.findIndex(n => n.id === nodeId);
+                if (nodeIndex === -1) return;
+
+                const removedNode = this.nodes[nodeIndex];
+                this.nodes.splice(nodeIndex, 1);
+                this.nodeMap.delete(nodeId);
+
+                // 移除相关的边
+                this.edges = this.edges.filter(edge => {
+                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                    return sourceId !== nodeId && targetId !== nodeId;
+                });
+
+                // 重新计算所有节点的连接数
+                this.nodes.forEach(node => {
+                    const connectionSet = new Set();
+                    this.edges.forEach(edge => {
+                        const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                        const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                        if (sourceId === node.id && targetId !== node.id) {
+                            connectionSet.add(targetId);
+                        }
+                        if (targetId === node.id && sourceId !== node.id) {
+                            connectionSet.add(sourceId);
+                        }
+                    });
+                    node.connections = connectionSet.size;
+                });
+
+                // 更新统计信息
+                this.updateStats();
+
+                // 重新渲染图形
+                this.simulation.stop();
+                this.container.selectAll('*').remove();
+                this.setupSimulation();
+                this.render();
+
+                // 重置选中状态，显示排名列表
+                this.selectedNode = null;
+                this.highlightedNodes.clear();
+                this.showRankingList();
+            }
+
+            centerOnNode(node) {
+                const scale = 1.5;
+                const x = this.width / 2 - node.x * scale;
+                const y = this.height / 2 - node.y * scale;
+
+                this.svg.transition()
+                    .duration(750)
+                    .call(this.zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+            }
+
+            setupControls() {
+                // GEXF 文件选择
+                const fileInput = document.getElementById('fileInput');
+                const btnLoadFile = document.getElementById('btnLoadFile');
+                const welcomeUploadBtn = document.getElementById('welcomeUploadBtn');
+
+                const triggerFileInput = () => fileInput.click();
+
+                btnLoadFile.addEventListener('click', triggerFileInput);
+                welcomeUploadBtn.addEventListener('click', triggerFileInput);
+
+                fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        try {
+                            const content = await this.loadFromFile(file);
+                            await this.reloadGraph(content, file.name);
+                        } catch (error) {
+                            console.error('读取文件失败:', error);
+                            alert('读取文件失败');
+                        }
+                    }
+                    fileInput.value = '';
+                });
+
+                // VRCX 数据库选择
+                const dbFileInput = document.getElementById('dbFileInput');
+                const btnLoadDB = document.getElementById('btnLoadDB');
+                const welcomeUploadDBBtn = document.getElementById('welcomeUploadDBBtn');
+
+                const triggerDBInput = () => dbFileInput.click();
+
+                btnLoadDB.addEventListener('click', triggerDBInput);
+                welcomeUploadDBBtn.addEventListener('click', triggerDBInput);
+
+                dbFileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        try {
+                            await this.loadFromVRCXDatabase(file);
+                        } catch (error) {
+                            console.error('解析数据库失败:', error);
+                            alert('解析数据库失败: ' + error.message);
+                        }
+                    }
+                    dbFileInput.value = '';
+                });
+
+                // 导出 GEXF 按钮
+                const btnExportGexf = document.getElementById('btnExportGexf');
+                btnExportGexf.addEventListener('click', () => {
+                    if (this.currentGexfContent) {
+                        this.exportGexf();
+                    }
+                });
+
+                // 搜索
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+
+                // 力度滑块
+                const forceSlider = document.getElementById('forceSlider');
+                forceSlider.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    document.getElementById('forceValue').textContent = value;
+                    if (this.simulation) {
+                        this.simulation.force('charge').strength(value);
+                        this.simulation.alpha(0.3).restart();
+                    }
+                });
+
+                // 距离滑块
+                const distanceSlider = document.getElementById('distanceSlider');
+                distanceSlider.addEventListener('input', (e) => {
+                    const value = parseInt(e.target.value);
+                    document.getElementById('distanceValue').textContent = value;
+                    if (this.simulation) {
+                        this.simulation.force('link').distance(value);
+                        this.simulation.alpha(0.3).restart();
+                    }
+                });
+
+                // 显示标签
+                const btnShowLabels = document.getElementById('btnShowLabels');
+                btnShowLabels.addEventListener('click', () => {
+                    this.showLabels = !this.showLabels;
+                    btnShowLabels.classList.toggle('active', this.showLabels);
+                    if (this.labels) {
+                        if (this.showLabels) {
+                            // 启用时根据缩放级别决定是否显示
+                            this.updateLabelsVisibility(this.currentZoom || 1);
+                        } else {
+                            this.labels.transition().duration(200).style('opacity', 0);
+                        }
+                    }
+                });
+
+                // 重置视图
+                const btnReset = document.getElementById('btnReset');
+                btnReset.addEventListener('click', () => {
+                    if (!this.simulation) return;
+                    this.svg.transition()
+                        .duration(750)
+                        .call(this.zoom.transform, d3.zoomIdentity);
+                    this.selectedNode = null;
+                    this.clearHighlights();
+                    this.simulation.alpha(0.3).restart();
+                });
+
+                // 冻结布局
+                const btnFreeze = document.getElementById('btnFreeze');
+                btnFreeze.addEventListener('click', () => {
+                    if (!this.simulation) return;
+                    this.frozen = !this.frozen;
+                    btnFreeze.classList.toggle('active', this.frozen);
+
+                    if (this.frozen) {
+                        this.simulation.stop();
+                        this.nodes.forEach(n => {
+                            n.fx = n.x;
+                            n.fy = n.y;
+                        });
+                    } else {
+                        this.nodes.forEach(n => {
+                            n.fx = null;
+                            n.fy = null;
+                        });
+                        this.simulation.alpha(0.3).restart();
+                    }
+                });
+
+                // 缩放按钮
+                document.getElementById('zoomIn').addEventListener('click', () => {
+                    if (this.zoom) this.svg.transition().call(this.zoom.scaleBy, 1.5);
+                });
+
+                document.getElementById('zoomOut').addEventListener('click', () => {
+                    if (this.zoom) this.svg.transition().call(this.zoom.scaleBy, 0.67);
+                });
+
+                document.getElementById('zoomFit').addEventListener('click', () => {
+                    if (this.container) this.fitToView();
+                });
+
+                // 点击空白处取消选择，显示排名列表
+                this.svg.on('click', () => {
+                    if (!this.simulation) return;
+                    this.selectedNode = null;
+                    this.clearHighlights();
+                    this.showRankingList();
+                });
+            }
+
+            handleSearch(query) {
+                if (!this.nodeElements || !this.links) return;
+
+                const normalizedQuery = query.toLowerCase().trim();
+
+                if (!normalizedQuery) {
+                    this.nodeElements.style('opacity', 1);
+                    this.links.style('opacity', 0.4);
+                    return;
+                }
+
+                const matchingNodes = new Set();
+                this.nodes.forEach(node => {
+                    if (node.label.toLowerCase().includes(normalizedQuery)) {
+                        matchingNodes.add(node.id);
+                    }
+                });
+
+                this.nodeElements.style('opacity', d =>
+                    matchingNodes.has(d.id) ? 1 : 0.1
+                );
+
+                this.links.style('opacity', d => {
+                    const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                    const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                    return matchingNodes.has(sourceId) || matchingNodes.has(targetId) ? 0.6 : 0.05;
+                });
+
+                // 如果只有一个匹配，自动选中并居中
+                if (matchingNodes.size === 1) {
+                    const nodeId = [...matchingNodes][0];
+                    const node = this.nodeMap.get(nodeId);
+                    if (node) {
+                        this.selectedNode = node;
+                        this.showNodeDetail(node);
+                        this.centerOnNode(node);
+                    }
+                }
+            }
+
+            fitToView() {
+                const bounds = this.container.node().getBBox();
+                const padding = 50;
+
+                const scale = Math.min(
+                    (this.width - padding * 2) / bounds.width,
+                    (this.height - padding * 2) / bounds.height,
+                    2
+                );
+
+                const x = this.width / 2 - (bounds.x + bounds.width / 2) * scale;
+                const y = this.height / 2 - (bounds.y + bounds.height / 2) * scale;
+
+                this.svg.transition()
+                    .duration(750)
+                    .call(this.zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+            }
+
+            hideLoading() {
+                const loading = document.getElementById('loading');
+                loading.style.opacity = '0';
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 300);
+            }
+
+            exportGexf() {
+                if (!this.currentGexfContent) return;
+
+                // 创建导出文件名
+                let exportFileName = this.currentFileName || 'mutual_graph';
+                if (exportFileName.endsWith('.sqlite3') || exportFileName.endsWith('.db')) {
+                    exportFileName = exportFileName.replace(/\.(sqlite3|db)$/i, '.gexf');
+                } else if (!exportFileName.endsWith('.gexf')) {
+                    exportFileName += '.gexf';
+                }
+
+                // 创建 Blob 并下载
+                const blob = new Blob([this.currentGexfContent], { type: 'application/xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = exportFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // 启动应用
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化语言选择器
+            const langBtn = document.getElementById('langBtn');
+            const langDropdown = document.getElementById('langDropdown');
+
+            // 从 localStorage 读取语言偏好
+            const savedLang = localStorage.getItem('preferredLang') || 'zh';
+            updateLanguage(savedLang);
+
+            // 语言切换点击事件
+            langDropdown.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const lang = option.getAttribute('data-lang');
+                    updateLanguage(lang);
+                });
+            });
+
+            // 移动端侧边栏控制
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.querySelector('.sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            let isMobile = window.innerWidth <= 900;
+
+            function updateMenuTogglePosition() {
+                if (!menuToggle) return;
+                if (window.innerWidth > 900) {
+                    menuToggle.style.left = '';
+                    return;
+                }
+                const logoSection = document.querySelector('.logo-section');
+                if (!logoSection) return;
+                const paddingLeft = parseFloat(getComputedStyle(logoSection).paddingLeft) || 0;
+                const btnWidth = parseFloat(getComputedStyle(menuToggle).width) || 0;
+                const offset = Math.max(6, (paddingLeft - btnWidth) / 2);
+                menuToggle.style.left = `${offset}px`;
+            }
+
+            function showSidebar() {
+                sidebar.classList.add('visible');
+                sidebarOverlay.classList.add('visible');
+                menuToggle.classList.add('active');
+            }
+
+            function hideSidebar() {
+                sidebar.classList.remove('visible');
+                sidebarOverlay.classList.remove('visible');
+                menuToggle.classList.remove('active');
+            }
+
+            // 菜单按钮点击
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    if (sidebar.classList.contains('visible')) {
+                        hideSidebar();
+                    } else {
+                        showSidebar();
+                    }
+                });
+                updateMenuTogglePosition();
+            }
+
+            // 遮罩点击关闭
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', hideSidebar);
+            }
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', () => {
+                const wasMobile = isMobile;
+                isMobile = window.innerWidth <= 900;
+
+                // 从移动端切换到桌面端时，移除移动端样式
+                if (wasMobile && !isMobile) {
+                    sidebar.classList.remove('visible');
+                    sidebarOverlay.classList.remove('visible');
+                }
+                updateMenuTogglePosition();
+            });
+
+            window.networkViz = new NetworkVisualization();
+        });
+    </script>
+    <!-- Cloudflare Web Analytics - Removed for security -->
+    <!-- End Cloudflare Web Analytics -->
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+# 暂时忽略所有文件
+*
+
+# 只跟踪这三个文件
+!index.html
+!README.md
+!vrcx_to_gexf.py
+
+# 允许 .gitignore 自己被跟踪
+!.gitignore
+
+# 部署时需要的 Cloudflare Analytics 配置（不提交）
+cloudflare-analytics.html

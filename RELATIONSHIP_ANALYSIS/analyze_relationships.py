@@ -201,9 +201,9 @@ class RelationshipAnalyzerV2:
     
     def get_daily_interactions(self) -> pd.DataFrame:
         query = """
-        SELECT user_id, date(created_at) as day, SUM(time) / 3600000.0 as hours
-        FROM gamelog_join_leave 
-        WHERE type = 'OnPlayerLeft' AND time > 0
+        SELECT user_id, date(created_at) as day, SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 3600000.0 as hours
+        FROM gamelog_join_leave
+        WHERE type = 'OnPlayerLeft'
         GROUP BY user_id, date(created_at)
         """
         df = pd.read_sql_query(query, self.conn)

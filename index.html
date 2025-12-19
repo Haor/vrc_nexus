@@ -588,6 +588,13 @@
             stroke: var(--accent-primary);
         }
 
+        .ranking-sub-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
         .ranking-desc {
             font-size: 12px;
             color: var(--text-muted);
@@ -694,6 +701,180 @@
             margin-left: 10px;
         }
 
+        .ranking-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            padding: 4px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .ranking-tab {
+            flex: 1;
+            padding: 8px 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .ranking-tab:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .ranking-tab.active {
+            background: var(--accent-primary);
+            color: #fff;
+        }
+
+        .ranking-time-selector {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .ranking-time-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .ranking-time-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .ranking-time-btn.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: #fff;
+        }
+
+        .ranking-data-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            padding: 6px 8px;
+            background: rgba(234, 40, 100, 0.1);
+            border-radius: 4px;
+            border-left: 2px solid var(--accent-primary);
+        }
+
+        /* Account Selector Modal */
+        .account-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .account-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            min-width: 320px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .account-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .account-modal-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .account-item:hover {
+            border-color: var(--accent-primary);
+            background: rgba(234, 40, 100, 0.1);
+        }
+
+        .account-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), #ff6b9d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .account-item-info {
+            flex: 1;
+        }
+
+        .account-item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .account-item-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'Orbitron', monospace;
+        }
+
         .detail-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -730,7 +911,7 @@
             word-break: break-word;
         }
 
-        .remove-node-btn {
+        .close-detail-btn {
             width: 28px;
             height: 28px;
             border: 1px solid var(--border-color);
@@ -746,11 +927,38 @@
             opacity: 0.6;
         }
 
-        .remove-node-btn:hover {
+        .close-detail-btn:hover {
             opacity: 1;
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-            background: rgba(234, 40, 100, 0.15);
+            border-color: var(--text-muted);
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .close-detail-btn svg {
+            stroke: currentColor;
+        }
+
+        .remove-node-btn {
+            width: 100%;
+            padding: 10px 16px;
+            margin-top: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .remove-node-btn:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
         }
 
         .remove-node-btn svg {
@@ -1858,7 +2066,23 @@
                 legendMid: '一般连接',
                 legendHigh: '较多连接',
                 legendTop: '社交中心',
-                removeNode: '从图中移除此节点'
+                removeNode: '从图中移除此节点',
+                rankingMutual: '共同好友',
+                rankingStrength: '关系强度',
+                rankingIntimacy: '近期亲密',
+                rankingPlaytime: '游玩时长',
+                rankingTitle: '排行榜',
+                timeAll: '全部',
+                time60d: '60天',
+                time90d: '90天',
+                time30d: '30天',
+                time7d: '7天',
+                timeDay: '天',
+                dataHint: '数据来自VRCX记录，完整性取决于记录时长',
+                closeDetail: '关闭详情',
+                selectAccount: '选择账号',
+                selectAccountDesc: '检测到多个账号数据，请选择要加载的账号：',
+                friendCount: '位好友'
             },
             en: {
                 subtitle: 'Mutual Friends Network',
@@ -1905,7 +2129,23 @@
                 legendMid: 'Average',
                 legendHigh: 'Many',
                 legendTop: 'Hub',
-                removeNode: 'Remove this node'
+                removeNode: 'Remove this node',
+                rankingMutual: 'Mutual',
+                rankingStrength: 'Strength',
+                rankingIntimacy: 'Intimacy',
+                rankingPlaytime: 'Playtime',
+                rankingTitle: 'Ranking',
+                timeAll: 'All',
+                time60d: '60d',
+                time90d: '90d',
+                time30d: '30d',
+                time7d: '7d',
+                timeDay: 'd',
+                dataHint: 'Data from VRCX logs, completeness depends on recording duration',
+                closeDetail: 'Close',
+                selectAccount: 'Select Account',
+                selectAccountDesc: 'Multiple accounts detected. Please select which account to load:',
+                friendCount: 'friends'
             },
             ja: {
                 subtitle: '共通フレンドネットワーク',
@@ -1952,7 +2192,23 @@
                 legendMid: '普通',
                 legendHigh: '多い',
                 legendTop: 'ハブ',
-                removeNode: 'このノードを削除'
+                removeNode: 'このノードを削除',
+                rankingMutual: '共通',
+                rankingStrength: '関係強度',
+                rankingIntimacy: '親密度',
+                rankingPlaytime: 'プレイ時間',
+                rankingTitle: 'ランキング',
+                timeAll: '全期間',
+                time60d: '60日',
+                time90d: '90日',
+                time30d: '30日',
+                time7d: '7日',
+                timeDay: '日',
+                dataHint: 'VRCXログに基づくデータ、完全性は記録期間に依存',
+                closeDetail: '閉じる',
+                selectAccount: 'アカウント選択',
+                selectAccountDesc: '複数のアカウントが検出されました。ロードするアカウントを選択してください：',
+                friendCount: '人のフレンド'
             }
         };
 
@@ -2020,28 +2276,98 @@
                 const edges = [];
                 const nodeMap = new Map();
 
+                // 首先解析属性定义，建立 id -> title 映射
+                const attrMap = new Map();
+                const attrElements = xml.querySelectorAll('attributes[class="node"] attribute');
+                attrElements.forEach(attr => {
+                    const attrId = attr.getAttribute('id');
+                    const title = attr.getAttribute('title');
+                    if (attrId && title) {
+                        attrMap.set(attrId, title);
+                    }
+                });
+
                 // 解析节点
                 const nodeElements = xml.querySelectorAll('node');
                 nodeElements.forEach(node => {
                     const id = node.getAttribute('id');
                     const label = node.getAttribute('label');
 
+                    // 默认值（兼容旧版 GEXF）
                     let type = 'friend';
                     let displayName = label;
+                    let trustLevel = '';
+                    let meetCount = 0;
+                    let meetCount7d = 0;
+                    let meetCount30d = 0;
+                    let playTime = 0;
+                    let playTime7d = 0;
+                    let playTime30d = 0;
+                    let daysKnown = 0;
+                    // 关系指标（新增）
+                    let relationshipStrength = 0;
+                    let recentIntimacy = 0;
+                    let recentIntimacy30d = 0;
+                    let recentIntimacy60d = 0;
+                    let recentIntimacy90d = 0;
+                    let effectiveHours = 0;
+                    let retentionRate = 0;
+                    let lifeShare = 0;
+                    let isHiddenFriend = false;
 
                     const attvalues = node.querySelectorAll('attvalue');
                     attvalues.forEach(attr => {
                         const forAttr = attr.getAttribute('for');
                         const value = attr.getAttribute('value');
-                        if (forAttr === '0') type = value;
-                        if (forAttr === '1') displayName = value;
+                        const attrTitle = attrMap.get(forAttr);
+
+                        // 优先使用 title 匹配，其次使用 id 匹配（兼容旧格式）
+                        if (attrTitle === 'type' || forAttr === '0') type = value;
+                        else if (attrTitle === 'displayName' || forAttr === '1') displayName = value;
+                        else if (attrTitle === 'trustLevel' || forAttr === '2') trustLevel = value;
+                        else if (attrTitle === 'meetCount' || forAttr === '3') meetCount = parseInt(value) || 0;
+                        else if (attrTitle === 'meetCount7d' || forAttr === '4') meetCount7d = parseInt(value) || 0;
+                        else if (attrTitle === 'meetCount30d' || forAttr === '5') meetCount30d = parseInt(value) || 0;
+                        else if (attrTitle === 'playTime' || forAttr === '6') playTime = parseFloat(value) || 0;
+                        else if (attrTitle === 'playTime7d' || forAttr === '7') playTime7d = parseFloat(value) || 0;
+                        else if (attrTitle === 'playTime30d' || forAttr === '8') playTime30d = parseFloat(value) || 0;
+                        else if (attrTitle === 'daysKnown' || forAttr === '9') daysKnown = parseInt(value) || 0;
+                        // 关系指标
+                        else if (attrTitle === 'relationshipStrength' || forAttr === '10') relationshipStrength = parseFloat(value) || 0;
+                        else if (attrTitle === 'recentIntimacy' || forAttr === '11') recentIntimacy = parseFloat(value) || 0;
+                        else if (attrTitle === 'effectiveHours' || forAttr === '12') effectiveHours = parseFloat(value) || 0;
+                        else if (attrTitle === 'retentionRate' || forAttr === '13') retentionRate = parseFloat(value) || 0;
+                        else if (attrTitle === 'lifeShare' || forAttr === '14') lifeShare = parseFloat(value) || 0;
+                        else if (attrTitle === 'isHiddenFriend' || forAttr === '15') isHiddenFriend = value === 'true';
+                        else if (attrTitle === 'recentIntimacy30d' || forAttr === '16') recentIntimacy30d = parseFloat(value) || 0;
+                        else if (attrTitle === 'recentIntimacy60d' || forAttr === '17') recentIntimacy60d = parseFloat(value) || 0;
+                        else if (attrTitle === 'recentIntimacy90d' || forAttr === '18') recentIntimacy90d = parseFloat(value) || 0;
                     });
 
                     const nodeData = {
                         id,
                         label: displayName || label,
                         type,
-                        connections: 0
+                        connections: 0,
+                        // 新增属性（可能为默认值，用于兼容旧版 GEXF）
+                        trustLevel,
+                        meetCount,
+                        meetCount7d,
+                        meetCount30d,
+                        playTime,
+                        playTime7d,
+                        playTime30d,
+                        daysKnown,
+                        // 关系指标
+                        relationshipStrength,
+                        recentIntimacy,
+                        recentIntimacy30d,
+                        recentIntimacy60d,
+                        recentIntimacy90d,
+                        effectiveHours,
+                        retentionRate,
+                        lifeShare,
+                        isHiddenFriend
                     };
 
                     nodes.push(nodeData);
@@ -2189,14 +2515,37 @@
 
                     document.querySelector('.loading-text').textContent = '正在解析数据...';
 
-                    // 检测表前缀
-                    const prefix = this.detectVRCXPrefix(db);
-                    if (!prefix) {
+                    // 检测所有可用的账号前缀
+                    const allPrefixes = this.detectAllVRCXPrefixes(db);
+                    if (!allPrefixes.length) {
                         throw new Error('无法找到 mutual_graph 相关表，请确保已在 VRCX 中执行过 Fetch Mutual Friends');
                     }
 
-                    // 加载显示名称
-                    const displayNames = this.loadVRCXDisplayNames(db, prefix);
+                    // 如果有多个账号，显示选择对话框
+                    let prefix;
+                    if (allPrefixes.length > 1) {
+                        // 隐藏加载动画，显示选择对话框
+                        loading.style.display = 'none';
+                        
+                        // 加载保存的账号信息
+                        const savedCredentials = this.loadSavedCredentials(db);
+                        
+                        // 获取每个账号的信息
+                        const accounts = allPrefixes.map(p => this.getAccountInfo(db, p, savedCredentials));
+                        prefix = await this.showAccountSelector(accounts);
+                        
+                        // 重新显示加载动画
+                        loading.style.display = 'flex';
+                        document.querySelector('.loading-text').textContent = '正在加载数据...';
+                    } else {
+                        prefix = allPrefixes[0];
+                    }
+
+                    // 获取数据库最新日期作为时间基准
+                    const latestDate = this.getVRCXLatestDate(db);
+
+                    // 加载好友信息（displayName + trustLevel）
+                    const friendInfo = this.loadVRCXDisplayNames(db, prefix);
 
                     // 加载好友 ID
                     const friendIds = this.loadVRCXFriendIds(db, prefix);
@@ -2204,13 +2553,28 @@
                     // 加载边
                     const edges = this.loadVRCXEdges(db, prefix);
 
+                    // 加载游玩数据（meetCount, playTime + 7d/30d）
+                    const playData = this.loadVRCXPlayData(db, latestDate);
+
+                    // 加载认识天数
+                    const daysKnown = this.loadVRCXDaysKnown(db, prefix, latestDate);
+
+                    document.querySelector('.loading-text').textContent = '正在计算关系指标...';
+
+                    // 执行关系分析算法
+                    const { metrics: relationshipMetrics, params: analysisParams } = 
+                        await this.analyzeRelationships(db, prefix, latestDate, friendIds);
+
+                    // 保存分析参数供后续使用
+                    this.analysisParams = analysisParams;
+
                     // 关闭数据库
                     db.close();
 
                     document.querySelector('.loading-text').textContent = '正在生成图形...';
 
-                    // 构建 GEXF
-                    const gexfContent = this.buildGEXFFromVRCX(friendIds, edges, displayNames);
+                    // 构建 GEXF（包含所有新增属性和关系指标）
+                    const gexfContent = this.buildGEXFFromVRCX(friendIds, edges, friendInfo, playData, daysKnown, relationshipMetrics);
 
                     // 加载图形（显示原始文件名，标记为从数据库导入）
                     await this.reloadGraph(gexfContent, file.name, true);
@@ -2230,21 +2594,119 @@
                 return tableName.replace('_mutual_graph_links', '');
             }
 
-            loadVRCXDisplayNames(db, prefix) {
-                const displayNames = new Map();
+            detectAllVRCXPrefixes(db) {
+                const result = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%_mutual_graph_links'");
+                if (!result.length || !result[0].values.length) return [];
+
+                return result[0].values.map(row => row[0].replace('_mutual_graph_links', ''));
+            }
+
+            // Load saved credentials from configs table (if available)
+            loadSavedCredentials(db) {
+                const credentials = new Map(); // userId -> displayName
                 try {
-                    const result = db.exec(`SELECT user_id, display_name FROM ${prefix}_friend_log_current`);
+                    const result = db.exec("SELECT value FROM configs WHERE key = 'config:savedcredentials'");
+                    if (result.length && result[0].values.length) {
+                        const jsonStr = result[0].values[0][0];
+                        if (jsonStr) {
+                            const savedCreds = JSON.parse(jsonStr);
+                            // savedCreds is an array of credential objects
+                            if (Array.isArray(savedCreds)) {
+                                savedCreds.forEach(cred => {
+                                    if (cred.user && cred.user.id && cred.user.displayName) {
+                                        credentials.set(cred.user.id, cred.user.displayName);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('无法加载 savedCredentials:', e);
+                }
+                return credentials;
+            }
+
+            getAccountInfo(db, prefix, savedCredentials) {
+                let friendCount = 0;
+                let displayName = '';
+                
+                try {
+                    const countResult = db.exec(`SELECT COUNT(*) FROM ${prefix}_friend_log_current`);
+                    if (countResult.length && countResult[0].values.length) {
+                        friendCount = countResult[0].values[0][0] || 0;
+                    }
+                } catch (e) {}
+
+                // Convert prefix to user ID format
+                let userId = prefix;
+                if (prefix.startsWith('usr') && prefix.length === 35) {
+                    const raw = prefix.slice(3);
+                    userId = `usr_${raw.slice(0,8)}-${raw.slice(8,12)}-${raw.slice(12,16)}-${raw.slice(16,20)}-${raw.slice(20)}`;
+                }
+
+                // Try to get display name from saved credentials
+                if (savedCredentials && savedCredentials.has(userId)) {
+                    displayName = savedCredentials.get(userId);
+                }
+
+                return { prefix, friendCount, userId, displayName };
+            }
+
+            showAccountSelector(accounts) {
+                return new Promise((resolve) => {
+                    const texts = i18n[currentLang];
+                    
+                    const overlay = document.createElement('div');
+                    overlay.className = 'account-modal-overlay';
+                    overlay.innerHTML = `
+                        <div class="account-modal">
+                            <div class="account-modal-title">${texts.selectAccount}</div>
+                            <div class="account-modal-desc">${texts.selectAccountDesc}</div>
+                            <div class="account-list">
+                                ${accounts.map((acc, idx) => `
+                                    <div class="account-item" data-prefix="${acc.prefix}">
+                                        <div class="account-item-icon">${acc.displayName ? acc.displayName.charAt(0).toUpperCase() : (idx + 1)}</div>
+                                        <div class="account-item-info">
+                                            <div class="account-item-name">${acc.displayName || `Account ${idx + 1}`}</div>
+                                            <div class="account-item-id">${acc.userId} (${acc.friendCount} ${texts.friendCount})</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(overlay);
+                    
+                    overlay.querySelectorAll('.account-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const prefix = item.getAttribute('data-prefix');
+                            overlay.remove();
+                            resolve(prefix);
+                        });
+                    });
+                });
+            }
+
+            loadVRCXDisplayNames(db, prefix) {
+                // Returns Map<userId, {displayName, trustLevel}>
+                const friendInfo = new Map();
+                try {
+                    const result = db.exec(`SELECT user_id, display_name, trust_level FROM ${prefix}_friend_log_current`);
                     if (result.length && result[0].values) {
-                        result[0].values.forEach(([userId, displayName]) => {
-                            if (userId && displayName) {
-                                displayNames.set(userId, displayName);
+                        result[0].values.forEach(([userId, displayName, trustLevel]) => {
+                            if (userId) {
+                                friendInfo.set(userId, {
+                                    displayName: displayName || '',
+                                    trustLevel: trustLevel || ''
+                                });
                             }
                         });
                     }
                 } catch (e) {
                     console.warn('无法加载显示名称表:', e);
                 }
-                return displayNames;
+                return friendInfo;
             }
 
             loadVRCXFriendIds(db, prefix) {
@@ -2267,7 +2729,660 @@
                     .map(([friendId, mutualId]) => ({ source: friendId, target: mutualId }));
             }
 
-            buildGEXFFromVRCX(friendIds, edges, displayNames) {
+            // Get the latest date from gamelog_join_leave as time reference
+            getVRCXLatestDate(db) {
+                try {
+                    const result = db.exec(`SELECT MAX(created_at) as latest_date FROM gamelog_join_leave`);
+                    if (result.length && result[0].values[0][0]) {
+                        return result[0].values[0][0];
+                    }
+                } catch (e) {
+                    console.warn('无法获取最新日期:', e);
+                }
+                return new Date().toISOString();
+            }
+
+            // Load play data (meetCount, playTime) for all friends
+            // Returns Map<userId, {meetCount, playTime, meetCount7d, playTime7d, meetCount30d, playTime30d}>
+            loadVRCXPlayData(db, latestDate) {
+                const playData = new Map();
+
+                try {
+                    // All-time data: meetCount and playTime (time is in milliseconds)
+                    const allTimeResult = db.exec(`
+                        SELECT
+                            user_id,
+                            COUNT(*) as meet_count,
+                            SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 1000.0 as play_seconds
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft'
+                          AND user_id IS NOT NULL
+                          AND user_id != ''
+                        GROUP BY user_id
+                    `);
+
+                    if (allTimeResult.length && allTimeResult[0].values) {
+                        allTimeResult[0].values.forEach(([userId, meetCount, playSeconds]) => {
+                            if (userId) {
+                                playData.set(userId, {
+                                    meetCount: meetCount || 0,
+                                    playTime: playSeconds || 0,
+                                    meetCount7d: 0,
+                                    playTime7d: 0,
+                                    meetCount30d: 0,
+                                    playTime30d: 0
+                                });
+                            }
+                        });
+                    }
+
+                    // Last 30 days data
+                    const last30dResult = db.exec(`
+                        SELECT
+                            user_id,
+                            COUNT(*) as meet_count,
+                            SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 1000.0 as play_seconds
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft'
+                          AND user_id IS NOT NULL
+                          AND user_id != ''
+                          AND created_at >= datetime('${latestDate}', '-30 days')
+                        GROUP BY user_id
+                    `);
+
+                    if (last30dResult.length && last30dResult[0].values) {
+                        last30dResult[0].values.forEach(([userId, meetCount, playSeconds]) => {
+                            if (userId && playData.has(userId)) {
+                                const data = playData.get(userId);
+                                data.meetCount30d = meetCount || 0;
+                                data.playTime30d = playSeconds || 0;
+                            }
+                        });
+                    }
+
+                    // Last 7 days data
+                    const last7dResult = db.exec(`
+                        SELECT
+                            user_id,
+                            COUNT(*) as meet_count,
+                            SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 1000.0 as play_seconds
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft'
+                          AND user_id IS NOT NULL
+                          AND user_id != ''
+                          AND created_at >= datetime('${latestDate}', '-7 days')
+                        GROUP BY user_id
+                    `);
+
+                    if (last7dResult.length && last7dResult[0].values) {
+                        last7dResult[0].values.forEach(([userId, meetCount, playSeconds]) => {
+                            if (userId && playData.has(userId)) {
+                                const data = playData.get(userId);
+                                data.meetCount7d = meetCount || 0;
+                                data.playTime7d = playSeconds || 0;
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载游玩数据:', e);
+                }
+
+                return playData;
+            }
+
+            // Load days known (from friend_log_history with type='Friend')
+            // Returns Map<userId, daysKnown>
+            loadVRCXDaysKnown(db, prefix, latestDate) {
+                const daysKnown = new Map();
+
+                try {
+                    const result = db.exec(`
+                        SELECT
+                            user_id,
+                            julianday('${latestDate}') - julianday(MIN(created_at)) as days
+                        FROM ${prefix}_friend_log_history
+                        WHERE type = 'Friend'
+                        GROUP BY user_id
+                    `);
+
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([userId, days]) => {
+                            if (userId) {
+                                daysKnown.set(userId, Math.round(days) || 0);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载认识天数:', e);
+                }
+
+                return daysKnown;
+            }
+
+            // ========== 关系分析算法 V2.1 ==========
+
+            // 获取每日互动数据聚合
+            // Returns Map<userId, Array<{day: string, hours: number}>>
+            loadVRCXDailyInteractions(db, latestDate) {
+                const dailyData = new Map();
+
+                try {
+                    const result = db.exec(`
+                        SELECT 
+                            user_id, 
+                            date(created_at) as day, 
+                            SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 3600000.0 as hours
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft'
+                          AND user_id IS NOT NULL
+                          AND user_id != ''
+                        GROUP BY user_id, date(created_at)
+                    `);
+
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([userId, day, hours]) => {
+                            if (userId && day) {
+                                if (!dailyData.has(userId)) {
+                                    dailyData.set(userId, []);
+                                }
+                                dailyData.get(userId).push({ day, hours: hours || 0 });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载每日互动数据:', e);
+                }
+
+                return dailyData;
+            }
+
+            // 获取好友统计数据 (interaction_count, meet_count, active_days)
+            // Returns Map<userId, {interactionCount, meetCount, activeDays}>
+            loadVRCXFriendStats(db) {
+                const stats = new Map();
+
+                try {
+                    const result = db.exec(`
+                        SELECT 
+                            user_id,
+                            COUNT(*) as interaction_count,
+                            COUNT(DISTINCT location) as meet_count,
+                            COUNT(DISTINCT date(created_at)) as active_days
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft' 
+                          AND user_id IS NOT NULL 
+                          AND user_id != ''
+                          AND time > 0
+                        GROUP BY user_id
+                    `);
+
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([userId, interactionCount, meetCount, activeDays]) => {
+                            if (userId) {
+                                stats.set(userId, {
+                                    interactionCount: interactionCount || 0,
+                                    meetCount: meetCount || 0,
+                                    activeDays: activeDays || 0
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载好友统计数据:', e);
+                }
+
+                return stats;
+            }
+
+            // 获取近期互动数据 (recent_hours, recent_meets)
+            // Returns Map<userId, {recentHours, recentMeets}>
+            loadVRCXRecentStats(db, latestDate, recentWindow) {
+                const recent = new Map();
+
+                try {
+                    const result = db.exec(`
+                        SELECT 
+                            user_id,
+                            SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 3600000.0 as recent_hours,
+                            COUNT(DISTINCT location) as recent_meets
+                        FROM gamelog_join_leave
+                        WHERE type = 'OnPlayerLeft'
+                          AND user_id IS NOT NULL
+                          AND user_id != ''
+                          AND created_at >= datetime('${latestDate}', '-${recentWindow} days')
+                        GROUP BY user_id
+                    `);
+
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([userId, recentHours, recentMeets]) => {
+                            if (userId) {
+                                recent.set(userId, {
+                                    recentHours: recentHours || 0,
+                                    recentMeets: recentMeets || 0
+                                });
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载近期互动数据:', e);
+                }
+
+                return recent;
+            }
+
+            // 获取我的近期在线时长
+            getMyRecentOnlineHours(db, latestDate, recentWindow) {
+                try {
+                    const result = db.exec(`
+                        SELECT SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 3600000.0 as hours
+                        FROM gamelog_location
+                        WHERE created_at >= datetime('${latestDate}', '-${recentWindow} days')
+                    `);
+
+                    if (result.length && result[0].values[0][0]) {
+                        return result[0].values[0][0];
+                    }
+                } catch (e) {
+                    console.warn('无法获取我的近期在线时长:', e);
+                }
+                return 0;
+            }
+
+            // 计算自适应参数（半衰期、近期窗口）
+            calculateAdaptiveParams(db, latestDate) {
+                let myActiveDays = 0;
+                let totalDays = 1;
+
+                try {
+                    // 获取总天数范围
+                    const rangeResult = db.exec(`
+                        SELECT 
+                            julianday(MAX(date(created_at))) - julianday(MIN(date(created_at))) + 1 as total_days
+                        FROM gamelog_join_leave
+                    `);
+                    if (rangeResult.length && rangeResult[0].values[0][0]) {
+                        totalDays = Math.max(1, rangeResult[0].values[0][0]);
+                    }
+
+                    // 获取我的活跃天数（从 gamelog_location）
+                    const activeDaysResult = db.exec(`
+                        SELECT COUNT(DISTINCT date(created_at)) as active_days
+                        FROM gamelog_location
+                    `);
+                    if (activeDaysResult.length && activeDaysResult[0].values[0][0]) {
+                        myActiveDays = activeDaysResult[0].values[0][0];
+                    }
+                } catch (e) {
+                    console.warn('无法计算活跃度参数:', e);
+                }
+
+                const activityFactor = Math.min(myActiveDays / totalDays, 1.0);
+                
+                // 半衰期 = 90 × (2 - 活跃度因子)，范围 90-180 天
+                const halflife = 90 * (2 - activityFactor);
+                
+                // 近期窗口 = 30 + (1 - 活跃度因子) × 30，范围 30-60 天
+                const recentWindow = Math.round(30 + (1 - activityFactor) * 30);
+
+                console.log(`[关系分析] 活跃度: ${(activityFactor * 100).toFixed(1)}%, 半衰期: ${halflife.toFixed(0)}天, 近期窗口: ${recentWindow}天`);
+
+                return { 
+                    activityFactor, 
+                    halflife, 
+                    recentWindow, 
+                    totalDays, 
+                    myActiveDays 
+                };
+            }
+
+            // 计算有效时长（带衰减）
+            calculateEffectiveHours(dailyData, latestDate, halflife) {
+                const results = new Map();
+                const maxDate = new Date(latestDate);
+
+                dailyData.forEach((interactions, userId) => {
+                    let effectiveHours = 0;
+                    let totalHours = 0;
+
+                    interactions.forEach(({ day, hours }) => {
+                        const dayDate = new Date(day);
+                        const daysAgo = Math.floor((maxDate - dayDate) / (1000 * 60 * 60 * 24));
+                        const weight = Math.pow(2, -daysAgo / halflife);
+                        effectiveHours += hours * weight;
+                        totalHours += hours;
+                    });
+
+                    const retentionRate = totalHours > 0 ? effectiveHours / totalHours : 0;
+
+                    results.set(userId, {
+                        totalHours,
+                        effectiveHours,
+                        retentionRate
+                    });
+                });
+
+                return results;
+            }
+
+            // Percentile Rank 归一化（百分位排名）
+            percentileRank(value, sortedValues) {
+                if (sortedValues.length === 0) return 0;
+                const below = sortedValues.filter(v => v < value).length;
+                return below / sortedValues.length;
+            }
+
+            // Sigmoid 归一化
+            sigmoid(x, k) {
+                if (k <= 0) return 0.5;
+                return x / (x + k);
+            }
+
+            // 计算关系强度和近期亲密度
+            calculateRelationshipMetrics(friendIds, effectiveData, friendStats, recentStats, mutualCounts, myRecentHours, totalDays, extraRecentData = null) {
+                const results = new Map();
+
+                // 收集所有有效时长用于排名计算
+                const allEffectiveHours = [];
+                const allTotalHours = [];
+                const allMeetCounts = [];
+                const allConnections = [];
+                const allAvgDurations = [];
+                const allRecentHours = [];
+                const allRecentMeets = [];
+                const allLifeShares = [];
+
+                // 为30d/60d/90d各自构建参考数据
+                const allRecentHours30d = [];
+                const allRecentMeets30d = [];
+                const allRecentHours60d = [];
+                const allRecentMeets60d = [];
+                const allRecentHours90d = [];
+                const allRecentMeets90d = [];
+
+                // 第一遍：收集数据
+                friendIds.forEach(userId => {
+                    const eff = effectiveData.get(userId);
+                    const stats = friendStats.get(userId);
+                    const recent = recentStats.get(userId);
+                    const connections = mutualCounts.get(userId) || 0;
+
+                    if (eff && stats) {
+                        allEffectiveHours.push(eff.effectiveHours);
+                        allTotalHours.push(eff.totalHours);
+                        allMeetCounts.push(stats.meetCount);
+                        allConnections.push(connections);
+                        
+                        if (stats.interactionCount > 0) {
+                            allAvgDurations.push(eff.totalHours / stats.interactionCount);
+                        }
+                    }
+
+                    if (recent && recent.recentHours > 0) {
+                        allRecentHours.push(recent.recentHours);
+                        allRecentMeets.push(recent.recentMeets);
+                        if (myRecentHours > 0) {
+                            allLifeShares.push(recent.recentHours / myRecentHours);
+                        }
+                    }
+
+                    // 收集30d/60d/90d数据
+                    if (extraRecentData) {
+                        const r30 = extraRecentData.recentStats30d?.get(userId);
+                        if (r30 && r30.recentHours > 0) {
+                            allRecentHours30d.push(r30.recentHours);
+                            allRecentMeets30d.push(r30.recentMeets);
+                        }
+                        const r60 = extraRecentData.recentStats60d?.get(userId);
+                        if (r60 && r60.recentHours > 0) {
+                            allRecentHours60d.push(r60.recentHours);
+                            allRecentMeets60d.push(r60.recentMeets);
+                        }
+                        const r90 = extraRecentData.recentStats90d?.get(userId);
+                        if (r90 && r90.recentHours > 0) {
+                            allRecentHours90d.push(r90.recentHours);
+                            allRecentMeets90d.push(r90.recentMeets);
+                        }
+                    }
+                });
+
+                // 排序用于百分位计算
+                allEffectiveHours.sort((a, b) => a - b);
+                allTotalHours.sort((a, b) => a - b);
+                allMeetCounts.sort((a, b) => a - b);
+                allConnections.sort((a, b) => a - b);
+                allAvgDurations.sort((a, b) => a - b);
+                allRecentHours.sort((a, b) => a - b);
+                allRecentMeets.sort((a, b) => a - b);
+                allLifeShares.sort((a, b) => a - b);
+                // 排序30d/60d/90d参考数据
+                allRecentHours30d.sort((a, b) => a - b);
+                allRecentMeets30d.sort((a, b) => a - b);
+                allRecentHours60d.sort((a, b) => a - b);
+                allRecentMeets60d.sort((a, b) => a - b);
+                allRecentHours90d.sort((a, b) => a - b);
+                allRecentMeets90d.sort((a, b) => a - b);
+
+                // 计算中位数
+                const medianAvgDuration = allAvgDurations.length > 0 
+                    ? allAvgDurations[Math.floor(allAvgDurations.length / 2)] 
+                    : 1;
+                const medianLifeShare = allLifeShares.length > 0 
+                    ? allLifeShares[Math.floor(allLifeShares.length / 2)] 
+                    : 0.01;
+
+                // 隐藏好友检测阈值 (P70)
+                const hoursP70 = allTotalHours.length > 0 
+                    ? allTotalHours[Math.floor(allTotalHours.length * 0.7)] 
+                    : 0;
+                const meetsP70 = allMeetCounts.length > 0 
+                    ? allMeetCounts[Math.floor(allMeetCounts.length * 0.7)] 
+                    : 0;
+
+                // 第二遍：计算指标
+                friendIds.forEach(userId => {
+                    const eff = effectiveData.get(userId);
+                    const stats = friendStats.get(userId);
+                    const recent = recentStats.get(userId) || { recentHours: 0, recentMeets: 0 };
+                    const connections = mutualCounts.get(userId) || 0;
+
+                    if (!eff || !stats) {
+                        results.set(userId, {
+                            relationshipStrength: 0,
+                            recentIntimacy: 0,
+                            effectiveHours: 0,
+                            totalHours: 0,
+                            retentionRate: 0,
+                            isHiddenFriend: false
+                        });
+                        return;
+                    }
+
+                    // === 关系强度计算 ===
+
+                    // 有效陪伴深度 (40%)
+                    const depthPercentile = this.percentileRank(eff.effectiveHours, allEffectiveHours);
+                    const depthScore = depthPercentile * 40;
+
+                    // 互动质量 (25%)
+                    const avgDuration = stats.interactionCount > 0 
+                        ? eff.totalHours / stats.interactionCount 
+                        : 0;
+                    const qualityScore = this.sigmoid(avgDuration, medianAvgDuration) * 25;
+
+                    // 稳定性 (20%)
+                    const stabilityRatio = stats.activeDays / totalDays;
+                    const stabilityScore = Math.sqrt(Math.min(stabilityRatio, 1)) * 20;
+
+                    // 社交羁绊 (15%) - 含隐藏好友检测
+                    let bondScore = 7.5; // 默认中等分
+                    let isHiddenFriend = false;
+
+                    if (connections > 0) {
+                        const bondPercentile = this.percentileRank(connections, allConnections);
+                        bondScore = bondPercentile * 15;
+                    } else {
+                        // 隐藏好友检测：共同好友=0 但互动量高
+                        const highInteraction = eff.totalHours > hoursP70 || stats.meetCount > meetsP70;
+                        if (highInteraction) {
+                            isHiddenFriend = true;
+                            bondScore = depthPercentile * 15; // 用互动量排名替代
+                        }
+                    }
+
+                    const relationshipStrength = depthScore + qualityScore + stabilityScore + bondScore;
+
+                    // === 近期亲密度计算 ===
+
+                    let recentTimeScore = 0;
+                    let recentFreqScore = 0;
+                    let shareScore = 0;
+                    let lifeShare = 0;
+
+                    if (recent.recentHours > 0) {
+                        // 近期陪伴 (40%)
+                        recentTimeScore = this.percentileRank(recent.recentHours, allRecentHours) * 40;
+
+                        // 近期频率 (30%)
+                        recentFreqScore = this.percentileRank(recent.recentMeets, allRecentMeets) * 30;
+
+                        // 生命份额 (30%)
+                        if (myRecentHours > 0) {
+                            lifeShare = recent.recentHours / myRecentHours;
+                            shareScore = this.sigmoid(lifeShare, Math.max(medianLifeShare, 0.01)) * 30;
+                        }
+                    }
+
+                    const recentIntimacy = recentTimeScore + recentFreqScore + shareScore;
+
+                    // 计算固定时间窗口的近期亲密度 (30d, 60d, 90d)
+                    let recentIntimacy30d = 0;
+                    let recentIntimacy60d = 0;
+                    let recentIntimacy90d = 0;
+
+                    if (extraRecentData) {
+                        // 30天近期亲密度 - 使用30天参考数据集
+                        const recent30 = extraRecentData.recentStats30d?.get(userId) || { recentHours: 0, recentMeets: 0 };
+                        if (recent30.recentHours > 0 && extraRecentData.myRecentHours30d > 0) {
+                            const timeScore30 = this.percentileRank(recent30.recentHours, allRecentHours30d) * 40;
+                            const freqScore30 = this.percentileRank(recent30.recentMeets, allRecentMeets30d) * 30;
+                            const lifeShare30 = recent30.recentHours / extraRecentData.myRecentHours30d;
+                            const shareScore30 = this.sigmoid(lifeShare30, Math.max(medianLifeShare, 0.01)) * 30;
+                            recentIntimacy30d = timeScore30 + freqScore30 + shareScore30;
+                        }
+
+                        // 60天近期亲密度 - 使用60天参考数据集
+                        const recent60 = extraRecentData.recentStats60d?.get(userId) || { recentHours: 0, recentMeets: 0 };
+                        if (recent60.recentHours > 0 && extraRecentData.myRecentHours60d > 0) {
+                            const timeScore60 = this.percentileRank(recent60.recentHours, allRecentHours60d) * 40;
+                            const freqScore60 = this.percentileRank(recent60.recentMeets, allRecentMeets60d) * 30;
+                            const lifeShare60 = recent60.recentHours / extraRecentData.myRecentHours60d;
+                            const shareScore60 = this.sigmoid(lifeShare60, Math.max(medianLifeShare, 0.01)) * 30;
+                            recentIntimacy60d = timeScore60 + freqScore60 + shareScore60;
+                        }
+
+                        // 90天近期亲密度 - 使用90天参考数据集
+                        const recent90 = extraRecentData.recentStats90d?.get(userId) || { recentHours: 0, recentMeets: 0 };
+                        if (recent90.recentHours > 0 && extraRecentData.myRecentHours90d > 0) {
+                            const timeScore90 = this.percentileRank(recent90.recentHours, allRecentHours90d) * 40;
+                            const freqScore90 = this.percentileRank(recent90.recentMeets, allRecentMeets90d) * 30;
+                            const lifeShare90 = recent90.recentHours / extraRecentData.myRecentHours90d;
+                            const shareScore90 = this.sigmoid(lifeShare90, Math.max(medianLifeShare, 0.01)) * 30;
+                            recentIntimacy90d = timeScore90 + freqScore90 + shareScore90;
+                        }
+                    }
+
+                    results.set(userId, {
+                        relationshipStrength,
+                        recentIntimacy,
+                        recentIntimacy30d,
+                        recentIntimacy60d,
+                        recentIntimacy90d,
+                        effectiveHours: eff.effectiveHours,
+                        totalHours: eff.totalHours,
+                        retentionRate: eff.retentionRate,
+                        recentHours: recent.recentHours,
+                        recentMeets: recent.recentMeets,
+                        lifeShare,
+                        isHiddenFriend,
+                        // 调试用得分明细
+                        depthScore,
+                        qualityScore,
+                        stabilityScore,
+                        bondScore
+                    });
+                });
+
+                return results;
+            }
+
+            // 完整的关系分析流程
+            async analyzeRelationships(db, prefix, latestDate, friendIds) {
+                console.log('[关系分析] 开始计算...');
+
+                // 1. 计算自适应参数
+                const params = this.calculateAdaptiveParams(db, latestDate);
+
+                // 2. 获取每日互动数据
+                const dailyData = this.loadVRCXDailyInteractions(db, latestDate);
+                console.log(`[关系分析] 每日互动数据: ${dailyData.size} 位好友`);
+
+                // 3. 计算有效时长
+                const effectiveData = this.calculateEffectiveHours(dailyData, latestDate, params.halflife);
+
+                // 4. 获取好友统计数据
+                const friendStats = this.loadVRCXFriendStats(db);
+
+                // 5. 获取近期互动数据（固定30d/60d/90d）
+                const recentStats = this.loadVRCXRecentStats(db, latestDate, params.recentWindow);
+                const recentStats30d = this.loadVRCXRecentStats(db, latestDate, 30);
+                const recentStats60d = this.loadVRCXRecentStats(db, latestDate, 60);
+                const recentStats90d = this.loadVRCXRecentStats(db, latestDate, 90);
+
+                // 6. 获取我的近期在线时长（固定30d/60d/90d）
+                const myRecentHours = this.getMyRecentOnlineHours(db, latestDate, params.recentWindow);
+                const myRecentHours30d = this.getMyRecentOnlineHours(db, latestDate, 30);
+                const myRecentHours60d = this.getMyRecentOnlineHours(db, latestDate, 60);
+                const myRecentHours90d = this.getMyRecentOnlineHours(db, latestDate, 90);
+                console.log(`[关系分析] 我近${params.recentWindow}天在线: ${myRecentHours.toFixed(1)}小时`);
+
+                // 7. 获取共同好友数
+                const mutualCounts = new Map();
+                try {
+                    const result = db.exec(`
+                        SELECT friend_id, COUNT(*) as count
+                        FROM ${prefix}_mutual_graph_links
+                        GROUP BY friend_id
+                    `);
+                    if (result.length && result[0].values) {
+                        result[0].values.forEach(([friendId, count]) => {
+                            if (friendId) {
+                                mutualCounts.set(friendId, count || 0);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('无法加载共同好友数:', e);
+                }
+
+                // 8. 计算关系指标
+                const friendIdSet = new Set(friendIds);
+                const metrics = this.calculateRelationshipMetrics(
+                    friendIdSet, 
+                    effectiveData, 
+                    friendStats, 
+                    recentStats, 
+                    mutualCounts, 
+                    myRecentHours, 
+                    params.totalDays,
+                    { recentStats30d, recentStats60d, recentStats90d, myRecentHours30d, myRecentHours60d, myRecentHours90d }
+                );
+
+                console.log(`[关系分析] 完成! 计算了 ${metrics.size} 位好友的关系指标`);
+
+                return { metrics, params };
+            }
+
+            buildGEXFFromVRCX(friendIds, edges, friendInfo, playData, daysKnown, relationshipMetrics = null) {
                 const friendSet = new Set(friendIds);
                 const nodeIds = new Set(friendIds);
                 const excludedIds = new Set(['usr_00000000-0000-0000-0000-000000000000']);
@@ -2279,14 +3394,54 @@
                     }
                 });
 
-                // 构建节点
+                // 构建节点（只导入在 friend_log_current 中存在的真正好友）
                 const nodes = [];
                 nodeIds.forEach(nodeId => {
                     if (excludedIds.has(nodeId)) return;
-                    const nodeType = friendSet.has(nodeId) ? 'friend' : 'mutual';
-                    const displayName = displayNames.get(nodeId) || '';
+                    
+                    // 只导入在 friendInfo（来自 friend_log_current）中存在的好友
+                    // mutual_graph_friends 可能包含已删除的好友，跳过这些节点
+                    const info = friendInfo.get(nodeId);
+                    if (!info) return;
+                    
+                    const nodeType = 'friend';
+                    const safeInfo = info;
+                    const play = playData.get(nodeId) || {
+                        meetCount: 0, playTime: 0,
+                        meetCount7d: 0, playTime7d: 0,
+                        meetCount30d: 0, playTime30d: 0
+                    };
+                    const days = daysKnown.get(nodeId) || 0;
+                    const displayName = info.displayName || '';
                     const label = displayName || nodeId;
-                    nodes.push({ id: nodeId, type: nodeType, label, displayName: displayName || label });
+
+                    // 获取关系指标（如果有）
+                    const metrics = relationshipMetrics ? relationshipMetrics.get(nodeId) : null;
+
+                    nodes.push({
+                        id: nodeId,
+                        type: nodeType,
+                        label,
+                        displayName: displayName || label,
+                        trustLevel: info.trustLevel || '',
+                        meetCount: play.meetCount || 0,
+                        meetCount7d: play.meetCount7d || 0,
+                        meetCount30d: play.meetCount30d || 0,
+                        playTime: play.playTime || 0,
+                        playTime7d: play.playTime7d || 0,
+                        playTime30d: play.playTime30d || 0,
+                        daysKnown: days || 0,
+                        // 关系指标
+                        relationshipStrength: (metrics && metrics.relationshipStrength) || 0,
+                        recentIntimacy: (metrics && metrics.recentIntimacy) || 0,
+                        recentIntimacy30d: (metrics && metrics.recentIntimacy30d) || 0,
+                        recentIntimacy60d: (metrics && metrics.recentIntimacy60d) || 0,
+                        recentIntimacy90d: (metrics && metrics.recentIntimacy90d) || 0,
+                        effectiveHours: (metrics && metrics.effectiveHours) || 0,
+                        retentionRate: (metrics && metrics.retentionRate) || 0,
+                        lifeShare: (metrics && metrics.lifeShare) || 0,
+                        isHiddenFriend: (metrics && metrics.isHiddenFriend) || false
+                    });
                 });
 
                 // 排序节点
@@ -2294,7 +3449,7 @@
 
                 // 构建 GEXF XML
                 const timestamp = new Date().toISOString().split('T')[0];
-                const escapeXml = (str) => str
+                const escapeXml = (str) => String(str)
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;')
@@ -2311,14 +3466,51 @@
     <attributes class="node" mode="static">
       <attribute id="0" title="type" type="string"/>
       <attribute id="1" title="displayName" type="string"/>
+      <attribute id="2" title="trustLevel" type="string"/>
+      <attribute id="3" title="meetCount" type="integer"/>
+      <attribute id="4" title="meetCount7d" type="integer"/>
+      <attribute id="5" title="meetCount30d" type="integer"/>
+      <attribute id="6" title="playTime" type="float"/>
+      <attribute id="7" title="playTime7d" type="float"/>
+      <attribute id="8" title="playTime30d" type="float"/>
+      <attribute id="9" title="daysKnown" type="integer"/>
+      <attribute id="10" title="relationshipStrength" type="float"/>
+      <attribute id="11" title="recentIntimacy" type="float"/>
+      <attribute id="12" title="effectiveHours" type="float"/>
+      <attribute id="13" title="retentionRate" type="float"/>
+      <attribute id="14" title="lifeShare" type="float"/>
+      <attribute id="15" title="isHiddenFriend" type="boolean"/>
+      <attribute id="16" title="recentIntimacy30d" type="float"/>
+      <attribute id="17" title="recentIntimacy60d" type="float"/>
+      <attribute id="18" title="recentIntimacy90d" type="float"/>
     </attributes>
     <nodes>
 `;
                 nodes.forEach(node => {
+                    // 安全获取数值，防止 undefined.toFixed() 错误
+                    const safeNum = (v) => (typeof v === 'number' && !isNaN(v)) ? v : 0;
+                    
                     gexf += `      <node id="${escapeXml(node.id)}" label="${escapeXml(node.label)}">
         <attvalues>
           <attvalue for="0" value="${escapeXml(node.type)}" />
           <attvalue for="1" value="${escapeXml(node.displayName)}" />
+          <attvalue for="2" value="${escapeXml(node.trustLevel)}" />
+          <attvalue for="3" value="${safeNum(node.meetCount)}" />
+          <attvalue for="4" value="${safeNum(node.meetCount7d)}" />
+          <attvalue for="5" value="${safeNum(node.meetCount30d)}" />
+          <attvalue for="6" value="${safeNum(node.playTime).toFixed(2)}" />
+          <attvalue for="7" value="${safeNum(node.playTime7d).toFixed(2)}" />
+          <attvalue for="8" value="${safeNum(node.playTime30d).toFixed(2)}" />
+          <attvalue for="9" value="${safeNum(node.daysKnown)}" />
+          <attvalue for="10" value="${safeNum(node.relationshipStrength).toFixed(2)}" />
+          <attvalue for="11" value="${safeNum(node.recentIntimacy).toFixed(2)}" />
+          <attvalue for="12" value="${safeNum(node.effectiveHours * 3600).toFixed(2)}" />
+          <attvalue for="13" value="${safeNum(node.retentionRate).toFixed(4)}" />
+          <attvalue for="14" value="${safeNum(node.lifeShare).toFixed(4)}" />
+          <attvalue for="15" value="${node.isHiddenFriend || false}" />
+          <attvalue for="16" value="${safeNum(node.recentIntimacy30d).toFixed(2)}" />
+          <attvalue for="17" value="${safeNum(node.recentIntimacy60d).toFixed(2)}" />
+          <attvalue for="18" value="${safeNum(node.recentIntimacy90d).toFixed(2)}" />
         </attvalues>
       </node>
 `;
@@ -2327,9 +3519,14 @@
                 gexf += `    </nodes>
     <edges>
 `;
-                edges.forEach((edge, index) => {
-                    gexf += `      <edge id="${index}" source="${escapeXml(edge.source)}" target="${escapeXml(edge.target)}" />
+                // 只包含两端节点都在 friendInfo 中的边
+                const validNodeIds = new Set(nodes.map(n => n.id));
+                let edgeIndex = 0;
+                edges.forEach((edge) => {
+                    if (validNodeIds.has(edge.source) && validNodeIds.has(edge.target)) {
+                        gexf += `      <edge id="${edgeIndex++}" source="${escapeXml(edge.source)}" target="${escapeXml(edge.target)}" />
 `;
+                    }
                 });
 
                 gexf += `    </edges>
@@ -2402,10 +3599,48 @@
                 this.hideLoading();
             }
 
-            showRankingList() {
-                // 按连接数排序
-                const sortedNodes = [...this.nodes].sort((a, b) => b.connections - a.connections);
+            showRankingList(dimension = 'mutual', timeRange = 'all') {
+                this.currentRankingDimension = dimension;
+                this.currentRankingTimeRange = timeRange;
                 const texts = i18n[currentLang];
+
+                // 根据维度和时间范围获取排序字段和格式化函数
+                const getDimensionConfig = () => {
+                    switch (dimension) {
+                        case 'strength':
+                            return {
+                                getValue: n => n.relationshipStrength || 0,
+                                format: v => v.toFixed(1),
+                                showHint: true
+                            };
+                        case 'intimacy':
+                            // 近期亲密度：30d/60d/90d 使用对应字段
+                            const intimacyField = timeRange === '60d' ? 'recentIntimacy60d' : 
+                                                  timeRange === '90d' ? 'recentIntimacy90d' : 'recentIntimacy30d';
+                            return {
+                                getValue: n => n[intimacyField] || 0,
+                                format: v => v.toFixed(1),
+                                showHint: true
+                            };
+                        case 'playtime':
+                            const field = timeRange === '7d' ? 'playTime7d' : 
+                                          timeRange === '30d' ? 'playTime30d' : 'playTime';
+                            return {
+                                getValue: n => n[field] || 0,
+                                format: v => (v / 3600).toFixed(1) + 'h',
+                                showHint: true
+                            };
+                        default: // mutual
+                            return {
+                                getValue: n => n.connections,
+                                format: v => v.toString(),
+                                showHint: false
+                            };
+                    }
+                };
+
+                const config = getDimensionConfig();
+                const sortedNodes = [...this.nodes].sort((a, b) => config.getValue(b) - config.getValue(a));
 
                 const detailSection = document.getElementById('detailSection');
                 detailSection.innerHTML = `
@@ -2414,22 +3649,68 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
                             </svg>
-                            <span>${texts.mutualRanking}</span>
+                            <span>${texts.rankingTitle}</span>
                         </div>
+                        <div class="ranking-tabs">
+                            <button class="ranking-tab ${dimension === 'mutual' ? 'active' : ''}" data-dim="mutual">${texts.rankingMutual}</button>
+                            <button class="ranking-tab ${dimension === 'strength' ? 'active' : ''}" data-dim="strength">${texts.rankingStrength}</button>
+                            <button class="ranking-tab ${dimension === 'intimacy' ? 'active' : ''}" data-dim="intimacy">${texts.rankingIntimacy}</button>
+                            <button class="ranking-tab ${dimension === 'playtime' ? 'active' : ''}" data-dim="playtime">${texts.rankingPlaytime}</button>
+                        </div>
+                        ${dimension === 'intimacy' ? `
+                            <div class="ranking-time-selector">
+                                <button class="ranking-time-btn ${timeRange === '30d' || timeRange === 'all' ? 'active' : ''}" data-time="30d">${texts.time30d}</button>
+                                <button class="ranking-time-btn ${timeRange === '60d' ? 'active' : ''}" data-time="60d">${texts.time60d}</button>
+                                <button class="ranking-time-btn ${timeRange === '90d' ? 'active' : ''}" data-time="90d">${texts.time90d}</button>
+                            </div>
+                        ` : ''}
+                        ${dimension === 'playtime' ? `
+                            <div class="ranking-time-selector">
+                                <button class="ranking-time-btn ${timeRange === 'all' ? 'active' : ''}" data-time="all">${texts.timeAll}</button>
+                                <button class="ranking-time-btn ${timeRange === '30d' ? 'active' : ''}" data-time="30d">${texts.time30d}</button>
+                                <button class="ranking-time-btn ${timeRange === '7d' ? 'active' : ''}" data-time="7d">${texts.time7d}</button>
+                            </div>
+                        ` : ''}
+                        ${config.showHint ? `<div class="ranking-data-hint">${texts.dataHint}</div>` : ''}
                         <div class="ranking-desc">${texts.clickToView}</div>
                         <div class="ranking-list">
                             ${sortedNodes.map((node, index) => `
                                 <div class="ranking-item ${index < 3 ? 'top-' + (index + 1) : ''}" data-id="${node.id}">
                                     <span class="ranking-position">${index + 1}</span>
                                     <span class="ranking-name">${node.label}</span>
-                                    <span class="ranking-score">${node.connections}</span>
+                                    <span class="ranking-score">${config.format(config.getValue(node))}</span>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
 
-                // 添加点击事件
+                // Tab 切换事件
+                detailSection.querySelectorAll('.ranking-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const dim = tab.getAttribute('data-dim');
+                        // 切换维度时，保留对应维度的时间范围或使用默认值
+                        let newTimeRange = 'all';
+                        if (dim === 'playtime' && this.currentRankingDimension === 'playtime') {
+                            newTimeRange = this.currentRankingTimeRange;
+                        } else if (dim === 'intimacy' && this.currentRankingDimension === 'intimacy') {
+                            newTimeRange = this.currentRankingTimeRange;
+                        } else if (dim === 'intimacy') {
+                            newTimeRange = '30d';
+                        }
+                        this.showRankingList(dim, newTimeRange);
+                    });
+                });
+
+                // 时间范围切换事件
+                detailSection.querySelectorAll('.ranking-time-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const time = btn.getAttribute('data-time');
+                        this.showRankingList(this.currentRankingDimension, time);
+                    });
+                });
+
+                // 排行榜项点击事件
                 detailSection.querySelectorAll('.ranking-item[data-id]').forEach(item => {
                     item.addEventListener('click', () => {
                         const id = item.getAttribute('data-id');
@@ -2745,7 +4026,7 @@
                     <div class="detail-card">
                         <div class="detail-header-row">
                             <div class="detail-name">${node.label}</div>
-                            <button class="remove-node-btn" data-id="${node.id}" title="${texts.removeNode}">
+                            <button class="close-detail-btn" title="${texts.closeDetail}">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M18 6L6 18"></path>
                                     <path d="M6 6l12 12"></path>
@@ -2784,6 +4065,13 @@
                                 `).join('')}
                             </div>
                         </div>
+                        <button class="remove-node-btn" data-id="${node.id}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                            </svg>
+                            ${texts.removeNode}
+                        </button>
                     </div>
                 `;
 
@@ -2801,7 +4089,18 @@
                     });
                 });
 
-                // 添加移除按钮点击事件
+                // 关闭详情按钮点击事件（返回排行榜）
+                const closeBtn = detailSection.querySelector('.close-detail-btn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectedNode = null;
+                        this.clearHighlights();
+                        this.showRankingList(this.currentRankingDimension, this.currentRankingTimeRange);
+                    });
+                }
+
+                // 移除节点按钮点击事件
                 const removeBtn = detailSection.querySelector('.remove-node-btn');
                 if (removeBtn) {
                     removeBtn.addEventListener('click', (e) => {

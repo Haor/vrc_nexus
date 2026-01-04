@@ -909,6 +909,10 @@
             color: var(--accent-primary);
             flex: 1;
             word-break: break-word;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .close-detail-btn {
@@ -1090,6 +1094,275 @@
             background: var(--bg-card);
             padding: 2px 8px;
             border-radius: 10px;
+        }
+
+        /* 节点详情增强 - 信任等级徽章 */
+        .trust-level-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px 5px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .trust-level-badge.visitor { background: rgba(204, 204, 204, 0.2); color: #cccccc; }
+        .trust-level-badge.new-user { background: rgba(23, 120, 255, 0.2); color: #1778ff; }
+        .trust-level-badge.user { background: rgba(43, 207, 92, 0.2); color: #2bcf5c; }
+        .trust-level-badge.known-user { background: rgba(255, 123, 66, 0.2); color: #ff7b42; }
+        .trust-level-badge.trusted-user { background: rgba(129, 67, 230, 0.2); color: #8143e6; }
+
+        /* 隐藏好友图标 */
+        .hidden-friend-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            cursor: help;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+        .hidden-friend-icon:hover {
+            opacity: 1;
+        }
+        .hidden-friend-icon svg {
+            display: block;
+        }
+
+        /* 徽章行 - 信任等级和隐藏好友徽章 */
+        .detail-badges-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+        .detail-badges-row:empty {
+            display: none;
+        }
+        .detail-badges-row .trust-level-badge,
+        .detail-badges-row .hidden-friend-badge {
+            margin-left: 0;
+        }
+
+        /* 节点详情增强 - 区块分隔线 */
+        .detail-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+
+        /* 节点详情增强 - 关系指标区块 */
+        .detail-metrics {
+            margin-top: 16px;
+        }
+
+        .detail-metrics-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-metrics-title svg {
+            stroke: var(--accent-primary);
+        }
+
+        .metric-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .metric-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-label-icon {
+            font-size: 14px;
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .metric-rank {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 6px;
+            font-weight: 400;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        /* 节点详情增强 - 原始数据区块 */
+        .detail-raw-data {
+            margin-top: 16px;
+        }
+
+        .raw-data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .raw-data-item {
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .raw-data-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .raw-data-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .raw-data-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .raw-data-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* 节点详情增强 - 得分明细折叠面板 */
+        .detail-score-breakdown {
+            margin-top: 16px;
+        }
+
+        .score-breakdown-toggle {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .score-breakdown-toggle:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .score-breakdown-toggle.expanded {
+            border-radius: 8px 8px 0 0;
+            border-bottom-color: var(--bg-secondary);
+        }
+
+        .score-breakdown-toggle svg {
+            transition: transform 0.2s ease;
+        }
+
+        .score-breakdown-toggle.expanded svg {
+            transform: rotate(180deg);
+        }
+
+        .score-breakdown-content {
+            display: none;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .score-breakdown-content.visible {
+            display: block;
+        }
+
+        /* 展开时整体容器边框高亮 */
+        .score-breakdown-toggle.expanded,
+        .score-breakdown-toggle.expanded + .score-breakdown-content.visible {
+            border-color: var(--accent-primary);
+        }
+
+        .score-breakdown-toggle.expanded {
+            border-bottom-color: var(--bg-secondary);
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 11px;
+        }
+
+        .score-item:not(:last-child) {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .score-item-label {
+            color: var(--text-muted);
+        }
+
+        .score-item-value {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-secondary);
+        }
+
+        .score-item-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-card);
+            border-radius: 2px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+
+        .score-item-bar-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* 节点详情增强 - 无数据提示 */
+        .no-data-hint {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .no-data-hint svg {
+            display: block;
+            margin: 0 auto 8px;
+            opacity: 0.5;
         }
 
         /* 图形区域 */
@@ -2082,7 +2355,32 @@
                 closeDetail: '关闭详情',
                 selectAccount: '选择账号',
                 selectAccountDesc: '检测到多个账号数据，请选择要加载的账号：',
-                friendCount: '位好友'
+                friendCount: '位好友',
+                // 节点详情增强
+                trustLevel: '信任等级',
+                relationMetrics: '关系指标',
+                relationshipStrength: '关系强度',
+                recentIntimacy: '近期亲密度',
+                rawData: '原始数据',
+                totalPlaytime: '总游玩时长',
+                effectivePlaytime: '有效时长',
+                retentionRate: '保留率',
+                meetCount: '见面次数',
+                recentPlaytime: '近期时长',
+                lifeShare: '生命份额',
+                scoreBreakdown: '得分明细',
+                depthScore: '有效陪伴深度',
+                qualityScore: '互动质量',
+                stabilityScore: '稳定性',
+                bondScore: '社交羁绊',
+                recentTimeScore: '近期陪伴',
+                recentFreqScore: '近期频率',
+                shareScore: '生命份额',
+                noInteractionData: '暂无互动记录',
+                hiddenFriend: '隐藏好友',
+                hiddenFriendHint: '该好友可能隐藏了共同好友关系',
+                hour: '小时',
+                times: '次'
             },
             en: {
                 subtitle: 'Mutual Friends Network',
@@ -2145,7 +2443,32 @@
                 closeDetail: 'Close',
                 selectAccount: 'Select Account',
                 selectAccountDesc: 'Multiple accounts detected. Please select which account to load:',
-                friendCount: 'friends'
+                friendCount: 'friends',
+                // Node detail enhancement
+                trustLevel: 'Trust Level',
+                relationMetrics: 'Relationship Metrics',
+                relationshipStrength: 'Relationship Strength',
+                recentIntimacy: 'Recent Intimacy',
+                rawData: 'Raw Data',
+                totalPlaytime: 'Total Playtime',
+                effectivePlaytime: 'Effective Time',
+                retentionRate: 'Retention',
+                meetCount: 'Meetings',
+                recentPlaytime: 'Recent Time',
+                lifeShare: 'Life Share',
+                scoreBreakdown: 'Score Breakdown',
+                depthScore: 'Effective Depth',
+                qualityScore: 'Interaction Quality',
+                stabilityScore: 'Stability',
+                bondScore: 'Social Bond',
+                recentTimeScore: 'Recent Companionship',
+                recentFreqScore: 'Recent Frequency',
+                shareScore: 'Life Share',
+                noInteractionData: 'No interaction data',
+                hiddenFriend: 'Hidden Friend',
+                hiddenFriendHint: 'This friend may have hidden mutual friend relationships',
+                hour: 'h',
+                times: 'times'
             },
             ja: {
                 subtitle: '共通フレンドネットワーク',
@@ -2208,7 +2531,32 @@
                 closeDetail: '閉じる',
                 selectAccount: 'アカウント選択',
                 selectAccountDesc: '複数のアカウントが検出されました。ロードするアカウントを選択してください：',
-                friendCount: '人のフレンド'
+                friendCount: '人のフレンド',
+                // ノード詳細強化
+                trustLevel: '信頼レベル',
+                relationMetrics: '関係指標',
+                relationshipStrength: '関係強度',
+                recentIntimacy: '最近の親密度',
+                rawData: '元データ',
+                totalPlaytime: '総プレイ時間',
+                effectivePlaytime: '有効時間',
+                retentionRate: '保持率',
+                meetCount: '会った回数',
+                recentPlaytime: '最近の時間',
+                lifeShare: 'ライフシェア',
+                scoreBreakdown: 'スコア内訳',
+                depthScore: '有効陪伴深度',
+                qualityScore: 'インタラクション品質',
+                stabilityScore: '安定性',
+                bondScore: 'ソーシャルボンド',
+                recentTimeScore: '最近の同行',
+                recentFreqScore: '最近の頻度',
+                shareScore: 'ライフシェア',
+                noInteractionData: 'インタラクション記録なし',
+                hiddenFriend: '隠しフレンド',
+                hiddenFriendHint: 'このフレンドは共通フレンド関係を隠している可能性があります',
+                hour: '時間',
+                times: '回'
             }
         };
 
@@ -4022,10 +4370,191 @@
 
                 const texts = i18n[currentLang];
                 const detailSection = document.getElementById('detailSection');
+
+                // 辅助函数：格式化时长
+                const formatHours = (seconds) => {
+                    if (seconds === undefined || seconds === null || isNaN(seconds)) return 'N/A';
+                    const hours = seconds / 3600;
+                    return hours.toFixed(1);
+                };
+
+                // 辅助函数：格式化百分比
+                const formatPercent = (value) => {
+                    if (value === undefined || value === null || isNaN(value)) return 'N/A';
+                    return (value * 100).toFixed(1) + '%';
+                };
+
+                // 辅助函数：获取信任等级样式类
+                const getTrustLevelClass = (level) => {
+                    if (!level) return '';
+                    const normalized = level.toLowerCase().replace(/\s+/g, '-');
+                    return normalized;
+                };
+
+                // 检查是否有互动数据
+                const hasInteractionData = node.playTime !== undefined && node.playTime > 0;
+
+                // 计算排名（关系强度和近期亲密度）
+                let strengthRank = '?';
+                let intimacyRank = '?';
+                if (this.nodes && this.nodes.length > 0) {
+                    const sortedByStrength = [...this.nodes].sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0));
+                    const sortedByIntimacy = [...this.nodes].sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0));
+                    strengthRank = sortedByStrength.findIndex(n => n.id === node.id) + 1;
+                    intimacyRank = sortedByIntimacy.findIndex(n => n.id === node.id) + 1;
+                }
+
+                // 构建信任等级徽章
+                const trustBadge = node.trustLevel ? 
+                    `<span class="trust-level-badge ${getTrustLevelClass(node.trustLevel)}">${node.trustLevel}</span>` : '';
+
+                // 构建隐藏好友标记（只显示锁图标，hover 显示提示）
+                const hiddenBadge = node.isHiddenFriend ? 
+                    `<span class="hidden-friend-icon" title="${texts.hiddenFriendHint}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>` : '';
+
+                // 构建关系指标区块
+                let metricsSection = '';
+                if (hasInteractionData && (node.relationshipStrength > 0 || node.recentIntimacy > 0)) {
+                    metricsSection = `
+                        <div class="detail-metrics">
+                            <div class="detail-metrics-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                                ${texts.relationMetrics}
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label"><span class="metric-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span>${texts.relationshipStrength}</span>
+                                <span class="metric-value">${(node.relationshipStrength || 0).toFixed(1)}%<span class="metric-rank">#${strengthRank}</span></span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label"><span class="metric-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg></span>${texts.recentIntimacy}</span>
+                                <span class="metric-value">${(node.recentIntimacy || 0).toFixed(1)}<span class="metric-rank">#${intimacyRank}</span></span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 构建原始数据区块
+                let rawDataSection = '';
+                if (hasInteractionData) {
+                    const playTimeHours = formatHours(node.playTime);
+                    const effectiveHours = node.effectiveHours !== undefined ? (node.effectiveHours / 3600).toFixed(1) : 'N/A';
+                    const retentionStr = formatPercent(node.retentionRate);
+                    const meetCount = node.meetCount !== undefined ? node.meetCount.toLocaleString() : 'N/A';
+                    const recentHours = node.playTime30d !== undefined ? formatHours(node.playTime30d) : 'N/A';
+                    const lifeShareStr = node.lifeShare !== undefined ? formatPercent(node.lifeShare) : 'N/A';
+
+                    rawDataSection = `
+                        <div class="detail-raw-data">
+                            <div class="detail-metrics-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20V10"></path>
+                                    <path d="M18 20V4"></path>
+                                    <path d="M6 20v-4"></path>
+                                </svg>
+                                ${texts.rawData}
+                            </div>
+                            <div class="raw-data-grid">
+                                <div class="raw-data-item">
+                                    <div class="raw-data-value">${playTimeHours}${texts.hour}</div>
+                                    <div class="raw-data-label">${texts.totalPlaytime}</div>
+                                </div>
+                                <div class="raw-data-item">
+                                    <div class="raw-data-value">${effectiveHours}${texts.hour}</div>
+                                    <div class="raw-data-label">${texts.effectivePlaytime}</div>
+                                    <div class="raw-data-sub">${texts.retentionRate} ${retentionStr}</div>
+                                </div>
+                                <div class="raw-data-item">
+                                    <div class="raw-data-value">${meetCount}${texts.times}</div>
+                                    <div class="raw-data-label">${texts.meetCount}</div>
+                                </div>
+                                <div class="raw-data-item">
+                                    <div class="raw-data-value">${recentHours}${texts.hour}</div>
+                                    <div class="raw-data-label">${texts.recentPlaytime}</div>
+                                    <div class="raw-data-sub">${texts.lifeShare} ${lifeShareStr}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    rawDataSection = `
+                        <div class="no-data-hint">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            ${texts.noInteractionData}
+                        </div>
+                    `;
+                }
+
+                // 构建得分明细折叠面板
+                let scoreBreakdownSection = '';
+                if (hasInteractionData && (node.depthScore !== undefined || node.relationshipStrength > 0)) {
+                    const depthScore = node.depthScore !== undefined ? node.depthScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.4).toFixed(1);
+                    const qualityScore = node.qualityScore !== undefined ? node.qualityScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.25).toFixed(1);
+                    const stabilityScore = node.stabilityScore !== undefined ? node.stabilityScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.2).toFixed(1);
+                    const bondScore = node.bondScore !== undefined ? node.bondScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.15).toFixed(1);
+                    const recentTimeScore = node.recentTimeScore !== undefined ? node.recentTimeScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.4).toFixed(1);
+                    const recentFreqScore = node.recentFreqScore !== undefined ? node.recentFreqScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.3).toFixed(1);
+                    const shareScore = node.shareScore !== undefined ? node.shareScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.3).toFixed(1);
+
+                    scoreBreakdownSection = `
+                        <div class="detail-score-breakdown">
+                            <button class="score-breakdown-toggle">
+                                <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10"></path><path d="M12 12L12 2"></path><path d="M12 12L20.5 16.5"></path></svg>${texts.scoreBreakdown}</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="score-breakdown-content">
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.depthScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(depthScore) / 40 * 100}%"></div></div>
+                                    <span class="score-item-value">${depthScore}/40</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.qualityScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(qualityScore) / 25 * 100}%"></div></div>
+                                    <span class="score-item-value">${qualityScore}/25</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.stabilityScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(stabilityScore) / 20 * 100}%"></div></div>
+                                    <span class="score-item-value">${stabilityScore}/20</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.bondScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(bondScore) / 15 * 100}%"></div></div>
+                                    <span class="score-item-value">${bondScore}/15</span>
+                                </div>
+                                <div class="detail-divider"></div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.recentTimeScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentTimeScore) / 40 * 100}%"></div></div>
+                                    <span class="score-item-value">${recentTimeScore}/40</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.recentFreqScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentFreqScore) / 30 * 100}%"></div></div>
+                                    <span class="score-item-value">${recentFreqScore}/30</span>
+                                </div>
+                                <div class="score-item">
+                                    <span class="score-item-label">${texts.shareScore}</span>
+                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(shareScore) / 30 * 100}%"></div></div>
+                                    <span class="score-item-value">${shareScore}/30</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 detailSection.innerHTML = `
                     <div class="detail-card">
                         <div class="detail-header-row">
-                            <div class="detail-name">${node.label}</div>
+                            <div class="detail-name">${node.label}${trustBadge}${hiddenBadge}</div>
                             <button class="close-detail-btn" title="${texts.closeDetail}">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M18 6L6 18"></path>
@@ -4044,6 +4573,10 @@
                                 <div class="detail-stat-label">${texts.mutualCount}</div>
                             </div>
                         </div>
+                        
+                        ${metricsSection}
+                        ${rawDataSection}
+                        ${scoreBreakdownSection}
                         
                         <div class="connections-list">
                             <div class="connections-title">
@@ -4107,6 +4640,16 @@
                         e.stopPropagation();
                         const nodeId = removeBtn.getAttribute('data-id');
                         this.removeNode(nodeId);
+                    });
+                }
+
+                // 得分明细折叠事件
+                const breakdownToggle = detailSection.querySelector('.score-breakdown-toggle');
+                if (breakdownToggle) {
+                    breakdownToggle.addEventListener('click', () => {
+                        breakdownToggle.classList.toggle('expanded');
+                        const content = detailSection.querySelector('.score-breakdown-content');
+                        if (content) content.classList.toggle('visible');
                     });
                 }
             }

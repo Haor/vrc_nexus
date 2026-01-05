@@ -50,8 +50,13 @@ class NodeData:
         self.recent_intimacy_30d = 0.0
         self.recent_intimacy_60d = 0.0
         self.recent_intimacy_90d = 0.0
+        # New fields for V2 algorithm
+        self.active_days = 0
+        self.interaction_count = 0
+        self.connections = 0
         self._first_met: Optional[_dt.datetime] = None
         self._sessions: List[Tuple[_dt.datetime, float]] = []
+        self._daily_hours: Dict[str, float] = {}  # day string -> hours
 
 
 def _parse_args() -> argparse.Namespace:
@@ -214,10 +219,17 @@ def _load_play_data(
             continue
 
         duration_s = max(0, (duration_ms or 0) / 1000.0)
+        duration_hours = duration_s / 3600.0
 
         if node._first_met is None or ts < node._first_met:
             node._first_met = ts
         node._sessions.append((ts, duration_s))
+
+        day_str = ts.strftime("%Y-%m-%d")
+        node._daily_hours[day_str] = node._daily_hours.get(day_str, 0) + duration_hours
+
+        if duration_s > 0:
+            node.interaction_count += 1
 
         node.meet_count += 1
         node.play_time += duration_s
@@ -229,7 +241,54 @@ def _load_play_data(
             node.meet_count_30d += 1
             node.play_time_30d += duration_s
 
+    for node in nodes.values():
+        node.active_days = len(node._daily_hours)
+
     return nodes
+
+
+def _load_connections(
+    conn: sqlite3.Connection, prefix: str, nodes: Dict[str, NodeData]
+) -> None:
+    """Load mutual friend connection counts for each node."""
+    table = _quote_table_name(f"{prefix}_mutual_graph_links")
+    try:
+        rows = conn.execute(
+            f"SELECT friend_id, COUNT(*) as cnt FROM {table} GROUP BY friend_id"
+        ).fetchall()
+        for user_id, cnt in rows:
+            if user_id in nodes:
+                nodes[user_id].connections = cnt
+    except sqlite3.OperationalError:
+        pass
+
+
+def _get_my_recent_hours(
+    conn: sqlite3.Connection, now: _dt.datetime, recent_days: int
+) -> float:
+    """Get user's own recent online hours from gamelog_location."""
+    try:
+        now_str = now.strftime("%Y-%m-%d")
+        row = conn.execute(f"""
+            SELECT SUM(CASE WHEN time > 0 THEN time ELSE 0 END) / 3600000.0
+            FROM gamelog_location
+            WHERE created_at >= datetime('{now_str}', '-{recent_days} days')
+        """).fetchone()
+        return row[0] if row and row[0] else 0.0
+    except sqlite3.OperationalError:
+        return 0.0
+
+
+def _get_total_days(conn: sqlite3.Connection) -> int:
+    """Get total days range from gamelog_join_leave."""
+    try:
+        row = conn.execute("""
+            SELECT julianday(MAX(date(created_at))) - julianday(MIN(date(created_at))) + 1
+            FROM gamelog_join_leave
+        """).fetchone()
+        return max(1, int(row[0])) if row and row[0] else 1
+    except sqlite3.OperationalError:
+        return 1
 
 
 def _detect_hidden_friends(
@@ -246,70 +305,159 @@ def _detect_hidden_friends(
 
 
 def _calculate_metrics(
-    nodes: Dict[str, NodeData], now: _dt.datetime, halflife_days: int
+    nodes: Dict[str, NodeData],
+    now: _dt.datetime,
+    halflife_days: int,
+    total_days: int,
+    my_recent_hours_30d: float,
+    my_recent_hours_60d: float,
+    my_recent_hours_90d: float,
 ) -> None:
     now_ts = now.timestamp()
-    decay_lambda = math.log(2) / (halflife_days * 86400)
+    now_str = now.strftime("%Y-%m-%d")
 
     for node in nodes.values():
         if node._first_met:
             node.days_known = int((now - node._first_met).total_seconds() / 86400)
 
-    max_play_time = max((n.play_time for n in nodes.values()), default=1) or 1
-    max_meet_count = max((n.meet_count for n in nodes.values()), default=1) or 1
+    for node in nodes.values():
+        effective = 0.0
+        total = 0.0
+        for day_str, hours in node._daily_hours.items():
+            try:
+                day_date = _dt.datetime.strptime(day_str, "%Y-%m-%d")
+                days_ago = (now.replace(tzinfo=None) - day_date).days
+            except ValueError:
+                days_ago = 0
+            weight = 2 ** (-days_ago / halflife_days)
+            effective += hours * weight
+            total += hours
+        node.effective_hours = effective
+        node.retention_rate = effective / total if total > 0 else 0
+
+    all_effective_hours: List[float] = []
+    all_total_hours: List[float] = []
+    all_avg_durations: List[float] = []
+    all_connections: List[int] = []
+
+    for node in nodes.values():
+        if node.play_time > 0:
+            all_effective_hours.append(node.effective_hours)
+            all_total_hours.append(node.play_time / 3600.0)
+            if node.interaction_count > 0:
+                all_avg_durations.append(
+                    (node.play_time / 3600.0) / node.interaction_count
+                )
+        if node.connections > 0:
+            all_connections.append(node.connections)
+
+    all_effective_hours.sort()
+    all_total_hours.sort()
+    all_avg_durations.sort()
+    all_connections.sort()
+
+    median_avg_duration = (
+        all_avg_durations[len(all_avg_durations) // 2] if all_avg_durations else 1.0
+    )
+    hours_p70 = (
+        all_total_hours[int(len(all_total_hours) * 0.7)] if all_total_hours else 0
+    )
+    meets_p70 = (
+        sorted([n.meet_count for n in nodes.values() if n.meet_count > 0])[
+            int(len([n for n in nodes.values() if n.meet_count > 0]) * 0.7)
+        ]
+        if any(n.meet_count > 0 for n in nodes.values())
+        else 0
+    )
+
+    def percentile_rank(value: float, sorted_values: Sequence[float]) -> float:
+        if not sorted_values:
+            return 0.0
+        count_below = sum(1 for v in sorted_values if v < value)
+        return count_below / len(sorted_values)
+
+    def sigmoid(x: float, k: float) -> float:
+        if k <= 0:
+            return 0.5
+        return x / (x + k)
 
     for node in nodes.values():
         if node.play_time <= 0:
             continue
 
-        # Relationship Strength (depth 40% + quality 25% + stability 20% + bond 15%)
-        decayed_time = sum(
-            d * math.exp(-decay_lambda * (now_ts - ts.timestamp()))
-            for ts, d in node._sessions
+        depth_percentile = percentile_rank(node.effective_hours, all_effective_hours)
+        depth_score = depth_percentile * 40
+
+        total_hours = node.play_time / 3600.0
+        avg_duration = (
+            total_hours / node.interaction_count if node.interaction_count > 0 else 0
         )
-        depth_raw = math.log1p(decayed_time / 3600) / math.log1p(max_play_time / 3600)
-        depth_score = min(40, depth_raw * 40)
+        quality_score = sigmoid(avg_duration, median_avg_duration) * 25
 
-        effective_time = sum(min(d, 4 * 3600) for _, d in node._sessions)
-        node.effective_hours = effective_time
-        node.retention_rate = (
-            effective_time / node.play_time if node.play_time > 0 else 0
-        )
-        quality_score = min(25, node.retention_rate * 25)
+        stability_ratio = node.active_days / total_days if total_days > 0 else 0
+        stability_score = math.sqrt(min(stability_ratio, 1)) * 20
 
-        stability_score = min(20, min(1, node.days_known / 365) * 20)
-
-        freq_raw = math.log1p(node.meet_count) / math.log1p(max_meet_count)
-        bond_score = min(15, freq_raw * 15)
+        bond_score = 7.5
+        if node.connections > 0:
+            bond_percentile = percentile_rank(node.connections, all_connections)
+            bond_score = bond_percentile * 15
+        else:
+            high_interaction = total_hours > hours_p70 or node.meet_count > meets_p70
+            if high_interaction:
+                node.is_hidden_friend = True
+                bond_score = depth_percentile * 15
 
         node.relationship_strength = (
             depth_score + quality_score + stability_score + bond_score
         )
 
-        # Recent Intimacy (30d/60d/90d)
-        for window_days, attr_name in [
-            (30, "recent_intimacy_30d"),
-            (60, "recent_intimacy_60d"),
-            (90, "recent_intimacy_90d"),
-        ]:
-            window_start = now_ts - window_days * 86400
-            recent_time = sum(
-                d for ts, d in node._sessions if ts.timestamp() >= window_start
+    for window_days, attr_name, my_hours in [
+        (30, "recent_intimacy_30d", my_recent_hours_30d),
+        (60, "recent_intimacy_60d", my_recent_hours_60d),
+        (90, "recent_intimacy_90d", my_recent_hours_90d),
+    ]:
+        window_start = now_ts - window_days * 86400
+        recent_data: List[Tuple[str, float, int]] = []
+
+        for node in nodes.values():
+            recent_hours = sum(
+                d / 3600.0 for ts, d in node._sessions if ts.timestamp() >= window_start
             )
-            recent_count = sum(
+            recent_meets = sum(
                 1 for ts, _ in node._sessions if ts.timestamp() >= window_start
             )
+            recent_data.append((node.id, recent_hours, recent_meets))
 
-            time_score = min(40, (recent_time / 3600) / 10 * 40)
-            freq_score = min(30, recent_count / 20 * 30)
-            window_hours = window_days * 24
-            life_share = (recent_time / 3600) / window_hours if window_hours > 0 else 0
-            share_score = min(30, life_share * 100 * 30)
+        all_recent_hours = sorted([h for _, h, _ in recent_data if h > 0])
+        all_recent_meets = sorted([m for _, _, m in recent_data if m > 0])
+        all_life_shares = (
+            sorted([h / my_hours for _, h, _ in recent_data if h > 0 and my_hours > 0])
+            if my_hours > 0
+            else []
+        )
+        median_life_share = (
+            all_life_shares[len(all_life_shares) // 2] if all_life_shares else 0.01
+        )
+
+        for uid, recent_hours, recent_meets in recent_data:
+            node = nodes[uid]
+            if recent_hours <= 0:
+                setattr(node, attr_name, 0.0)
+                if window_days == 30:
+                    node.life_share = 0.0
+                continue
+
+            time_score = percentile_rank(recent_hours, all_recent_hours) * 40
+            freq_score = percentile_rank(recent_meets, all_recent_meets) * 30
+
+            life_share = recent_hours / my_hours if my_hours > 0 else 0
+            share_score = sigmoid(life_share, max(median_life_share, 0.01)) * 30
 
             setattr(node, attr_name, time_score + freq_score + share_score)
             if window_days == 30:
                 node.life_share = life_share
 
+    for node in nodes.values():
         node.recent_intimacy = node.recent_intimacy_30d
 
 
@@ -429,11 +577,28 @@ def main() -> None:
         print(f"Database time reference: {now.isoformat()}")
 
         nodes = _load_play_data(conn, valid_ids, now)
+        _load_connections(conn, prefix, nodes)
+
+        total_days = _get_total_days(conn)
+        my_recent_hours_30d = _get_my_recent_hours(conn, now, 30)
+        my_recent_hours_60d = _get_my_recent_hours(conn, now, 60)
+        my_recent_hours_90d = _get_my_recent_hours(conn, now, 90)
+        print(
+            f"Total days: {total_days}, My recent hours (30d): {my_recent_hours_30d:.1f}h"
+        )
     finally:
         conn.close()
 
     _detect_hidden_friends(nodes, edges)
-    _calculate_metrics(nodes, now, args.halflife)
+    _calculate_metrics(
+        nodes,
+        now,
+        args.halflife,
+        total_days,
+        my_recent_hours_30d,
+        my_recent_hours_60d,
+        my_recent_hours_90d,
+    )
 
     gexf_text = _build_gexf(nodes, edges, friend_info)
     output_path = Path(args.output).expanduser()

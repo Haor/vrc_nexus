@@ -228,10 +228,6 @@ def _load_play_data(
         day_str = ts.strftime("%Y-%m-%d")
         node._daily_hours[day_str] = node._daily_hours.get(day_str, 0) + duration_hours
 
-        if duration_s > 0:
-            node.interaction_count += 1
-
-        node.meet_count += 1
         node.play_time += duration_s
 
         if ts_epoch >= ts_7d:
@@ -240,9 +236,6 @@ def _load_play_data(
         if ts_epoch >= ts_30d:
             node.meet_count_30d += 1
             node.play_time_30d += duration_s
-
-    for node in nodes.values():
-        node.active_days = len(node._daily_hours)
 
     return nodes
 
@@ -259,6 +252,32 @@ def _load_connections(
         for user_id, cnt in rows:
             if user_id in nodes:
                 nodes[user_id].connections = cnt
+    except sqlite3.OperationalError:
+        pass
+
+
+def _load_friend_stats(conn: sqlite3.Connection, nodes: Dict[str, NodeData]) -> None:
+    """Load meet_count (DISTINCT location) and active_days from aggregated query."""
+    try:
+        rows = conn.execute("""
+            SELECT 
+                user_id,
+                COUNT(*) as interaction_count,
+                COUNT(DISTINCT location) as meet_count,
+                COUNT(DISTINCT date(created_at)) as active_days
+            FROM gamelog_join_leave
+            WHERE type = 'OnPlayerLeft' 
+              AND user_id IS NOT NULL 
+              AND user_id != ''
+              AND time > 0
+            GROUP BY user_id
+        """).fetchall()
+        for user_id, interaction_count, meet_count, active_days in rows:
+            if user_id in nodes:
+                node = nodes[user_id]
+                node.meet_count = meet_count or 0
+                node.interaction_count = interaction_count or 0
+                node.active_days = active_days or 0
     except sqlite3.OperationalError:
         pass
 
@@ -291,6 +310,30 @@ def _get_total_days(conn: sqlite3.Connection) -> int:
         return 1
 
 
+def _load_days_known(
+    conn: sqlite3.Connection, prefix: str, now: _dt.datetime
+) -> Dict[str, int]:
+    """Load days known from friend_log_history (first 'Friend' record)."""
+    days_known: Dict[str, int] = {}
+    now_str = now.strftime("%Y-%m-%d")
+    table = _quote_table_name(f"{prefix}_friend_log_history")
+    try:
+        rows = conn.execute(f"""
+            SELECT
+                user_id,
+                julianday('{now_str}') - julianday(MIN(created_at)) as days
+            FROM {table}
+            WHERE type = 'Friend'
+            GROUP BY user_id
+        """).fetchall()
+        for user_id, days in rows:
+            if user_id:
+                days_known[user_id] = max(0, int(round(days))) if days else 0
+    except sqlite3.OperationalError:
+        pass
+    return days_known
+
+
 def _detect_hidden_friends(
     nodes: Dict[str, NodeData], edges: List[Tuple[str, str]]
 ) -> None:
@@ -314,11 +357,6 @@ def _calculate_metrics(
     my_recent_hours_90d: float,
 ) -> None:
     now_ts = now.timestamp()
-    now_str = now.strftime("%Y-%m-%d")
-
-    for node in nodes.values():
-        if node._first_met:
-            node.days_known = int((now - node._first_met).total_seconds() / 86400)
 
     for node in nodes.values():
         effective = 0.0
@@ -524,7 +562,7 @@ def _build_gexf(
             f'          <attvalue for="11" value="{node.recent_intimacy:.2f}" />'
         )
         lines.append(
-            f'          <attvalue for="12" value="{node.effective_hours:.2f}" />'
+            f'          <attvalue for="12" value="{node.effective_hours * 3600:.2f}" />'
         )
         lines.append(
             f'          <attvalue for="13" value="{node.retention_rate:.4f}" />'
@@ -578,6 +616,12 @@ def main() -> None:
 
         nodes = _load_play_data(conn, valid_ids, now)
         _load_connections(conn, prefix, nodes)
+        _load_friend_stats(conn, nodes)
+
+        days_known_map = _load_days_known(conn, prefix, now)
+        for uid, node in nodes.items():
+            if uid in days_known_map:
+                node.days_known = days_known_map[uid]
 
         total_days = _get_total_days(conn)
         my_recent_hours_30d = _get_my_recent_hours(conn, now, 30)

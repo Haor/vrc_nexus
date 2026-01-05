@@ -15,16 +15,11 @@ import math
 import os
 import sqlite3
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 from xml.sax.saxutils import quoteattr
 
-# IDs that should be excluded from export (e.g. placeholder/hidden mutuals)
 EXCLUDED_IDS = {"usr_00000000-0000-0000-0000-000000000000"}
-
-# Algorithm constants (matching ALGORITHM_DESIGN.md)
-HALFLIFE_DEFAULT_DAYS = 120  # Decay half-life in days
-RECENT_WINDOW_DAYS = 30  # Recent intimacy window
-HOURS_PER_DAY = 24
+HALFLIFE_DEFAULT_DAYS = 120
 
 
 class ExportError(RuntimeError):
@@ -42,24 +37,21 @@ class NodeData:
         self.meet_count = 0
         self.meet_count_7d = 0
         self.meet_count_30d = 0
-        self.play_time = 0.0  # seconds
+        self.play_time = 0.0
         self.play_time_7d = 0.0
         self.play_time_30d = 0.0
         self.days_known = 0
         self.relationship_strength = 0.0
         self.recent_intimacy = 0.0
-        self.effective_hours = 0.0  # seconds
+        self.effective_hours = 0.0
         self.retention_rate = 0.0
         self.life_share = 0.0
         self.is_hidden_friend = False
         self.recent_intimacy_30d = 0.0
         self.recent_intimacy_60d = 0.0
         self.recent_intimacy_90d = 0.0
-        # Internal calculation fields
         self._first_met: Optional[_dt.datetime] = None
-        self._sessions: List[
-            Tuple[_dt.datetime, float]
-        ] = []  # (timestamp, duration_seconds)
+        self._sessions: List[Tuple[_dt.datetime, float]] = []
 
 
 def _parse_args() -> argparse.Namespace:
@@ -75,9 +67,7 @@ def _parse_args() -> argparse.Namespace:
         help="Path to the VRCX sqlite database (default: %(default)s).",
     )
     parser.add_argument(
-        "--win",
-        action="store_true",
-        help="Use the default Windows VRCX DB path (%APPDATA%\\VRCX\\VRCX.sqlite3).",
+        "--win", action="store_true", help="Use the default Windows VRCX DB path."
     )
     parser.add_argument(
         "--output",
@@ -85,17 +75,13 @@ def _parse_args() -> argparse.Namespace:
         help="Destination GEXF file path (default: %(default)s).",
     )
     parser.add_argument(
-        "--prefix",
-        help=(
-            "Optional table prefix (e.g. usr670fcf3665cb48b986d4018b837d6fed). "
-            "When omitted the exporter will try to detect it automatically."
-        ),
+        "--prefix", help="Optional table prefix. Auto-detected if omitted."
     )
     parser.add_argument(
         "--halflife",
         type=int,
         default=HALFLIFE_DEFAULT_DAYS,
-        help=f"Decay half-life in days for relationship strength (default: {HALFLIFE_DEFAULT_DAYS}).",
+        help=f"Decay half-life in days (default: {HALFLIFE_DEFAULT_DAYS}).",
     )
     return parser.parse_args()
 
@@ -110,11 +96,7 @@ def _quote_table_name(name: str) -> str:
 
 
 def _normalize_prefix(value: str) -> str:
-    suffixes = (
-        "_mutual_graph_links",
-        "_mutual_graph_friends",
-    )
-    for suffix in suffixes:
+    for suffix in ("_mutual_graph_links", "_mutual_graph_friends"):
         if value.endswith(suffix):
             return value[: -len(suffix)]
     return value
@@ -127,30 +109,27 @@ def _detect_prefix(conn: sqlite3.Connection, explicit_prefix: str | None) -> str
         "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE ?",
         ("%mutual_graph_links",),
     ).fetchall()
-    matches: List[str] = []
-    for (table_name,) in rows:
-        if table_name.endswith("_mutual_graph_links"):
-            matches.append(table_name[: -len("_mutual_graph_links")])
-    unique_matches = sorted(set(matches))
-    if not unique_matches:
+    matches = sorted(
+        {
+            r[0][: -len("_mutual_graph_links")]
+            for r in rows
+            if r[0].endswith("_mutual_graph_links")
+        }
+    )
+    if not matches:
+        raise ExportError("Could not find any *_mutual_graph_links tables.")
+    if len(matches) > 1:
         raise ExportError(
-            "Could not find any *_mutual_graph_links tables in the database."
+            f"Multiple datasets found. Use --prefix. Detected: {', '.join(matches)}"
         )
-    if len(unique_matches) > 1:
-        raise ExportError(
-            "Multiple mutual graph datasets found. Please specify one with --prefix. "
-            f"Detected prefixes: {', '.join(unique_matches)}"
-        )
-    return unique_matches[0]
+    return matches[0]
 
 
 def _resolve_db_path(args: argparse.Namespace) -> Path:
     if args.win:
         appdata = os.environ.get("APPDATA")
         if not appdata:
-            raise ExportError(
-                "APPDATA is not set; cannot resolve Windows default DB path."
-            )
+            raise ExportError("APPDATA is not set.")
         path = Path(appdata) / "VRCX" / "VRCX.sqlite3"
         if not path.exists():
             raise ExportError(f"Default Windows DB not found: {path}")
@@ -158,48 +137,43 @@ def _resolve_db_path(args: argparse.Namespace) -> Path:
     return Path(args.db).expanduser()
 
 
-def _load_friend_ids(conn: sqlite3.Connection, prefix: str) -> Sequence[str]:
-    table = _quote_table_name(f"{prefix}_mutual_graph_friends")
-    rows = conn.execute(f"SELECT friend_id FROM {table}").fetchall()
-    return [row[0] for row in rows if row[0]]
-
-
-def _load_edges(conn: sqlite3.Connection, prefix: str) -> List[Tuple[str, str]]:
-    table = _quote_table_name(f"{prefix}_mutual_graph_links")
-    rows = conn.execute(f"SELECT friend_id, mutual_id FROM {table}").fetchall()
-    edges: List[Tuple[str, str]] = []
-    for friend_id, mutual_id in rows:
-        if friend_id and mutual_id:
-            if friend_id in EXCLUDED_IDS or mutual_id in EXCLUDED_IDS:
-                continue
-            edges.append((friend_id, mutual_id))
-    return edges
-
-
 def _load_friend_info(
     conn: sqlite3.Connection, prefix: str
 ) -> Dict[str, Tuple[str, str]]:
-    """Load display_name and trust_level for friends.
-    Returns: {user_id: (display_name, trust_level)}
-    """
+    """Load friends from friend_log_current. Only these are valid nodes."""
     table = _quote_table_name(f"{prefix}_friend_log_current")
     try:
         rows = conn.execute(
             f"SELECT user_id, display_name, trust_level FROM {table}"
         ).fetchall()
     except sqlite3.OperationalError:
-        # Fallback if trust_level column doesn't exist
         rows = conn.execute(f"SELECT user_id, display_name, '' FROM {table}").fetchall()
+    return {
+        r[0]: (r[1] or "", r[2] or "")
+        for r in rows
+        if r[0] and r[0] not in EXCLUDED_IDS
+    }
 
-    result: Dict[str, Tuple[str, str]] = {}
-    for user_id, display_name, trust_level in rows:
-        if user_id:
-            result[user_id] = (display_name or "", trust_level or "")
-    return result
+
+def _load_edges(
+    conn: sqlite3.Connection, prefix: str, valid_ids: Set[str]
+) -> List[Tuple[str, str]]:
+    """Load edges, keeping only those where BOTH ends are in valid_ids (friend_log_current)."""
+    table = _quote_table_name(f"{prefix}_mutual_graph_links")
+    rows = conn.execute(f"SELECT friend_id, mutual_id FROM {table}").fetchall()
+    edges: List[Tuple[str, str]] = []
+    for friend_id, mutual_id in rows:
+        if (
+            friend_id
+            and mutual_id
+            and friend_id in valid_ids
+            and mutual_id in valid_ids
+        ):
+            edges.append((friend_id, mutual_id))
+    return edges
 
 
 def _get_db_max_time(conn: sqlite3.Connection) -> _dt.datetime:
-    """Get the maximum created_at timestamp from gamelog_join_leave as 'now'."""
     try:
         row = conn.execute("SELECT MAX(created_at) FROM gamelog_join_leave").fetchone()
         if row and row[0]:
@@ -210,70 +184,47 @@ def _get_db_max_time(conn: sqlite3.Connection) -> _dt.datetime:
 
 
 def _load_play_data(
-    conn: sqlite3.Connection, friend_ids: Sequence[str], now: _dt.datetime
+    conn: sqlite3.Connection, valid_ids: Set[str], now: _dt.datetime
 ) -> Dict[str, NodeData]:
-    """Load play data from gamelog_join_leave.
-    Returns: {user_id: NodeData with play stats populated}
-    """
-    nodes: Dict[str, NodeData] = {}
-
-    # Initialize nodes for all friends
-    for fid in friend_ids:
-        if fid not in EXCLUDED_IDS:
-            nodes[fid] = NodeData(fid)
+    """Load play data ONLY for valid friend IDs."""
+    nodes: Dict[str, NodeData] = {uid: NodeData(uid) for uid in valid_ids}
 
     try:
-        # Query all OnPlayerLeft events (which contain duration in 'time' field as milliseconds)
         rows = conn.execute("""
             SELECT user_id, created_at, time
             FROM gamelog_join_leave
-            WHERE type = 'OnPlayerLeft' AND user_id IS NOT NULL
+            WHERE type = 'OnPlayerLeft' AND user_id IS NOT NULL AND user_id != ''
         """).fetchall()
     except sqlite3.OperationalError:
         return nodes
 
-    # Calculate time boundaries
     now_ts = now.timestamp()
     ts_7d = now_ts - 7 * 86400
     ts_30d = now_ts - 30 * 86400
-    ts_60d = now_ts - 60 * 86400
-    ts_90d = now_ts - 90 * 86400
 
     for user_id, created_at, duration_ms in rows:
-        if not user_id or user_id in EXCLUDED_IDS:
-            continue
         if user_id not in nodes:
-            # This user is a mutual but not a direct friend
-            nodes[user_id] = NodeData(user_id)
-            nodes[user_id].type = "mutual"
+            continue
 
         node = nodes[user_id]
-
-        # Parse timestamp
         try:
             ts = _dt.datetime.fromisoformat(created_at.replace("Z", "+00:00"))
             ts_epoch = ts.timestamp()
         except (ValueError, AttributeError):
             continue
 
-        # Duration in seconds (handle negative values as 0)
         duration_s = max(0, (duration_ms or 0) / 1000.0)
 
-        # Track first met date
         if node._first_met is None or ts < node._first_met:
             node._first_met = ts
-
-        # Store session for decay calculation
         node._sessions.append((ts, duration_s))
 
-        # Accumulate stats
         node.meet_count += 1
         node.play_time += duration_s
 
         if ts_epoch >= ts_7d:
             node.meet_count_7d += 1
             node.play_time_7d += duration_s
-
         if ts_epoch >= ts_30d:
             node.meet_count_30d += 1
             node.play_time_30d += duration_s
@@ -282,41 +233,28 @@ def _load_play_data(
 
 
 def _detect_hidden_friends(
-    conn: sqlite3.Connection,
-    prefix: str,
-    nodes: Dict[str, NodeData],
-    edges: List[Tuple[str, str]],
+    nodes: Dict[str, NodeData], edges: List[Tuple[str, str]]
 ) -> None:
-    """Detect friends who may have hidden their mutual friend relationships."""
-    # Build adjacency from edges
-    adjacency: Dict[str, set] = {}
+    adjacency: Dict[str, Set[str]] = {}
     for src, tgt in edges:
         adjacency.setdefault(src, set()).add(tgt)
         adjacency.setdefault(tgt, set()).add(src)
 
-    # Friends with interactions but no mutual connections might be hidden
     for user_id, node in nodes.items():
-        if node.type == "friend" and node.meet_count > 0:
-            if user_id not in adjacency or len(adjacency.get(user_id, set())) == 0:
-                node.is_hidden_friend = True
+        if node.meet_count > 0 and user_id not in adjacency:
+            node.is_hidden_friend = True
 
 
 def _calculate_metrics(
     nodes: Dict[str, NodeData], now: _dt.datetime, halflife_days: int
 ) -> None:
-    """Calculate relationship strength, recent intimacy, and other metrics."""
     now_ts = now.timestamp()
-    decay_lambda = math.log(2) / (halflife_days * 86400)  # per second
+    decay_lambda = math.log(2) / (halflife_days * 86400)
 
-    # Calculate per-user lifespan for life_share
-    total_days = 0
     for node in nodes.values():
         if node._first_met:
-            days = (now - node._first_met).total_seconds() / 86400
-            node.days_known = int(days)
-            total_days = max(total_days, days)
+            node.days_known = int((now - node._first_met).total_seconds() / 86400)
 
-    # Find max values for normalization
     max_play_time = max((n.play_time for n in nodes.values()), default=1) or 1
     max_meet_count = max((n.meet_count for n in nodes.values()), default=1) or 1
 
@@ -324,20 +262,14 @@ def _calculate_metrics(
         if node.play_time <= 0:
             continue
 
-        # === Relationship Strength (long-term) ===
-        # Depth score (40%): log-scaled total time with decay
-        decayed_time = 0.0
-        for ts, duration in node._sessions:
-            age = now_ts - ts.timestamp()
-            weight = math.exp(-decay_lambda * age)
-            decayed_time += duration * weight
-
-        # Normalize and apply log scale
+        # Relationship Strength (depth 40% + quality 25% + stability 20% + bond 15%)
+        decayed_time = sum(
+            d * math.exp(-decay_lambda * (now_ts - ts.timestamp()))
+            for ts, d in node._sessions
+        )
         depth_raw = math.log1p(decayed_time / 3600) / math.log1p(max_play_time / 3600)
         depth_score = min(40, depth_raw * 40)
 
-        # Quality score (25%): retention rate (effective time / total time)
-        # Approximate effective time as sessions with reasonable duration (< 4 hours)
         effective_time = sum(min(d, 4 * 3600) for _, d in node._sessions)
         node.effective_hours = effective_time
         node.retention_rate = (
@@ -345,11 +277,8 @@ def _calculate_metrics(
         )
         quality_score = min(25, node.retention_rate * 25)
 
-        # Stability score (20%): based on days known and regularity
-        stability_raw = min(1, node.days_known / 365)  # Cap at 1 year
-        stability_score = stability_raw * 20
+        stability_score = min(20, min(1, node.days_known / 365) * 20)
 
-        # Bond score (15%): frequency of meetings
         freq_raw = math.log1p(node.meet_count) / math.log1p(max_meet_count)
         bond_score = min(15, freq_raw * 15)
 
@@ -357,48 +286,38 @@ def _calculate_metrics(
             depth_score + quality_score + stability_score + bond_score
         )
 
-        # === Recent Intimacy (short-term) ===
-        # Calculate for different time windows
+        # Recent Intimacy (30d/60d/90d)
         for window_days, attr_name in [
             (30, "recent_intimacy_30d"),
             (60, "recent_intimacy_60d"),
             (90, "recent_intimacy_90d"),
         ]:
             window_start = now_ts - window_days * 86400
-            recent_time = 0.0
-            recent_count = 0
-            for ts, duration in node._sessions:
-                if ts.timestamp() >= window_start:
-                    recent_time += duration
-                    recent_count += 1
+            recent_time = sum(
+                d for ts, d in node._sessions if ts.timestamp() >= window_start
+            )
+            recent_count = sum(
+                1 for ts, _ in node._sessions if ts.timestamp() >= window_start
+            )
 
-            # Time score (40%): recent play time
-            time_score = min(40, (recent_time / 3600) / 10 * 40)  # 10 hours = max
-
-            # Frequency score (30%): recent meet count
-            freq_score = min(30, recent_count / 20 * 30)  # 20 meetings = max
-
-            # Life share score (30%): percentage of recent life spent together
+            time_score = min(40, (recent_time / 3600) / 10 * 40)
+            freq_score = min(30, recent_count / 20 * 30)
             window_hours = window_days * 24
             life_share = (recent_time / 3600) / window_hours if window_hours > 0 else 0
-            share_score = min(30, life_share * 100 * 30)  # 1% = max
+            share_score = min(30, life_share * 100 * 30)
 
-            intimacy = time_score + freq_score + share_score
-            setattr(node, attr_name, intimacy)
-
+            setattr(node, attr_name, time_score + freq_score + share_score)
             if window_days == 30:
                 node.life_share = life_share
 
-        # Default recent_intimacy is 30d
         node.recent_intimacy = node.recent_intimacy_30d
 
 
 def _build_gexf(
     nodes: Dict[str, NodeData],
-    edges: Sequence[Tuple[str, str]],
+    edges: List[Tuple[str, str]],
     friend_info: Dict[str, Tuple[str, str]],
 ) -> str:
-    """Build GEXF XML string with all attributes."""
     timestamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d")
 
     lines: List[str] = [
@@ -434,14 +353,8 @@ def _build_gexf(
     ]
 
     for node_id in sorted(nodes.keys()):
-        if node_id in EXCLUDED_IDS:
-            continue
         node = nodes[node_id]
-
-        # Get display name and trust level from friend_info
         display_name, trust_level = friend_info.get(node_id, ("", ""))
-        if not display_name:
-            display_name = node.display_name
         label = display_name or node_id
 
         lines.append(f"      <node id={quoteattr(node_id)} label={quoteattr(label)}>")
@@ -486,16 +399,13 @@ def _build_gexf(
 
     lines.append("    </nodes>")
     lines.append("    <edges>")
-
-    for index, (source, target) in enumerate(edges):
+    for idx, (src, tgt) in enumerate(edges):
         lines.append(
-            f'      <edge id="{index}" source={quoteattr(source)} target={quoteattr(target)} />'
+            f'      <edge id="{idx}" source={quoteattr(src)} target={quoteattr(tgt)} />'
         )
-
     lines.append("    </edges>")
     lines.append("  </graph>")
     lines.append("</gexf>")
-
     return "\n".join(lines)
 
 
@@ -510,49 +420,28 @@ def main() -> None:
         prefix = _detect_prefix(conn, args.prefix)
         print(f"Using prefix: {prefix}")
 
-        # Load basic data
-        friend_ids = _load_friend_ids(conn, prefix)
-        edges = _load_edges(conn, prefix)
         friend_info = _load_friend_info(conn, prefix)
+        valid_ids = set(friend_info.keys())
+        print(f"Found {len(valid_ids)} friends in friend_log_current")
 
-        # Get database "now" time
+        edges = _load_edges(conn, prefix, valid_ids)
         now = _get_db_max_time(conn)
         print(f"Database time reference: {now.isoformat()}")
 
-        # Load play data and create nodes
-        nodes = _load_play_data(conn, friend_ids, now)
-
-        # Add mutual-only nodes from edges
-        for _, mutual_id in edges:
-            if mutual_id and mutual_id not in nodes and mutual_id not in EXCLUDED_IDS:
-                nodes[mutual_id] = NodeData(mutual_id)
-                nodes[mutual_id].type = "mutual"
-
-        # Detect hidden friends
-        _detect_hidden_friends(conn, prefix, nodes, edges)
-
+        nodes = _load_play_data(conn, valid_ids, now)
     finally:
         conn.close()
 
-    # Calculate metrics
+    _detect_hidden_friends(nodes, edges)
     _calculate_metrics(nodes, now, args.halflife)
 
-    # Build GEXF
     gexf_text = _build_gexf(nodes, edges, friend_info)
-
     output_path = Path(args.output).expanduser()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(gexf_text, encoding="utf-8")
 
-    # Statistics
-    friend_count = sum(1 for n in nodes.values() if n.type == "friend")
-    mutual_count = sum(1 for n in nodes.values() if n.type == "mutual")
     hidden_count = sum(1 for n in nodes.values() if n.is_hidden_friend)
-
-    print(
-        f"Exported {len(nodes)} nodes ({friend_count} friends, {mutual_count} mutuals) "
-        f"and {len(edges)} edges to {output_path}"
-    )
+    print(f"Exported {len(nodes)} friends and {len(edges)} edges to {output_path}")
     if hidden_count > 0:
         print(f"Detected {hidden_count} potential hidden friends")
 

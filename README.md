@@ -18,6 +18,7 @@ A visualization tool for analyzing mutual friend relationships based on [VRCX](h
 - **Trust Level**: VRChat trust level colors (Visitor/New User/User/Known User/Trusted User)
 - **Relationship Strength**: Purple-red gradient based on long-term relationship depth (0-100 score)
 - **Playtime**: Cyan-blue gradient based on relative play time
+- **Community**: Color by detected community groups (Louvain algorithm)
 
 ### Relationship Metrics
 - **Relationship Strength**: Long-term accumulated relationship depth with decay mechanism
@@ -34,6 +35,7 @@ A visualization tool for analyzing mutual friend relationships based on [VRCX](h
 - Trust level badge with color coding
 - Relationship metrics with ranking position
 - Raw data: total playtime, effective hours, retention rate, meet count
+- Clustering coefficient and community membership
 - Complete list of mutual friends for each person
 - Search and filter friends by name
 - Remove nodes from the graph for focused analysis
@@ -43,6 +45,14 @@ A visualization tool for analyzing mutual friend relationships based on [VRCX](h
 - Total connection count
 - Average connections per friend
 - Network density percentage
+- Average clustering coefficient
+- Community count
+
+### Community Detection
+- **Louvain Algorithm**: Modularity-based community detection with hierarchical aggregation
+- **Adaptive Resolution**: Auto-adjusts based on network density
+- **Resolution Slider**: Manual adjustment for fine-grained control (0.5-4.0 range)
+- **Multi-run Optimization**: Runs 3 times and selects the highest modularity result
 
 ### Interface
 - Multi-language support: Chinese, English, Japanese

@@ -1649,6 +1649,89 @@
         .preview-playtime .color-mode-preview-dot:nth-child(3) { background: #4db6ac; }
         .preview-playtime .color-mode-preview-dot:nth-child(4) { background: #64ffda; }
 
+        .preview-community .color-mode-preview-dot:nth-child(1) { background: #e74c3c; }
+        .preview-community .color-mode-preview-dot:nth-child(2) { background: #3498db; }
+        .preview-community .color-mode-preview-dot:nth-child(3) { background: #2ecc71; }
+        .preview-community .color-mode-preview-dot:nth-child(4) { background: #f39c12; }
+
+        /* Resolution 滑条 */
+        .resolution-slider-container {
+            display: none;
+            padding: 8px 4px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        .resolution-slider-container.visible {
+            display: block;
+        }
+
+        .resolution-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .resolution-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .resolution-value {
+            font-size: 11px;
+            color: var(--accent-primary);
+            font-family: 'Orbitron', monospace;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        .resolution-slider {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .resolution-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            box-shadow: 0 0 6px rgba(234, 40, 100, 0.5);
+            transition: transform 0.15s ease;
+        }
+
+        .resolution-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .resolution-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 6px rgba(234, 40, 100, 0.5);
+        }
+
+        .resolution-hints {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 9px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
         /* 导出按钮 */
         .export-csv-dropdown {
             position: relative;
@@ -2436,6 +2519,14 @@
                         <div class="stat-value" id="density">--</div>
                         <div class="stat-label" data-i18n="networkDensity">网络密度</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="clusteringCoef">--</div>
+                        <div class="stat-label" data-i18n="avgClustering">聚类系数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="communityCount">--</div>
+                        <div class="stat-label" data-i18n="communityCount">社区数量</div>
+                    </div>
                 </div>
             </div>
 
@@ -2714,6 +2805,33 @@
                             <div class="color-mode-preview-dot"></div>
                         </div>
                     </button>
+                    <button class="color-mode-btn preview-community" data-mode="community">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="5" r="3"></circle>
+                            <circle cx="5" cy="19" r="3"></circle>
+                            <circle cx="19" cy="19" r="3"></circle>
+                            <line x1="12" y1="8" x2="5" y2="16"></line>
+                            <line x1="12" y1="8" x2="19" y2="16"></line>
+                        </svg>
+                        <span data-i18n="colorByCommunity">社区</span>
+                        <div class="color-mode-preview">
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                        </div>
+                    </button>
+                </div>
+                <div class="resolution-slider-container" id="resolutionSliderContainer">
+                    <div class="resolution-slider-header">
+                        <span class="resolution-label" data-i18n="communityResolution">社区粒度</span>
+                        <span class="resolution-value" id="resolutionValue">自动</span>
+                    </div>
+                    <input type="range" class="resolution-slider" id="resolutionSlider" min="0" max="40" value="0" step="1">
+                    <div class="resolution-hints">
+                        <span data-i18n="resolutionAuto">自动</span>
+                        <span data-i18n="resolutionFine">精细</span>
+                    </div>
                 </div>
             </div>
 
@@ -2750,6 +2868,10 @@
                 totalConnections: '连接总数',
                 avgConnections: '平均连接',
                 networkDensity: '网络密度',
+                avgClustering: '聚类系数',
+                communityCount: '社区数量',
+                community: '社区',
+                clusteringCoef: '聚类系数',
                 nodeDetail: '节点详情',
                 clickToView: '点击节点查看详细信息',
                 mutualRanking: '共同好友排名',
@@ -2831,6 +2953,10 @@
                 colorByTrust: '信任等级',
                 colorByStrength: '关系强度',
                 colorByPlaytime: '游玩时长',
+                colorByCommunity: '社区',
+                communityResolution: '社区粒度',
+                resolutionAuto: '自动',
+                resolutionFine: '精细',
                 // 导出功能
                 exportCSV: '导出',
                 exportStrength: '关系强度排名',
@@ -2862,6 +2988,10 @@
                 totalConnections: 'Connections',
                 avgConnections: 'Avg Connections',
                 networkDensity: 'Density',
+                avgClustering: 'Clustering',
+                communityCount: 'Communities',
+                community: 'Community',
+                clusteringCoef: 'Clustering',
                 nodeDetail: 'Node Details',
                 clickToView: 'Click a node to view details',
                 mutualRanking: 'Mutual Friends Ranking',
@@ -2943,6 +3073,10 @@
                 colorByTrust: 'Trust Level',
                 colorByStrength: 'Relationship',
                 colorByPlaytime: 'Playtime',
+                colorByCommunity: 'Community',
+                communityResolution: 'Resolution',
+                resolutionAuto: 'Auto',
+                resolutionFine: 'Fine',
                 // Export
                 exportCSV: 'Export',
                 exportStrength: 'Relationship Ranking',
@@ -2974,6 +3108,10 @@
                 totalConnections: '接続数',
                 avgConnections: '平均接続',
                 networkDensity: 'ネットワーク密度',
+                avgClustering: 'クラスタ係数',
+                communityCount: 'コミュニティ数',
+                community: 'コミュニティ',
+                clusteringCoef: 'クラスタ係数',
                 nodeDetail: 'ノード詳細',
                 clickToView: 'ノードをクリックして詳細表示',
                 mutualRanking: '共通フレンドランキング',
@@ -3055,6 +3193,10 @@
                 colorByTrust: '信頼レベル',
                 colorByStrength: '関係強度',
                 colorByPlaytime: 'プレイ時間',
+                colorByCommunity: 'コミュニティ',
+                communityResolution: '解像度',
+                resolutionAuto: '自動',
+                resolutionFine: '精細',
                 // エクスポート
                 exportCSV: 'CSV出力',
                 exportStrength: '関係強度ランキング',
@@ -3302,6 +3444,7 @@
                 this.currentFileName = null;     // 当前文件名
                 this.isDragging = false;         // 是否正在拖动节点
                 this.colorMode = 'connections';  // 着色模式
+                this.userResolution = null;      // 用户设置的社区粒度（null=自动）
                 this.dataParams = null;          // 数据库参数信息
 
                 // 缓存常用 DOM 元素引用
@@ -4712,6 +4855,374 @@
                 sorted.forEach((node, index) => {
                     this.nodeRanks.set(node.id, index + 1);
                 });
+
+                // 构建邻接表（用于聚类系数和社区检测）
+                this.adjacencyMap = new Map();
+                this.edgeSet = new Set();
+                this.nodes.forEach(n => this.adjacencyMap.set(n.id, new Set()));
+                this.edges.forEach(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    if (this.adjacencyMap.has(s)) this.adjacencyMap.get(s).add(t);
+                    if (this.adjacencyMap.has(t)) this.adjacencyMap.get(t).add(s);
+                    const edgeKey = s < t ? `${s}|${t}` : `${t}|${s}`;
+                    this.edgeSet.add(edgeKey);
+                });
+
+                // 计算聚类系数
+                this.calculateClusteringCoefficients();
+
+                // 社区检测
+                this.detectCommunities();
+
+                // 更新统计卡片
+                const avgClustering = this.avgClusteringCoef !== undefined ? this.avgClusteringCoef.toFixed(2) : '--';
+                const communityCount = this.communityCount || '--';
+                document.getElementById('clusteringCoef').textContent = avgClustering;
+                document.getElementById('communityCount').textContent = communityCount;
+            }
+
+            calculateClusteringCoefficients() {
+                let totalClustering = 0;
+                let countWithNeighbors = 0;
+                this.nodes.forEach(node => {
+                    const neighbors = this.adjacencyMap.get(node.id);
+                    if (!neighbors || neighbors.size < 2) {
+                        node.clusteringCoef = 0;
+                        return;
+                    }
+                    const neighborArr = Array.from(neighbors);
+                    let edgesBetween = 0;
+                    for (let i = 0; i < neighborArr.length; i++) {
+                        for (let j = i + 1; j < neighborArr.length; j++) {
+                            const key = neighborArr[i] < neighborArr[j] 
+                                ? `${neighborArr[i]}|${neighborArr[j]}` 
+                                : `${neighborArr[j]}|${neighborArr[i]}`;
+                            if (this.edgeSet.has(key)) edgesBetween++;
+                        }
+                    }
+                    const maxEdges = (neighbors.size * (neighbors.size - 1)) / 2;
+                    node.clusteringCoef = maxEdges > 0 ? edgesBetween / maxEdges : 0;
+                    totalClustering += node.clusteringCoef;
+                    countWithNeighbors++;
+                });
+                this.avgClusteringCoef = countWithNeighbors > 0 ? totalClustering / countWithNeighbors : 0;
+            }
+
+            detectCommunities() {
+                // 完整 Louvain 算法 - 基于模块度优化的社区检测
+                // 包含：自适应/手动 resolution、多次运行取最优、两阶段迭代
+                
+                if (this.nodes.length === 0) {
+                    this.communityCount = 0;
+                    this.communityColors = [];
+                    return;
+                }
+
+                const m = this.edges.length;
+                if (m === 0) {
+                    this.nodes.forEach((node, i) => { node.community = i; });
+                    this.communityCount = this.nodes.length;
+                    this.communityColors = this.generateCommunityColors(this.communityCount);
+                    return;
+                }
+
+                // 获取 resolution：用户设置或自适应
+                let resolution;
+                if (this.userResolution !== null && this.userResolution !== undefined) {
+                    resolution = this.userResolution;
+                } else {
+                    // 自适应：根据网络密度计算
+                    const n = this.nodes.length;
+                    const maxEdges = (n * (n - 1)) / 2;
+                    const density = m / maxEdges;
+                    resolution = 1.0 + density * 2.0;
+                }
+
+                // 多次运行取最优结果
+                const numRuns = 3;
+                let bestResult = null;
+                let bestModularity = -Infinity;
+
+                for (let run = 0; run < numRuns; run++) {
+                    const result = this.louvainOneRun(resolution);
+                    if (result.modularity > bestModularity) {
+                        bestModularity = result.modularity;
+                        bestResult = result;
+                    }
+                }
+
+                // 应用最优结果
+                this.nodes.forEach(node => {
+                    node.community = bestResult.communities.get(node.id) ?? 0;
+                });
+                this.communityCount = bestResult.communityCount;
+                this.communityColors = this.generateCommunityColors(this.communityCount);
+            }
+
+            louvainOneRun(resolution) {
+                // 构建工作图（支持超节点聚合）
+                let graph = {
+                    nodes: this.nodes.map(n => n.id),
+                    adj: new Map(),
+                    degree: new Map(),
+                    nodeWeight: new Map() // 超节点内部边权重
+                };
+                
+                // 初始化邻接表和度数
+                graph.nodes.forEach(nid => {
+                    graph.adj.set(nid, new Map());
+                    graph.nodeWeight.set(nid, 0);
+                });
+                this.edges.forEach(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    if (s === t) return;
+                    graph.adj.get(s).set(t, (graph.adj.get(s).get(t) || 0) + 1);
+                    graph.adj.get(t).set(s, (graph.adj.get(t).get(s) || 0) + 1);
+                });
+                graph.nodes.forEach(nid => {
+                    let deg = 0;
+                    graph.adj.get(nid).forEach(w => { deg += w; });
+                    graph.degree.set(nid, deg);
+                });
+
+                // 记录原始节点到最终社区的映射
+                let nodeToFinalComm = new Map();
+                graph.nodes.forEach(nid => nodeToFinalComm.set(nid, nid));
+
+                let totalM = this.edges.length;
+                let level = 0;
+                const maxLevels = 10;
+
+                while (level < maxLevels) {
+                    // 第一阶段：局部移动
+                    const phaseResult = this.louvainPhase1(graph, resolution, totalM);
+                    
+                    if (!phaseResult.improved) break;
+
+                    // 更新原始节点到社区的映射
+                    const newMapping = new Map();
+                    nodeToFinalComm.forEach((currentComm, origNode) => {
+                        newMapping.set(origNode, phaseResult.nodeToComm.get(currentComm));
+                    });
+                    nodeToFinalComm = newMapping;
+
+                    // 第二阶段：社区聚合为超节点
+                    graph = this.louvainPhase2(graph, phaseResult.nodeToComm);
+                    
+                    if (graph.nodes.length <= 1) break;
+                    level++;
+                }
+
+                // 重新编号社区
+                const uniqueComms = [...new Set(nodeToFinalComm.values())];
+                const commRemap = new Map();
+                uniqueComms.forEach((c, i) => commRemap.set(c, i));
+
+                const communities = new Map();
+                nodeToFinalComm.forEach((comm, nid) => {
+                    communities.set(nid, commRemap.get(comm));
+                });
+
+                // 计算最终模块度
+                const modularity = this.calculateModularity(communities, resolution);
+
+                return {
+                    communities,
+                    communityCount: uniqueComms.length,
+                    modularity
+                };
+            }
+
+            louvainPhase1(graph, resolution, totalM) {
+                // 初始化：每个节点一个社区
+                const nodeToComm = new Map();
+                const commNodes = new Map();
+                graph.nodes.forEach((nid, i) => {
+                    nodeToComm.set(nid, nid);
+                    commNodes.set(nid, new Set([nid]));
+                });
+
+                // 社区总度数
+                const commTotDegree = new Map();
+                graph.nodes.forEach(nid => {
+                    commTotDegree.set(nid, graph.degree.get(nid) + 2 * graph.nodeWeight.get(nid));
+                });
+
+                // 社区内部边权重
+                const commInternalWeight = new Map();
+                graph.nodes.forEach(nid => {
+                    commInternalWeight.set(nid, graph.nodeWeight.get(nid));
+                });
+
+                const m2 = totalM * 2; // 2m
+                let improved = false;
+                const maxPasses = 20;
+
+                for (let pass = 0; pass < maxPasses; pass++) {
+                    let passImproved = false;
+                    const shuffled = [...graph.nodes].sort(() => Math.random() - 0.5);
+
+                    for (const nid of shuffled) {
+                        const currentComm = nodeToComm.get(nid);
+                        const neighbors = graph.adj.get(nid);
+                        if (!neighbors || neighbors.size === 0) continue;
+
+                        const ki = graph.degree.get(nid) + 2 * graph.nodeWeight.get(nid);
+
+                        // 统计到各社区的边权重
+                        const commEdgeWeight = new Map();
+                        neighbors.forEach((weight, neighborId) => {
+                            const neighborComm = nodeToComm.get(neighborId);
+                            commEdgeWeight.set(neighborComm, (commEdgeWeight.get(neighborComm) || 0) + weight);
+                        });
+
+                        // 从当前社区移除
+                        commNodes.get(currentComm).delete(nid);
+                        const kiInCurrent = commEdgeWeight.get(currentComm) || 0;
+                        commTotDegree.set(currentComm, commTotDegree.get(currentComm) - ki);
+                        commInternalWeight.set(currentComm, 
+                            (commInternalWeight.get(currentComm) || 0) - graph.nodeWeight.get(nid) - kiInCurrent);
+
+                        // 寻找最佳社区
+                        let bestComm = currentComm;
+                        let bestDeltaQ = 0;
+
+                        const candidateComms = new Set([currentComm]);
+                        neighbors.forEach((_, neighborId) => candidateComms.add(nodeToComm.get(neighborId)));
+
+                        for (const targetComm of candidateComms) {
+                            if (!commNodes.has(targetComm) || commNodes.get(targetComm).size === 0) {
+                                if (targetComm !== currentComm) continue;
+                            }
+                            
+                            const kiInTarget = commEdgeWeight.get(targetComm) || 0;
+                            const sigmaTot = commTotDegree.get(targetComm) || 0;
+
+                            // ΔQ = 2 * (ki_in - resolution * ki * Σ_tot / (2m))
+                            const deltaQ = (kiInTarget - resolution * ki * sigmaTot / m2) / totalM;
+
+                            if (deltaQ > bestDeltaQ + 1e-10) {
+                                bestDeltaQ = deltaQ;
+                                bestComm = targetComm;
+                            }
+                        }
+
+                        // 加入最佳社区
+                        nodeToComm.set(nid, bestComm);
+                        if (!commNodes.has(bestComm)) commNodes.set(bestComm, new Set());
+                        commNodes.get(bestComm).add(nid);
+                        const kiInBest = commEdgeWeight.get(bestComm) || 0;
+                        commTotDegree.set(bestComm, (commTotDegree.get(bestComm) || 0) + ki);
+                        commInternalWeight.set(bestComm,
+                            (commInternalWeight.get(bestComm) || 0) + graph.nodeWeight.get(nid) + kiInBest);
+
+                        if (bestComm !== currentComm) {
+                            passImproved = true;
+                            improved = true;
+                        }
+                    }
+
+                    if (!passImproved) break;
+                }
+
+                return { nodeToComm, improved };
+            }
+
+            louvainPhase2(graph, nodeToComm) {
+                // 将社区聚合为超节点
+                const communities = [...new Set(nodeToComm.values())];
+                const newGraph = {
+                    nodes: communities,
+                    adj: new Map(),
+                    degree: new Map(),
+                    nodeWeight: new Map()
+                };
+
+                communities.forEach(c => {
+                    newGraph.adj.set(c, new Map());
+                    newGraph.nodeWeight.set(c, 0);
+                    newGraph.degree.set(c, 0);
+                });
+
+                // 计算超节点内部边权重和社区间边权重
+                graph.nodes.forEach(nid => {
+                    const comm = nodeToComm.get(nid);
+                    // 累加节点内部权重
+                    newGraph.nodeWeight.set(comm, newGraph.nodeWeight.get(comm) + graph.nodeWeight.get(nid));
+                    
+                    graph.adj.get(nid).forEach((weight, neighborId) => {
+                        const neighborComm = nodeToComm.get(neighborId);
+                        if (comm === neighborComm) {
+                            // 内部边（只计算一半避免重复）
+                            newGraph.nodeWeight.set(comm, newGraph.nodeWeight.get(comm) + weight / 2);
+                        } else {
+                            // 社区间边
+                            newGraph.adj.get(comm).set(neighborComm, 
+                                (newGraph.adj.get(comm).get(neighborComm) || 0) + weight);
+                        }
+                    });
+                });
+
+                // 计算新图度数
+                communities.forEach(c => {
+                    let deg = 0;
+                    newGraph.adj.get(c).forEach(w => { deg += w; });
+                    newGraph.degree.set(c, deg);
+                });
+
+                return newGraph;
+            }
+
+            calculateModularity(communities, resolution) {
+                const m = this.edges.length;
+                if (m === 0) return 0;
+
+                const m2 = 2 * m;
+                let Q = 0;
+
+                // 计算每个社区的内部边数和总度数
+                const commInternalEdges = new Map();
+                const commTotalDegree = new Map();
+
+                this.nodes.forEach(node => {
+                    const comm = communities.get(node.id);
+                    const deg = this.adjacencyMap.get(node.id)?.size || 0;
+                    commTotalDegree.set(comm, (commTotalDegree.get(comm) || 0) + deg);
+                });
+
+                this.edges.forEach(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    const commS = communities.get(s);
+                    const commT = communities.get(t);
+                    if (commS === commT) {
+                        commInternalEdges.set(commS, (commInternalEdges.get(commS) || 0) + 1);
+                    }
+                });
+
+                commTotalDegree.forEach((totalDeg, comm) => {
+                    const internalEdges = commInternalEdges.get(comm) || 0;
+                    Q += internalEdges / m - resolution * (totalDeg / m2) * (totalDeg / m2);
+                });
+
+                return Q;
+            }
+
+            generateCommunityColors(count) {
+                // 使用黄金角分布生成颜色，确保对比度
+                const colors = [];
+                const goldenRatio = 0.618033988749895;
+                let hue = 0.1;
+                for (let i = 0; i < count; i++) {
+                    hue = (hue + goldenRatio) % 1;
+                    const h = Math.floor(hue * 360);
+                    const s = 65 + (i % 3) * 10;
+                    const l = 50 + (i % 2) * 10;
+                    colors.push(`hsl(${h}, ${s}%, ${l}%)`);
+                }
+                return colors;
             }
 
             setupSimulation() {
@@ -4742,6 +5253,8 @@
                         return this.getNodeColorByStrength(d);
                     case 'playtime':
                         return this.getNodeColorByPlaytime(d);
+                    case 'community':
+                        return this.getNodeColorByCommunity(d);
                     default: // connections
                         return this.getNodeColorByConnections(d);
                 }
@@ -4790,6 +5303,11 @@
                 else return '#64ffda';                   // 亮青 - 深度陪伴
             }
 
+            getNodeColorByCommunity(d) {
+                if (d.community === undefined || !this.communityColors) return '#5e6575';
+                return this.communityColors[d.community % this.communityColors.length];
+            }
+
             updateNodeColors() {
                 this.maxStrength = null;
                 this.maxPlaytime = null;
@@ -4831,6 +5349,18 @@
                             { color: '#4db6ac', label: texts.legendPlaytimeHigh },
                             { color: '#64ffda', label: texts.legendPlaytimeTop }
                         ];
+                        break;
+                    case 'community':
+                        // 动态生成社区图例（显示前4个社区）
+                        if (this.communityColors && this.communityCount) {
+                            const count = Math.min(this.communityCount, 4);
+                            for (let i = 0; i < count; i++) {
+                                items.push({ color: this.communityColors[i], label: `${texts.community || 'Community'} ${i + 1}` });
+                            }
+                            if (this.communityCount > 4) {
+                                items.push({ color: '#666', label: `+${this.communityCount - 4}` });
+                            }
+                        }
                         break;
                     default:
                         items = [
@@ -5380,9 +5910,17 @@
                         </div>
                         
                         <div class="detail-stats">
-                            <div class="detail-stat full-width">
+                            <div class="detail-stat">
                                 <div class="detail-stat-value">${connections.length}</div>
                                 <div class="detail-stat-label">${texts.mutualCount}</div>
+                            </div>
+                            <div class="detail-stat">
+                                <div class="detail-stat-value">${node.clusteringCoef !== undefined ? node.clusteringCoef.toFixed(2) : '--'}</div>
+                                <div class="detail-stat-label">${texts.clusteringCoef || '聚类系数'}</div>
+                            </div>
+                            <div class="detail-stat full-width">
+                                <div class="detail-stat-value">${node.community !== undefined ? `#${node.community + 1}` : '--'}</div>
+                                <div class="detail-stat-label">${texts.community || '社区'}</div>
                             </div>
                         </div>
                         
@@ -5684,8 +6222,47 @@
                             document.querySelectorAll('.color-mode-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
                             this.updateNodeColors();
+                            // 显示/隐藏社区粒度滑条
+                            const sliderContainer = document.getElementById('resolutionSliderContainer');
+                            if (mode === 'community') {
+                                sliderContainer.classList.add('visible');
+                            } else {
+                                sliderContainer.classList.remove('visible');
+                            }
                         }
                     });
+                });
+
+                // 社区粒度滑条
+                const resolutionSlider = document.getElementById('resolutionSlider');
+                const resolutionValue = document.getElementById('resolutionValue');
+                const texts = i18n[currentLang];
+                resolutionSlider.addEventListener('input', () => {
+                    const val = parseInt(resolutionSlider.value);
+                    if (val === 0) {
+                        resolutionValue.textContent = texts.resolutionAuto || '自动';
+                        this.userResolution = null;
+                    } else {
+                        // 滑条值 1-40 映射到 resolution 0.5-4.0
+                        const res = 0.5 + (val / 40) * 3.5;
+                        resolutionValue.textContent = res.toFixed(1);
+                        this.userResolution = res;
+                    }
+                });
+                resolutionSlider.addEventListener('change', () => {
+                    // 松开滑条时重新计算社区
+                    if (this.nodes && this.nodes.length > 0) {
+                        this.detectCommunities();
+                        if (this.colorMode === 'community') {
+                            this.updateNodeColors();
+                        }
+                        // 更新统计卡片
+                        document.getElementById('communityCount').textContent = this.communityCount || '--';
+                        // 如果有选中节点，更新详情
+                        if (this.selectedNode) {
+                            this.showNodeDetail(this.selectedNode);
+                        }
+                    }
                 });
 
                 // 着色模式工具栏折叠

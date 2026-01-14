@@ -9,14 +9,32 @@ A visualization tool for analyzing mutual friend relationships based on [VRCX](h
 ### Network Visualization
 - Interactive force-directed graph displaying mutual friend connections
 - Zoom, pan, and drag nodes to explore the network
-- Node size and color indicate the number of mutual connections
+- Node size indicates the number of mutual connections
 - Adjustable repulsion and link strength parameters
 - Freeze layout to lock node positions
 
+### Color Modes
+- **Connections**: Node color by mutual friend count (gray-pink gradient)
+- **Trust Level**: VRChat trust level colors (Visitor/New User/User/Known User/Trusted User)
+- **Relationship Strength**: Purple-red gradient based on long-term relationship depth (0-100 score)
+- **Playtime**: Cyan-blue gradient based on relative play time
+
+### Relationship Metrics
+- **Relationship Strength**: Long-term accumulated relationship depth with decay mechanism
+- **Recent Intimacy**: Recent interaction intensity with configurable time windows (30/60/90 days)
+- Detailed score breakdown panel showing individual metric components
+
+### Ranking & Export
+- Multi-dimension ranking: Mutual friends / Relationship strength / Recent intimacy / Playtime
+- CSV export for relationship strength ranking, intimacy ranking, or full data
+- Data completeness indicator showing date range, total days, activity rate, and half-life
+
 ### Friend Analysis
-- Mutual friends ranking sorted by connection count
 - Click any node to view detailed friend information
-- See the complete list of mutual friends for each person
+- Trust level badge with color coding
+- Relationship metrics with ranking position
+- Raw data: total playtime, effective hours, retention rate, meet count
+- Complete list of mutual friends for each person
 - Search and filter friends by name
 - Remove nodes from the graph for focused analysis
 
@@ -28,7 +46,9 @@ A visualization tool for analyzing mutual friend relationships based on [VRCX](h
 
 ### Interface
 - Multi-language support: Chinese, English, Japanese
-- Responsive sidebar with controls and details panel
+- Dark theme with cyberpunk aesthetic
+- Responsive design with mobile support
+- Collapsible color mode toolbar
 - Export GEXF files when importing from VRCX database
 
 ## Usage

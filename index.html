@@ -114,7 +114,7 @@
         }
 
         .sidebar::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-cyan);
+            background: var(--accent-primary);
         }
 
         .sidebar::before {
@@ -329,9 +329,9 @@
         }
 
         .export-btn:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            background: rgba(0, 245, 255, 0.1);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(234, 40, 100, 0.1);
         }
 
         .export-btn svg {
@@ -1422,7 +1422,6 @@
             transition: opacity 0.2s ease;
             z-index: 1000;
             box-shadow: var(--glow-soft);
-            box-shadow: var(--glow-cyan);
             max-width: 250px;
         }
 
@@ -1515,6 +1514,331 @@
             background: var(--bg-hover);
             border-color: var(--accent-primary);
             color: var(--accent-primary);
+        }
+
+        /* 着色模式工具栏 */
+        .color-mode-toolbar {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: none;
+            background: rgba(26, 34, 52, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .color-mode-toolbar.visible {
+            display: block;
+        }
+
+        .color-mode-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+
+        .color-mode-header:hover {
+            background: var(--bg-hover);
+        }
+
+        .color-mode-header svg {
+            stroke: var(--accent-primary);
+            transition: transform 0.2s ease;
+        }
+
+        .color-mode-header span {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex: 1;
+        }
+
+        .color-mode-toggle-icon {
+            stroke: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+
+        .color-mode-toolbar.collapsed .color-mode-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .color-mode-toolbar.collapsed .color-mode-options {
+            display: none;
+        }
+
+        .color-mode-toolbar:not(.collapsed) .color-mode-header {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .color-mode-options {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .color-mode-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .color-mode-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .color-mode-btn.active {
+            background: rgba(234, 40, 100, 0.15);
+            color: var(--accent-primary);
+        }
+
+        .color-mode-btn svg {
+            flex-shrink: 0;
+        }
+
+        .color-mode-preview {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+        }
+
+        .color-mode-preview-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .preview-connections .color-mode-preview-dot:nth-child(1) { background: #5e6575; }
+        .preview-connections .color-mode-preview-dot:nth-child(2) { background: #8f7585; }
+        .preview-connections .color-mode-preview-dot:nth-child(3) { background: #c75a80; }
+        .preview-connections .color-mode-preview-dot:nth-child(4) { background: #ea2864; }
+
+        .preview-trust .color-mode-preview-dot:nth-child(1) { background: #cccccc; }
+        .preview-trust .color-mode-preview-dot:nth-child(2) { background: #1778ff; }
+        .preview-trust .color-mode-preview-dot:nth-child(3) { background: #2bcf5c; }
+        .preview-trust .color-mode-preview-dot:nth-child(4) { background: #8143e6; }
+
+        .preview-strength .color-mode-preview-dot:nth-child(1) { background: #4a4a5c; }
+        .preview-strength .color-mode-preview-dot:nth-child(2) { background: #7b4b8c; }
+        .preview-strength .color-mode-preview-dot:nth-child(3) { background: #b84a7c; }
+        .preview-strength .color-mode-preview-dot:nth-child(4) { background: #e84393; }
+
+        .preview-playtime .color-mode-preview-dot:nth-child(1) { background: #2d4a5a; }
+        .preview-playtime .color-mode-preview-dot:nth-child(2) { background: #3d7a8a; }
+        .preview-playtime .color-mode-preview-dot:nth-child(3) { background: #4db6ac; }
+        .preview-playtime .color-mode-preview-dot:nth-child(4) { background: #64ffda; }
+
+        /* 导出按钮 */
+        .export-csv-dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: auto;
+        }
+
+        .export-csv-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .export-csv-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(234, 40, 100, 0.1);
+        }
+
+        .export-csv-btn svg {
+            stroke: currentColor;
+        }
+
+        .export-csv-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .export-csv-dropdown:hover .export-csv-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .export-csv-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: left;
+        }
+
+        .export-csv-option:hover {
+            background: var(--bg-hover);
+            color: var(--accent-primary);
+        }
+
+        .export-csv-option svg {
+            stroke: currentColor;
+            flex-shrink: 0;
+        }
+
+        .ranking-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        /* 数据完整性指示器 */
+        .data-info-section {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .data-info-section.visible {
+            display: block;
+        }
+
+        .data-info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+        }
+
+        .data-info-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .data-info-header svg {
+            stroke: var(--accent-primary);
+        }
+
+        .data-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .data-info-item {
+            padding: 10px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .data-info-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .data-info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--accent-primary);
+            margin-bottom: 2px;
+        }
+
+        .data-info-label {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .data-info-note {
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(234, 40, 100, 0.08);
+            border-left: 2px solid var(--accent-primary);
+            border-radius: 0 6px 6px 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .data-info-toggle {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .data-info-toggle:hover {
+            opacity: 1;
+        }
+
+        .data-info-toggle svg {
+            transition: transform 0.2s;
+        }
+
+        .data-info-card.collapsed .data-info-toggle svg {
+            transform: rotate(180deg);
+        }
+
+        .data-info-card.collapsed .data-info-grid,
+        .data-info-card.collapsed .data-info-note {
+            display: none;
         }
 
         /* 加载动画 */
@@ -2115,6 +2439,51 @@
                 </div>
             </div>
 
+            <!-- 数据完整性指示器 -->
+            <div class="data-info-section" id="dataInfoSection">
+                <div class="data-info-card">
+                    <button class="data-info-toggle" id="dataInfoToggle">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </button>
+                    <div class="data-info-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        <span data-i18n="dataInfo">数据信息</span>
+                    </div>
+                    <div class="data-info-grid">
+                        <div class="data-info-item">
+                            <div class="data-info-value" id="dataInfoRange">--</div>
+                            <div class="data-info-label" data-i18n="dataRange">数据范围</div>
+                        </div>
+                        <div class="data-info-item">
+                            <div class="data-info-value" id="dataInfoDays">--</div>
+                            <div class="data-info-label" data-i18n="totalDays">覆盖天数</div>
+                        </div>
+                        <div class="data-info-item">
+                            <div class="data-info-value" id="dataInfoActivity">--</div>
+                            <div class="data-info-label" data-i18n="activityRate">活跃度</div>
+                        </div>
+                        <div class="data-info-item">
+                            <div class="data-info-value" id="dataInfoHalflife">--</div>
+                            <div class="data-info-label" data-i18n="halflife">半衰期</div>
+                        </div>
+                    </div>
+                    <div class="data-info-note" id="dataInfoNote">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                        <span data-i18n="dataInfoDesc">关系指标基于VRCX记录计算，数据完整性取决于记录时长</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="controls-section">
                 <div class="control-group">
                     <div class="control-label">
@@ -2278,6 +2647,76 @@
                 </div>
             </div>
 
+            <!-- 着色模式工具栏 -->
+            <div class="color-mode-toolbar" id="colorModeToolbar">
+                <div class="color-mode-header" id="colorModeHeader">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                    <span data-i18n="colorMode">着色模式</span>
+                    <svg class="color-mode-toggle-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="color-mode-options">
+                    <button class="color-mode-btn active preview-connections" data-mode="connections">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span data-i18n="colorByConnections">共同好友数</span>
+                        <div class="color-mode-preview">
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                        </div>
+                    </button>
+                    <button class="color-mode-btn preview-trust" data-mode="trust">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span data-i18n="colorByTrust">信任等级</span>
+                        <div class="color-mode-preview">
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                        </div>
+                    </button>
+                    <button class="color-mode-btn preview-strength" data-mode="strength">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                        <span data-i18n="colorByStrength">关系强度</span>
+                        <div class="color-mode-preview">
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                        </div>
+                    </button>
+                    <button class="color-mode-btn preview-playtime" data-mode="playtime">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span data-i18n="colorByPlaytime">游玩时长</span>
+                        <div class="color-mode-preview">
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                            <div class="color-mode-preview-dot"></div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
             <div class="zoom-controls">
                 <button class="zoom-btn" id="zoomIn">+</button>
                 <button class="zoom-btn" id="zoomOut">−</button>
@@ -2339,6 +2778,11 @@
                 legendMid: '一般连接',
                 legendHigh: '较多连接',
                 legendTop: '社交中心',
+                // 游玩时长图例
+                legendPlaytimeLow: '短时游玩',
+                legendPlaytimeMid: '中等时长',
+                legendPlaytimeHigh: '长时游玩',
+                legendPlaytimeTop: '深度陪伴',
                 removeNode: '从图中移除此节点',
                 rankingMutual: '共同好友',
                 rankingStrength: '关系强度',
@@ -2380,7 +2824,26 @@
                 hiddenFriend: '隐藏好友',
                 hiddenFriendHint: '该好友可能隐藏了共同好友关系',
                 hour: '小时',
-                times: '次'
+                times: '次',
+                // 着色模式
+                colorMode: '着色模式',
+                colorByConnections: '共同好友数',
+                colorByTrust: '信任等级',
+                colorByStrength: '关系强度',
+                colorByPlaytime: '游玩时长',
+                // 导出功能
+                exportCSV: '导出',
+                exportStrength: '关系强度排名',
+                exportIntimacy: '近期亲密度排名',
+                exportFull: '完整数据',
+                // 数据信息
+                dataInfo: '数据信息',
+                dataRange: '数据范围',
+                totalDays: '覆盖天数',
+                activityRate: '活跃度',
+                halflife: '半衰期',
+                day: '天',
+                dataInfoDesc: '关系指标基于VRCX记录计算，数据完整性取决于记录时长'
             },
             en: {
                 subtitle: 'Mutual Friends Network',
@@ -2427,6 +2890,11 @@
                 legendMid: 'Average',
                 legendHigh: 'Many',
                 legendTop: 'Hub',
+                // Playtime legend
+                legendPlaytimeLow: 'Brief',
+                legendPlaytimeMid: 'Moderate',
+                legendPlaytimeHigh: 'Extended',
+                legendPlaytimeTop: 'Core',
                 removeNode: 'Remove this node',
                 rankingMutual: 'Mutual',
                 rankingStrength: 'Strength',
@@ -2468,7 +2936,26 @@
                 hiddenFriend: 'Hidden Friend',
                 hiddenFriendHint: 'This friend may have hidden mutual friend relationships',
                 hour: 'h',
-                times: 'times'
+                times: 'times',
+                // Color mode
+                colorMode: 'Color Mode',
+                colorByConnections: 'Connections',
+                colorByTrust: 'Trust Level',
+                colorByStrength: 'Relationship',
+                colorByPlaytime: 'Playtime',
+                // Export
+                exportCSV: 'Export',
+                exportStrength: 'Relationship Ranking',
+                exportIntimacy: 'Intimacy Ranking',
+                exportFull: 'Full Data',
+                // Data info
+                dataInfo: 'Data Info',
+                dataRange: 'Date Range',
+                totalDays: 'Total Days',
+                activityRate: 'Activity',
+                halflife: 'Half-life',
+                day: 'd',
+                dataInfoDesc: 'Metrics are calculated from VRCX logs. Completeness depends on recording duration.'
             },
             ja: {
                 subtitle: '共通フレンドネットワーク',
@@ -2515,6 +3002,11 @@
                 legendMid: '普通',
                 legendHigh: '多い',
                 legendTop: 'ハブ',
+                // プレイ時間凡例
+                legendPlaytimeLow: '短時間',
+                legendPlaytimeMid: '中程度',
+                legendPlaytimeHigh: '長時間',
+                legendPlaytimeTop: '深い絆',
                 removeNode: 'このノードを削除',
                 rankingMutual: '共通',
                 rankingStrength: '関係強度',
@@ -2556,7 +3048,26 @@
                 hiddenFriend: '隠しフレンド',
                 hiddenFriendHint: 'このフレンドは共通フレンド関係を隠している可能性があります',
                 hour: '時間',
-                times: '回'
+                times: '回',
+                // 着色モード
+                colorMode: '着色モード',
+                colorByConnections: '共通フレンド数',
+                colorByTrust: '信頼レベル',
+                colorByStrength: '関係強度',
+                colorByPlaytime: 'プレイ時間',
+                // エクスポート
+                exportCSV: 'CSV出力',
+                exportStrength: '関係強度ランキング',
+                exportIntimacy: '親密度ランキング',
+                exportFull: '完全データ',
+                // データ情報
+                dataInfo: 'データ情報',
+                dataRange: 'データ範囲',
+                totalDays: '総日数',
+                activityRate: 'アクティビティ',
+                halflife: '半減期',
+                day: '日',
+                dataInfoDesc: '指標はVRCXログに基づいて計算されます。完全性は記録期間に依存します。'
             }
         };
 
@@ -2606,6 +3117,14 @@
 
             // 刷新动态生成的内容（排名列表或节点详情）
             if (window.networkViz && window.networkViz.nodes && window.networkViz.nodes.length > 0) {
+                // 更新图例翻译
+                if (window.networkViz.updateLegendColors) {
+                    window.networkViz.updateLegendColors();
+                }
+                // 更新数据信息面板
+                if (window.networkViz.dataParams && window.networkViz.updateDataInfo) {
+                    window.networkViz.updateDataInfo(window.networkViz.dataParams);
+                }
                 if (window.networkViz.selectedNode) {
                     window.networkViz.showNodeDetail(window.networkViz.selectedNode);
                 } else {
@@ -2748,6 +3267,23 @@
             }
         }
 
+        // 算法常量
+        const ALGORITHM_CONSTANTS = {
+            HALFLIFE_BASE_DAYS: 90,           // 半衰期基准天数
+            HALFLIFE_MULTIPLIER: 2,           // 半衰期乘数 (2 - activityFactor)
+            RECENT_WINDOW_BASE_DAYS: 30,      // 近期窗口基准天数
+            RECENT_WINDOW_RANGE_DAYS: 30,     // 近期窗口浮动范围
+            // 关系强度权重
+            WEIGHT_DEPTH: 35,                 // 有效陪伴深度
+            WEIGHT_QUALITY: 25,               // 互动质量
+            WEIGHT_STABILITY: 20,             // 稳定性
+            WEIGHT_BOND: 20,                  // 社交羁绊
+            // 近期亲密度权重
+            WEIGHT_RECENT_TIME: 50,           // 近期陪伴时长
+            WEIGHT_RECENT_FREQ: 30,           // 近期频率
+            WEIGHT_LIFE_SHARE: 20             // 生命份额
+        };
+
         // 主可视化类
         class NetworkVisualization {
             constructor() {
@@ -2765,6 +3301,21 @@
                 this.currentGexfContent = null;  // 保存当前的 GEXF 内容用于导出
                 this.currentFileName = null;     // 当前文件名
                 this.isDragging = false;         // 是否正在拖动节点
+                this.colorMode = 'connections';  // 着色模式
+                this.dataParams = null;          // 数据库参数信息
+
+                // 缓存常用 DOM 元素引用
+                this.domCache = {
+                    loading: document.getElementById('loading'),
+                    welcomeScreen: document.getElementById('welcomeScreen'),
+                    legend: document.querySelector('.legend'),
+                    zoomControls: document.querySelector('.zoom-controls'),
+                    colorModeToolbar: document.getElementById('colorModeToolbar'),
+                    dataInfoSection: document.getElementById('dataInfoSection'),
+                    detailSection: document.getElementById('detailSection'),
+                    fileName: document.getElementById('fileName'),
+                    exportGexfBtn: document.getElementById('btnExportGexf')
+                };
 
                 this.init();
             }
@@ -2780,18 +3331,21 @@
 
             showWelcome() {
                 // 隐藏加载动画，显示欢迎界面
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('welcomeScreen').style.display = 'flex';
+                this.domCache.loading.style.display = 'none';
+                this.domCache.welcomeScreen.style.display = 'flex';
                 // 隐藏图例和控制按钮
-                document.querySelector('.legend').style.display = 'none';
-                document.querySelector('.zoom-controls').style.display = 'none';
+                this.domCache.legend.style.display = 'none';
+                this.domCache.zoomControls.style.display = 'none';
+                this.domCache.colorModeToolbar.classList.remove('visible');
+                this.domCache.dataInfoSection.classList.remove('visible');
             }
 
             hideWelcome() {
-                document.getElementById('welcomeScreen').style.display = 'none';
+                this.domCache.welcomeScreen.style.display = 'none';
                 // 显示图例和控制按钮
-                document.querySelector('.legend').style.display = 'block';
-                document.querySelector('.zoom-controls').style.display = 'flex';
+                this.domCache.legend.style.display = 'block';
+                this.domCache.zoomControls.style.display = 'flex';
+                this.domCache.colorModeToolbar.classList.add('visible');
             }
 
             updateDimensions() {
@@ -2843,7 +3397,7 @@
             async loadFromVRCXDatabase(file) {
                 // 显示加载界面
                 this.hideWelcome();
-                const loading = document.getElementById('loading');
+                const loading = this.domCache.loading;
                 loading.style.display = 'flex';
                 loading.style.opacity = '1';
                 const texts = i18n[currentLang];
@@ -2926,6 +3480,15 @@
 
                     // 加载图形（显示原始文件名，标记为从数据库导入）
                     await this.reloadGraph(gexfContent, file.name, true);
+
+                    // 显示数据完整性信息
+                    this.updateDataInfo({
+                        dateRange: analysisParams.dateRange,
+                        totalDays: analysisParams.totalDays,
+                        activityFactor: analysisParams.activityFactor,
+                        halflife: analysisParams.halflife,
+                        recentWindow: analysisParams.recentWindow
+                    });
 
                 } catch (error) {
                     loading.style.display = 'none';
@@ -3340,16 +3903,23 @@
             calculateAdaptiveParams(db, latestDate) {
                 let myActiveDays = 0;
                 let totalDays = 1;
+                let dateRange = '--';
 
                 try {
-                    // 获取总天数范围
+                    // 获取总天数范围和日期范围
                     const rangeResult = db.exec(`
                         SELECT 
-                            julianday(MAX(date(created_at))) - julianday(MIN(date(created_at))) + 1 as total_days
+                            julianday(MAX(date(created_at))) - julianday(MIN(date(created_at))) + 1 as total_days,
+                            MIN(date(created_at)) as min_date,
+                            MAX(date(created_at)) as max_date
                         FROM gamelog_join_leave
                     `);
-                    if (rangeResult.length && rangeResult[0].values[0][0]) {
-                        totalDays = Math.max(1, rangeResult[0].values[0][0]);
+                    if (rangeResult.length && rangeResult[0].values[0]) {
+                        const [td, minDate, maxDate] = rangeResult[0].values[0];
+                        totalDays = Math.max(1, td || 1);
+                        if (minDate && maxDate) {
+                            dateRange = `${minDate.slice(5)} ~ ${maxDate.slice(5)}`;
+                        }
                     }
 
                     // 获取我的活跃天数（从 gamelog_location）
@@ -3366,11 +3936,11 @@
 
                 const activityFactor = Math.min(myActiveDays / totalDays, 1.0);
                 
-                // 半衰期 = 90 × (2 - 活跃度因子)，范围 90-180 天
-                const halflife = 90 * (2 - activityFactor);
+                // 半衰期 = 基准 × (乘数 - 活跃度因子)，范围 90-180 天
+                const halflife = ALGORITHM_CONSTANTS.HALFLIFE_BASE_DAYS * (ALGORITHM_CONSTANTS.HALFLIFE_MULTIPLIER - activityFactor);
                 
-                // 近期窗口 = 30 + (1 - 活跃度因子) × 30，范围 30-60 天
-                const recentWindow = Math.round(30 + (1 - activityFactor) * 30);
+                // 近期窗口 = 基准 + (1 - 活跃度因子) × 范围，范围 30-60 天
+                const recentWindow = Math.round(ALGORITHM_CONSTANTS.RECENT_WINDOW_BASE_DAYS + (1 - activityFactor) * ALGORITHM_CONSTANTS.RECENT_WINDOW_RANGE_DAYS);
 
                 console.log(`[关系分析] 活跃度: ${(activityFactor * 100).toFixed(1)}%, 半衰期: ${halflife.toFixed(0)}天, 近期窗口: ${recentWindow}天`);
 
@@ -3379,7 +3949,8 @@
                     halflife, 
                     recentWindow, 
                     totalDays, 
-                    myActiveDays 
+                    myActiveDays,
+                    dateRange
                 };
             }
 
@@ -3889,7 +4460,7 @@
                 this.hideWelcome();
 
                 // 显示加载动画
-                const loading = document.getElementById('loading');
+                const loading = this.domCache.loading;
                 loading.style.display = 'flex';
                 loading.style.opacity = '1';
 
@@ -3920,10 +4491,10 @@
 
                 // 更新文件名显示（使用当前语言）
                 const texts = i18n[currentLang];
-                document.getElementById('fileName').textContent = `${texts.currentFile}: ${fileName}`;
+                this.domCache.fileName.textContent = `${texts.currentFile}: ${fileName}`;
 
                 // 如果是从数据库导入的，显示导出按钮
-                const exportBtn = document.getElementById('btnExportGexf');
+                const exportBtn = this.domCache.exportGexfBtn;
                 if (isFromDatabase) {
                     exportBtn.style.display = 'flex';
                 } else {
@@ -3990,14 +4561,51 @@
                 const config = getDimensionConfig();
                 const sortedNodes = [...this.nodes].sort((a, b) => config.getValue(b) - config.getValue(a));
 
-                const detailSection = document.getElementById('detailSection');
+                const detailSection = this.domCache.detailSection;
                 detailSection.innerHTML = `
                     <div class="ranking-card">
-                        <div class="ranking-header">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
-                            </svg>
-                            <span>${texts.rankingTitle}</span>
+                        <div class="ranking-header-row">
+                            <div class="ranking-header">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
+                                </svg>
+                                <span>${texts.rankingTitle}</span>
+                            </div>
+                            <div class="export-csv-dropdown">
+                                <button class="export-csv-btn">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>${texts.exportCSV}</span>
+                                </button>
+                                <div class="export-csv-menu">
+                                    <button class="export-csv-option" data-export="strength">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                        </svg>
+                                        <span>${texts.exportStrength}</span>
+                                    </button>
+                                    <button class="export-csv-option" data-export="intimacy">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                                        </svg>
+                                        <span>${texts.exportIntimacy}</span>
+                                    </button>
+                                    <button class="export-csv-option" data-export="full">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <span>${texts.exportFull}</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="ranking-tabs">
                             <button class="ranking-tab ${dimension === 'mutual' ? 'active' : ''}" data-dim="mutual">${texts.rankingMutual}</button>
@@ -4055,6 +4663,15 @@
                     btn.addEventListener('click', () => {
                         const time = btn.getAttribute('data-time');
                         this.showRankingList(this.currentRankingDimension, time);
+                    });
+                });
+
+                // 导出 CSV 事件
+                detailSection.querySelectorAll('.export-csv-option').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const exportType = btn.getAttribute('data-export');
+                        this.exportCSV(exportType);
                     });
                 });
 
@@ -4118,19 +4735,214 @@
             }
 
             getNodeColor(d) {
-                // 使用缓存的最大连接数
-                const ratio = d.connections / (this.maxConnections || 1);
-
-                // 灰色到粉色的和谐渐变（饱和度递增 + 色相偏移）
-                if (ratio < 0.25) {
-                    return '#5e6575'; // 冷灰蓝 - 少量连接
-                } else if (ratio < 0.5) {
-                    return '#8f7585'; // 灰玫瑰 - 一般连接
-                } else if (ratio < 0.75) {
-                    return '#c75a80'; // 玫瑰粉 - 较多连接
-                } else {
-                    return '#ea2864'; // 主色调粉红 - 社交中心
+                switch (this.colorMode) {
+                    case 'trust':
+                        return this.getNodeColorByTrust(d);
+                    case 'strength':
+                        return this.getNodeColorByStrength(d);
+                    case 'playtime':
+                        return this.getNodeColorByPlaytime(d);
+                    default: // connections
+                        return this.getNodeColorByConnections(d);
                 }
+            }
+
+            getNodeColorByConnections(d) {
+                const ratio = d.connections / (this.maxConnections || 1);
+                if (ratio < 0.25) return '#5e6575';
+                else if (ratio < 0.5) return '#8f7585';
+                else if (ratio < 0.75) return '#c75a80';
+                else return '#ea2864';
+            }
+
+            getNodeColorByTrust(d) {
+                const trustColors = {
+                    'Visitor': '#cccccc',
+                    'New User': '#1778ff',
+                    'User': '#2bcf5c',
+                    'Known User': '#ff7b42',
+                    'Trusted User': '#8143e6'
+                };
+                return trustColors[d.trustLevel] || '#5e6575';
+            }
+
+            getNodeColorByStrength(d) {
+                // 基于绝对分数着色（关系强度已是0-100分）
+                const score = d.relationshipStrength || 0;
+                // 紫红渐变 - 与主色 #ea2864 相邻色系，表达情感羁绊深度
+                // 从冷紫灰到暖玫红，情感由浅入深
+                if (score < 25) return '#4a4a5c';       // 暗紫灰 - 浅层关系
+                else if (score < 50) return '#7b4b8c';  // 葡萄紫 - 一般关系
+                else if (score < 75) return '#b84a7c';  // 梅紫红 - 较深关系
+                else return '#e84393';                   // 亮粉紫 - 深厚羁绊
+            }
+
+            getNodeColorByPlaytime(d) {
+                if (!this.maxPlaytime) {
+                    this.maxPlaytime = Math.max(...this.nodes.map(n => n.playTime || 0), 1);
+                }
+                const ratio = (d.playTime || 0) / this.maxPlaytime;
+                // 青蓝渐变 - 主色的对比色系，表达时间沉淀/陪伴能量
+                // 从深青到亮青，时间由少到多
+                if (ratio < 0.25) return '#2d4a5a';     // 深青灰 - 短时游玩
+                else if (ratio < 0.5) return '#3d7a8a'; // 青蓝 - 中等时长
+                else if (ratio < 0.75) return '#4db6ac';// 青绿 - 长时游玩
+                else return '#64ffda';                   // 亮青 - 深度陪伴
+            }
+
+            updateNodeColors() {
+                this.maxStrength = null;
+                this.maxPlaytime = null;
+                this.nodeElements.selectAll('.node-glow')
+                    .transition().duration(300)
+                    .attr('fill', d => this.getNodeColor(d));
+                this.nodeElements.selectAll('.node-circle')
+                    .transition().duration(300)
+                    .attr('fill', d => this.getNodeColor(d));
+                this.updateLegendColors();
+            }
+
+            updateLegendColors() {
+                const legend = document.querySelector('.legend');
+                const texts = i18n[currentLang];
+                let items = [];
+                switch (this.colorMode) {
+                    case 'trust':
+                        items = [
+                            { color: '#cccccc', label: 'Visitor' },
+                            { color: '#1778ff', label: 'New User' },
+                            { color: '#2bcf5c', label: 'User' },
+                            { color: '#ff7b42', label: 'Known User' },
+                            { color: '#8143e6', label: 'Trusted User' }
+                        ];
+                        break;
+                    case 'strength':
+                        items = [
+                            { color: '#4a4a5c', label: '0-25' },
+                            { color: '#7b4b8c', label: '25-50' },
+                            { color: '#b84a7c', label: '50-75' },
+                            { color: '#e84393', label: '75-100' }
+                        ];
+                        break;
+                    case 'playtime':
+                        items = [
+                            { color: '#2d4a5a', label: texts.legendPlaytimeLow },
+                            { color: '#3d7a8a', label: texts.legendPlaytimeMid },
+                            { color: '#4db6ac', label: texts.legendPlaytimeHigh },
+                            { color: '#64ffda', label: texts.legendPlaytimeTop }
+                        ];
+                        break;
+                    default:
+                        items = [
+                            { color: '#5e6575', label: texts.legendLow },
+                            { color: '#8f7585', label: texts.legendMid },
+                            { color: '#c75a80', label: texts.legendHigh },
+                            { color: '#ea2864', label: texts.legendTop }
+                        ];
+                }
+                legend.innerHTML = items.map(i => `
+                    <div class="legend-item">
+                        <div class="legend-circle" style="background: ${i.color}; box-shadow: 0 0 10px ${i.color}40;"></div>
+                        <span class="legend-label">${i.label}</span>
+                    </div>
+                `).join('');
+            }
+
+            exportCSV(type) {
+                const texts = i18n[currentLang];
+                let filename, headers, rows;
+                
+                const formatHours = (s) => s ? (s / 3600).toFixed(2) : '0';
+                const formatPercent = (v) => v ? (v * 100).toFixed(2) : '0';
+                
+                switch (type) {
+                    case 'strength':
+                        filename = 'relationship_strength_ranking.csv';
+                        headers = ['Rank', 'Name', 'UserID', 'RelationshipStrength', 'TotalHours', 'EffectiveHours', 'RetentionRate', 'MeetCount', 'Connections'];
+                        rows = [...this.nodes]
+                            .sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0))
+                            .map((n, i) => [
+                                i + 1,
+                                `"${(n.label || '').replace(/"/g, '""')}"`,
+                                n.id,
+                                (n.relationshipStrength || 0).toFixed(2),
+                                formatHours(n.playTime),
+                                formatHours(n.effectiveHours),
+                                formatPercent(n.retentionRate),
+                                n.meetCount || 0,
+                                n.connections || 0
+                            ]);
+                        break;
+                    case 'intimacy':
+                        filename = 'recent_intimacy_ranking.csv';
+                        headers = ['Rank', 'Name', 'UserID', 'RecentIntimacy', 'RecentHours30d', 'LifeShare', 'MeetCount30d'];
+                        rows = [...this.nodes]
+                            .sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0))
+                            .map((n, i) => [
+                                i + 1,
+                                `"${(n.label || '').replace(/"/g, '""')}"`,
+                                n.id,
+                                (n.recentIntimacy || 0).toFixed(2),
+                                formatHours(n.playTime30d),
+                                formatPercent(n.lifeShare),
+                                n.meetCount30d || 0
+                            ]);
+                        break;
+                    default: // full
+                        filename = 'full_relationship_data.csv';
+                        headers = ['Rank', 'Name', 'UserID', 'TrustLevel', 'Connections', 'TotalHours', 'EffectiveHours', 'RetentionRate', 
+                                   'MeetCount', 'RecentHours30d', 'MeetCount30d', 'LifeShare', 
+                                   'RelationshipStrength', 'RecentIntimacy', 'RecentIntimacy30d', 'RecentIntimacy60d', 'RecentIntimacy90d', 
+                                   'DaysKnown', 'IsHiddenFriend'];
+                        rows = [...this.nodes]
+                            .sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0))
+                            .map((n, i) => [
+                                i + 1,
+                                `"${(n.label || '').replace(/"/g, '""')}"`,
+                                n.id,
+                                `"${n.trustLevel || ''}"`,
+                                n.connections || 0,
+                                formatHours(n.playTime),
+                                formatHours(n.effectiveHours),
+                                formatPercent(n.retentionRate),
+                                n.meetCount || 0,
+                                formatHours(n.playTime30d),
+                                n.meetCount30d || 0,
+                                formatPercent(n.lifeShare),
+                                (n.relationshipStrength || 0).toFixed(2),
+                                (n.recentIntimacy || 0).toFixed(2),
+                                (n.recentIntimacy30d || 0).toFixed(2),
+                                (n.recentIntimacy60d || 0).toFixed(2),
+                                (n.recentIntimacy90d || 0).toFixed(2),
+                                n.daysKnown || 0,
+                                n.isHiddenFriend ? 'true' : 'false'
+                            ]);
+                }
+                
+                const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+                const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            updateDataInfo(params) {
+                this.dataParams = params;
+                if (!params) {
+                    document.getElementById('dataInfoSection').classList.remove('visible');
+                    return;
+                }
+                document.getElementById('dataInfoSection').classList.add('visible');
+                const texts = i18n[currentLang];
+                document.getElementById('dataInfoRange').textContent = params.dateRange || '--';
+                document.getElementById('dataInfoDays').textContent = params.totalDays ? `${params.totalDays}${texts.day || '天'}` : '--';
+                document.getElementById('dataInfoActivity').textContent = params.activityFactor ? `${(params.activityFactor * 100).toFixed(0)}%` : '--';
+                document.getElementById('dataInfoHalflife').textContent = params.halflife ? `${Math.round(params.halflife)}${texts.day || '天'}` : '--';
             }
 
             render() {
@@ -4369,7 +5181,7 @@
                 const rank = this.nodeRanks ? this.nodeRanks.get(node.id) : '?';
 
                 const texts = i18n[currentLang];
-                const detailSection = document.getElementById('detailSection');
+                const detailSection = this.domCache.detailSection;
 
                 // 辅助函数：格式化时长
                 const formatHours = (seconds) => {
@@ -4760,7 +5572,7 @@
                 });
 
                 // 导出 GEXF 按钮
-                const btnExportGexf = document.getElementById('btnExportGexf');
+                const btnExportGexf = this.domCache.exportGexfBtn;
                 btnExportGexf.addEventListener('click', () => {
                     if (this.currentGexfContent) {
                         this.exportGexf();
@@ -4862,6 +5674,29 @@
                     this.clearHighlights();
                     this.showRankingList();
                 });
+
+                // 着色模式切换
+                document.querySelectorAll('.color-mode-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const mode = btn.dataset.mode;
+                        if (mode && mode !== this.colorMode) {
+                            this.colorMode = mode;
+                            document.querySelectorAll('.color-mode-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            this.updateNodeColors();
+                        }
+                    });
+                });
+
+                // 着色模式工具栏折叠
+                document.getElementById('colorModeHeader').addEventListener('click', () => {
+                    this.domCache.colorModeToolbar.classList.toggle('collapsed');
+                });
+
+                // 数据信息折叠
+                document.getElementById('dataInfoToggle').addEventListener('click', () => {
+                    document.querySelector('.data-info-card').classList.toggle('collapsed');
+                });
             }
 
             handleSearch(query) {
@@ -4923,7 +5758,7 @@
             }
 
             hideLoading() {
-                const loading = document.getElementById('loading');
+                const loading = this.domCache.loading;
                 loading.style.opacity = '0';
                 setTimeout(() => {
                     loading.style.display = 'none';

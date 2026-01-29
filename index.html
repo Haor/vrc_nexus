@@ -27,7 +27,7 @@
             --accent-secondary: #2d2a35;
             --text-primary: #f5f5f7;
             --text-secondary: #a8a8b3;
-            --text-muted: #6b6b78;
+            --text-muted: #8a8a96;  /* 提亮以满足 WCAG AA 4.5:1 对比度 */
             --border-color: #2a2832;
             --glow-primary: 0 0 20px rgba(234, 40, 100, 0.4);
             --glow-soft: 0 0 30px rgba(234, 40, 100, 0.2);
@@ -43,12 +43,101 @@
             box-sizing: border-box;
         }
 
+        /* 统一 Focus 状态 - 键盘可访问性 */
+        :focus-visible {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--accent-primary);
+            outline-offset: 2px;
+        }
+
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow: hidden;
             height: 100vh;
+        }
+
+        /* ========== 液态玻璃效果基础样式 ========== */
+        .liquid-glass {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.08) 0%,
+                rgba(255, 255, 255, 0.02) 50%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* 液态玻璃边缘高光 */
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 20%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0.3) 80%,
+                transparent 100%
+            );
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        /* 粉色调液态玻璃变体 */
+        .liquid-glass-pink {
+            background: linear-gradient(
+                135deg,
+                rgba(234, 40, 100, 0.12) 0%,
+                rgba(234, 40, 100, 0.04) 50%,
+                rgba(234, 40, 100, 0.08) 100%
+            );
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(234, 40, 100, 0.2);
+            box-shadow:
+                0 8px 32px rgba(234, 40, 100, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .liquid-glass-pink::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 77, 127, 0.4) 20%,
+                rgba(255, 77, 127, 0.6) 50%,
+                rgba(255, 77, 127, 0.4) 80%,
+                transparent 100%
+            );
+            border-radius: inherit;
+            pointer-events: none;
         }
 
         /* 背景动画 */
@@ -75,7 +164,7 @@
             background-image:
                 linear-gradient(rgba(234, 40, 100, 0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(234, 40, 100, 0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
+            background-size: 48px 48px;
             pointer-events: none;
             z-index: 1;
         }
@@ -159,6 +248,21 @@
             color: var(--text-muted);
             margin-top: 4px;
             letter-spacing: 3px;
+        }
+
+        /* GitHub 链接 */
+        .github-link {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .github-link:hover {
+            color: var(--accent-primary);
         }
 
         /* 语言选择 */
@@ -399,13 +503,14 @@
         }
 
         .stat-card {
-            background: var(--bg-card);
+            background: linear-gradient(135deg, rgba(27, 30, 38, 0.9) 0%, rgba(22, 20, 28, 0.95) 100%);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 16px;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(8px);
         }
 
         .stat-card::before {
@@ -429,24 +534,25 @@
             opacity: 1;
         }
 
+        /* stat-card 顶部渐变条统一粉色系 */
+        .stat-card:nth-child(2)::before {
+            background: linear-gradient(90deg, var(--accent-light), var(--accent-primary));
+        }
+
+        .stat-card:nth-child(3)::before {
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-dark));
+        }
+
+        .stat-card:nth-child(4)::before {
+            background: linear-gradient(90deg, var(--accent-dark), var(--accent-primary));
+        }
+
         .stat-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 26px;
             font-weight: 700;
             color: var(--accent-primary);
             line-height: 1;
-        }
-
-        .stat-card:nth-child(2) .stat-value {
-            color: var(--accent-light);
-        }
-
-        .stat-card:nth-child(3) .stat-value {
-            color: var(--accent-primary);
-        }
-
-        .stat-card:nth-child(4) .stat-value {
-            color: var(--accent-light);
         }
 
         .stat-label {
@@ -457,7 +563,7 @@
 
         /* 控制面板 */
         .controls-section {
-            padding: 20px 24px;
+            padding: 16px 24px;
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -568,9 +674,9 @@
 
         /* 排行榜样式 */
         .ranking-card {
-            background: var(--bg-card);
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(22, 20, 28, 0.8) 100%);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
         }
 
@@ -640,32 +746,38 @@
 
         .ranking-item.top-1 {
             background: linear-gradient(135deg, rgba(234, 40, 100, 0.18), rgba(234, 40, 100, 0.05));
-            border-color: rgba(234, 40, 100, 0.35);
+            border-color: rgba(234, 40, 100, 0.5);
+            box-shadow: 0 0 12px rgba(234, 40, 100, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .ranking-item.top-1 .ranking-position {
             background: linear-gradient(135deg, #ea2864, #c41e52);
             color: #fff;
+            box-shadow: 0 0 8px rgba(234, 40, 100, 0.4);
         }
 
         .ranking-item.top-2 {
             background: linear-gradient(135deg, rgba(199, 90, 128, 0.15), rgba(199, 90, 128, 0.05));
-            border-color: rgba(199, 90, 128, 0.3);
+            border-color: rgba(199, 90, 128, 0.4);
+            box-shadow: 0 0 10px rgba(199, 90, 128, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         .ranking-item.top-2 .ranking-position {
             background: linear-gradient(135deg, #c75a80, #a84d6d);
             color: #fff;
+            box-shadow: 0 0 6px rgba(199, 90, 128, 0.3);
         }
 
         .ranking-item.top-3 {
             background: linear-gradient(135deg, rgba(143, 117, 133, 0.15), rgba(143, 117, 133, 0.05));
-            border-color: rgba(143, 117, 133, 0.3);
+            border-color: rgba(143, 117, 133, 0.4);
+            box-shadow: 0 0 8px rgba(143, 117, 133, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .ranking-item.top-3 .ranking-position {
             background: linear-gradient(135deg, #8f7585, #7a6472);
             color: #fff;
+            box-shadow: 0 0 5px rgba(143, 117, 133, 0.25);
         }
 
         .ranking-position {
@@ -712,11 +824,11 @@
 
         .ranking-tab {
             flex: 1;
-            padding: 8px 4px;
+            padding: 10px 6px;
             border: none;
             background: transparent;
             color: var(--text-muted);
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             border-radius: 6px;
@@ -788,15 +900,42 @@
         }
 
         .account-modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+            background: linear-gradient(
+                135deg,
+                rgba(27, 30, 38, 0.9) 0%,
+                rgba(22, 20, 28, 0.95) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 24px;
             min-width: 320px;
             max-width: 90vw;
             max-height: 80vh;
             overflow-y: auto;
             animation: modalSlideIn 0.3s ease;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow:
+                0 24px 80px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(234, 40, 100, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .account-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 15%;
+            right: 15%;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 77, 127, 0.4) 50%,
+                transparent 100%
+            );
+            border-radius: 20px 20px 0 0;
         }
 
         @keyframes modalSlideIn {
@@ -876,9 +1015,9 @@
         }
 
         .detail-card {
-            background: var(--bg-card);
+            background: linear-gradient(180deg, var(--bg-card) 0%, rgba(22, 20, 28, 0.9) 100%);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
             animation: slideIn 0.3s ease;
         }
@@ -1413,16 +1552,42 @@
         .tooltip {
             position: fixed;
             padding: 12px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--accent-primary);
-            border-radius: 8px;
+            background: linear-gradient(
+                135deg,
+                rgba(27, 30, 38, 0.92) 0%,
+                rgba(22, 20, 28, 0.95) 100%
+            );
+            border: 1px solid rgba(234, 40, 100, 0.3);
+            border-radius: 12px;
             font-size: 13px;
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.2s ease;
             z-index: 1000;
-            box-shadow: var(--glow-soft);
             max-width: 250px;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(234, 40, 100, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* Tooltip 顶部高光 */
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 77, 127, 0.5) 50%,
+                transparent 100%
+            );
+            border-radius: 12px 12px 0 0;
         }
 
         .tooltip.visible {
@@ -1445,12 +1610,20 @@
             position: absolute;
             bottom: 24px;
             left: 24px;
-            background: rgba(22, 20, 28, 0.9);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                rgba(27, 30, 38, 0.88) 0%,
+                rgba(22, 20, 28, 0.92) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             padding: 16px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
             display: none;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         .legend-title {
@@ -1497,16 +1670,24 @@
         .zoom-btn {
             width: 44px;
             height: 44px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            background: rgba(26, 34, 52, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                rgba(27, 30, 38, 0.88) 0%,
+                rgba(22, 20, 28, 0.92) 100%
+            );
             color: var(--text-secondary);
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
             display: flex;
             align-items: center;
+            box-shadow:
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
             justify-content: center;
         }
 
@@ -1522,12 +1703,20 @@
             top: 24px;
             left: 24px;
             display: none;
-            background: rgba(26, 34, 52, 0.95);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                rgba(27, 30, 38, 0.88) 0%,
+                rgba(22, 20, 28, 0.92) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             padding: 8px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
             z-index: 100;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         .color-mode-toolbar.visible {
@@ -1972,12 +2161,42 @@
         .welcome-content {
             text-align: center;
             padding: 60px;
-            background: rgba(22, 20, 28, 0.9);
-            border: 1px solid var(--border-color);
+            background: linear-gradient(
+                135deg,
+                rgba(22, 20, 28, 0.85) 0%,
+                rgba(27, 30, 38, 0.9) 50%,
+                rgba(22, 20, 28, 0.85) 100%
+            );
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
             max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            box-shadow:
+                0 24px 80px rgba(0, 0, 0, 0.5),
+                0 8px 32px rgba(234, 40, 100, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        /* 欢迎卡片顶部高光 */
+        .welcome-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 77, 127, 0.5) 30%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 77, 127, 0.5) 70%,
+                transparent 100%
+            );
+            border-radius: 24px 24px 0 0;
         }
 
         .welcome-icon {
@@ -2432,6 +2651,11 @@
                     <div class="logo">NEXUS</div>
                     <div class="logo-subtitle" data-i18n="subtitle">共同好友网络分析</div>
                 </div>
+                <a href="https://github.com/Haor/vrc_nexus" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
                 <div class="lang-selector">
                     <button class="lang-btn" id="langBtn" title="Language / 语言 / 言語">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -6001,6 +6225,12 @@
                         const content = detailSection.querySelector('.score-breakdown-content');
                         if (content) content.classList.toggle('visible');
                     });
+                }
+
+                // 自动滚动侧边栏到节点详情区域
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar && detailSection) {
+                    detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
 

@@ -1393,31 +1393,32 @@
         /* 节点详情增强 - 得分明细折叠面板 */
         .detail-score-breakdown {
             margin-top: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+
+        .detail-score-breakdown:has(.score-breakdown-toggle.expanded) {
+            border-color: var(--accent-primary);
         }
 
         .score-breakdown-toggle {
             width: 100%;
             padding: 10px 12px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border: none;
             color: var(--text-secondary);
             font-size: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s ease;
+            transition: color 0.2s ease;
         }
 
         .score-breakdown-toggle:hover {
-            border-color: var(--accent-primary);
             color: var(--text-primary);
-        }
-
-        .score-breakdown-toggle.expanded {
-            border-radius: 8px 8px 0 0;
-            border-bottom-color: var(--bg-secondary);
         }
 
         .score-breakdown-toggle svg {
@@ -1428,27 +1429,24 @@
             transform: rotate(180deg);
         }
 
+        /* CSS Grid 高度过渡动画 */
+        .score-breakdown-content-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.25s ease-out;
+        }
+
+        .score-breakdown-content-wrapper.expanded {
+            grid-template-rows: 1fr;
+        }
+
         .score-breakdown-content {
-            display: none;
-            padding: 12px;
+            overflow: hidden;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            border-radius: 0 0 8px 8px;
         }
 
-        .score-breakdown-content.visible {
-            display: block;
-        }
-
-        /* 展开时整体容器边框高亮 */
-        .score-breakdown-toggle.expanded,
-        .score-breakdown-toggle.expanded + .score-breakdown-content.visible {
-            border-color: var(--accent-primary);
-        }
-
-        .score-breakdown-toggle.expanded {
-            border-bottom-color: var(--bg-secondary);
+        .score-breakdown-content-inner {
+            padding: 12px;
         }
 
         .score-item {
@@ -6147,42 +6145,45 @@
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </button>
-                            <div class="score-breakdown-content">
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.depthScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(depthScore) / 40 * 100}%"></div></div>
-                                    <span class="score-item-value">${depthScore}/40</span>
-                                </div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.qualityScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(qualityScore) / 25 * 100}%"></div></div>
-                                    <span class="score-item-value">${qualityScore}/25</span>
-                                </div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.stabilityScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(stabilityScore) / 20 * 100}%"></div></div>
-                                    <span class="score-item-value">${stabilityScore}/20</span>
-                                </div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.bondScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(bondScore) / 15 * 100}%"></div></div>
-                                    <span class="score-item-value">${bondScore}/15</span>
-                                </div>
-                                <div class="detail-divider"></div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.recentTimeScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentTimeScore) / 40 * 100}%"></div></div>
-                                    <span class="score-item-value">${recentTimeScore}/40</span>
-                                </div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.recentFreqScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentFreqScore) / 30 * 100}%"></div></div>
-                                    <span class="score-item-value">${recentFreqScore}/30</span>
-                                </div>
-                                <div class="score-item">
-                                    <span class="score-item-label">${texts.shareScore}</span>
-                                    <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(shareScore) / 30 * 100}%"></div></div>
-                                    <span class="score-item-value">${shareScore}/30</span>
+                            <div class="score-breakdown-content-wrapper">
+                                <div class="score-breakdown-content">
+                                    <div class="score-breakdown-content-inner">
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.depthScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(depthScore) / 40 * 100}%"></div></div>
+                                            <span class="score-item-value">${depthScore}/40</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.qualityScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(qualityScore) / 25 * 100}%"></div></div>
+                                            <span class="score-item-value">${qualityScore}/25</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.stabilityScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(stabilityScore) / 20 * 100}%"></div></div>
+                                            <span class="score-item-value">${stabilityScore}/20</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.bondScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(bondScore) / 15 * 100}%"></div></div>
+                                            <span class="score-item-value">${bondScore}/15</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.recentTimeScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentTimeScore) / 40 * 100}%"></div></div>
+                                            <span class="score-item-value">${recentTimeScore}/40</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.recentFreqScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(recentFreqScore) / 30 * 100}%"></div></div>
+                                            <span class="score-item-value">${recentFreqScore}/30</span>
+                                        </div>
+                                        <div class="score-item">
+                                            <span class="score-item-label">${texts.shareScore}</span>
+                                            <div class="score-item-bar"><div class="score-item-bar-fill" style="width: ${parseFloat(shareScore) / 30 * 100}%"></div></div>
+                                            <span class="score-item-value">${shareScore}/30</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -6294,8 +6295,8 @@
                 if (breakdownToggle) {
                     breakdownToggle.addEventListener('click', () => {
                         breakdownToggle.classList.toggle('expanded');
-                        const content = detailSection.querySelector('.score-breakdown-content');
-                        if (content) content.classList.toggle('visible');
+                        const wrapper = detailSection.querySelector('.score-breakdown-content-wrapper');
+                        if (wrapper) wrapper.classList.toggle('expanded');
                     });
                 }
 
@@ -6758,8 +6759,6 @@
         });
     </script>
     <!-- Cloudflare Web Analytics - Removed for security -->
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
-    data-cf-beacon='{"token": "61c26e590dae46ef82b69657bca36f58"}'></script>
     <!-- End Cloudflare Web Analytics -->
 </body>
 

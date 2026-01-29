@@ -2962,26 +2962,12 @@
             <svg id="graph"></svg>
 
             <div class="legend">
-
-                <div class="legend-item">
-                    <div class="legend-circle"
-                        style="background: #5e6575; box-shadow: 0 0 10px rgba(94, 101, 117, 0.4);"></div>
-                    <span class="legend-label" data-i18n="legendLow">少量连接</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-circle"
-                        style="background: #8f7585; box-shadow: 0 0 10px rgba(143, 117, 133, 0.45);"></div>
-                    <span class="legend-label" data-i18n="legendMid">一般连接</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-circle"
-                        style="background: #c75a80; box-shadow: 0 0 10px rgba(199, 90, 128, 0.5);"></div>
-                    <span class="legend-label" data-i18n="legendHigh">较多连接</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-circle"
-                        style="background: #ea2864; box-shadow: 0 0 10px rgba(234, 40, 100, 0.6);"></div>
-                    <span class="legend-label" data-i18n="legendTop">社交中心</span>
+                <div class="legend-gradient-container">
+                    <div class="legend-gradient-bar" style="background: linear-gradient(to right, #5e6575, #ea2864);"></div>
+                    <div class="legend-gradient-labels">
+                        <span data-i18n="legendLow">少量连接</span>
+                        <span data-i18n="legendTop">社交中心</span>
+                    </div>
                 </div>
             </div>
 
@@ -3144,13 +3130,9 @@
                 vrcxPathLabel: 'Windows 默认路径：',
 
                 legendLow: '少量连接',
-                legendMid: '一般连接',
-                legendHigh: '较多连接',
                 legendTop: '社交中心',
                 // 游玩时长图例
                 legendPlaytimeLow: '短时游玩',
-                legendPlaytimeMid: '中等时长',
-                legendPlaytimeHigh: '长时游玩',
                 legendPlaytimeTop: '深度陪伴',
                 removeNode: '从图中移除此节点',
                 rankingMutual: '共同好友',
@@ -3264,13 +3246,9 @@
                 vrcxPathLabel: 'Windows default path:',
 
                 legendLow: 'Few',
-                legendMid: 'Average',
-                legendHigh: 'Many',
                 legendTop: 'Hub',
                 // Playtime legend
                 legendPlaytimeLow: 'Brief',
-                legendPlaytimeMid: 'Moderate',
-                legendPlaytimeHigh: 'Extended',
                 legendPlaytimeTop: 'Core',
                 removeNode: 'Remove this node',
                 rankingMutual: 'Mutual',
@@ -3384,13 +3362,9 @@
                 vrcxPathLabel: 'Windows デフォルトパス：',
 
                 legendLow: '少ない',
-                legendMid: '普通',
-                legendHigh: '多い',
                 legendTop: 'ハブ',
                 // プレイ時間凡例
                 legendPlaytimeLow: '短時間',
-                legendPlaytimeMid: '中程度',
-                legendPlaytimeHigh: '長時間',
                 legendPlaytimeTop: '深い絆',
                 removeNode: 'このノードを削除',
                 rankingMutual: '共通',
@@ -5261,9 +5235,10 @@
 
                 const m = this.edges.length;
                 if (m === 0) {
-                    this.nodes.forEach((node, i) => { node.community = i; });
-                    this.communityCount = this.nodes.length;
-                    this.communityColors = this.generateCommunityColors(this.communityCount);
+                    // 没有边，所有节点都是孤立的
+                    this.nodes.forEach(node => { node.community = null; });
+                    this.communityCount = 0;
+                    this.communityColors = [];
                     return;
                 }
 
@@ -5294,7 +5269,12 @@
 
                 // 应用最优结果
                 this.nodes.forEach(node => {
-                    node.community = bestResult.communities.get(node.id) ?? 0;
+                    if (bestResult.communities.has(node.id)) {
+                        node.community = bestResult.communities.get(node.id);
+                    } else {
+                        // 孤立节点（0共同好友）不参与社区
+                        node.community = null;
+                    }
                 });
                 this.communityCount = bestResult.communityCount;
                 this.communityColors = this.generateCommunityColors(this.communityCount);
@@ -5302,24 +5282,31 @@
 
             louvainOneRun(resolution) {
                 // 构建工作图（支持超节点聚合）
-                let graph = {
-                    nodes: this.nodes.map(n => n.id),
-                    adj: new Map(),
-                    degree: new Map(),
-                    nodeWeight: new Map() // 超节点内部边权重
-                };
-                
-                // 初始化邻接表和度数
-                graph.nodes.forEach(nid => {
-                    graph.adj.set(nid, new Map());
-                    graph.nodeWeight.set(nid, 0);
-                });
+                // 先构建邻接表以识别孤立节点
+                const tempAdj = new Map();
+                this.nodes.forEach(n => tempAdj.set(n.id, new Map()));
                 this.edges.forEach(e => {
                     const s = typeof e.source === 'object' ? e.source.id : e.source;
                     const t = typeof e.target === 'object' ? e.target.id : e.target;
                     if (s === t) return;
-                    graph.adj.get(s).set(t, (graph.adj.get(s).get(t) || 0) + 1);
-                    graph.adj.get(t).set(s, (graph.adj.get(t).get(s) || 0) + 1);
+                    if (tempAdj.has(s)) tempAdj.get(s).set(t, (tempAdj.get(s).get(t) || 0) + 1);
+                    if (tempAdj.has(t)) tempAdj.get(t).set(s, (tempAdj.get(t).get(s) || 0) + 1);
+                });
+
+                // 排除孤立节点（0共同好友，通常是隐藏好友列表的用户）
+                const connectedNodes = this.nodes.filter(n => tempAdj.get(n.id).size > 0).map(n => n.id);
+
+                let graph = {
+                    nodes: connectedNodes,
+                    adj: new Map(),
+                    degree: new Map(),
+                    nodeWeight: new Map()
+                };
+
+                // 初始化邻接表和度数（仅连通节点）
+                graph.nodes.forEach(nid => {
+                    graph.adj.set(nid, tempAdj.get(nid));
+                    graph.nodeWeight.set(nid, 0);
                 });
                 graph.nodes.forEach(nid => {
                     let deg = 0;
@@ -5644,7 +5631,8 @@
             }
 
             getNodeColorByCommunity(d) {
-                if (d.community === undefined || !this.communityColors) return '#5e6575';
+                // null = 孤立节点（0共同好友），undefined = 未计算
+                if (d.community === null || d.community === undefined || !this.communityColors) return '#5e6575';
                 return this.communityColors[d.community % this.communityColors.length];
             }
 
@@ -6260,7 +6248,7 @@
                                 <div class="detail-stat-label">${texts.clusteringCoef || '聚类系数'}</div>
                             </div>
                             <div class="detail-stat full-width">
-                                <div class="detail-stat-value">${node.community !== undefined ? `#${node.community + 1}` : '--'}</div>
+                                <div class="detail-stat-value">${node.community !== undefined && node.community !== null ? `#${node.community + 1}` : '--'}</div>
                                 <div class="detail-stat-label">${texts.community || '社区'}</div>
                             </div>
                         </div>

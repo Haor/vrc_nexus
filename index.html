@@ -1531,6 +1531,11 @@
             transition: stroke-opacity 0.2s ease;
         }
 
+        /* 大规模数据时禁用边的 CSS 过渡以提升性能 */
+        .graph-container.large-dataset .link {
+            transition: none;
+        }
+
         .link.highlighted {
             stroke-opacity: 1;
             stroke-width: 2px;
@@ -3679,6 +3684,8 @@
                 this.nodes = [];
                 this.edges = [];
                 this.nodeMap = new Map();
+                this.neighborIndex = new Map();  // 邻接表索引：nodeId -> Set<neighborId>
+                this.edgeIndex = new Map();      // 边索引：nodeId -> [edges]
                 this.simulation = null;
                 this.showLabels = true;
                 this.frozen = false;
@@ -3764,6 +3771,9 @@
                     this.nodes.forEach(node => {
                         this.nodeMap.set(node.id, node);
                     });
+
+                    // 构建邻接表索引（性能优化）
+                    this.buildGraphIndex();
 
                     this.updateStats();
                 } catch (error) {
@@ -5077,6 +5087,40 @@
                 });
             }
 
+            // 构建图索引（邻接表 + 边索引），用于加速高亮和邻居查询
+            buildGraphIndex() {
+                this.neighborIndex.clear();
+                this.edgeIndex.clear();
+
+                // 初始化每个节点的索引
+                this.nodes.forEach(node => {
+                    this.neighborIndex.set(node.id, new Set());
+                    this.edgeIndex.set(node.id, []);
+                });
+
+                // 遍历边构建索引
+                this.edges.forEach(edge => {
+                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+                    // 添加邻居关系
+                    if (this.neighborIndex.has(sourceId)) {
+                        this.neighborIndex.get(sourceId).add(targetId);
+                    }
+                    if (this.neighborIndex.has(targetId)) {
+                        this.neighborIndex.get(targetId).add(sourceId);
+                    }
+
+                    // 添加边索引
+                    if (this.edgeIndex.has(sourceId)) {
+                        this.edgeIndex.get(sourceId).push(edge);
+                    }
+                    if (this.edgeIndex.has(targetId)) {
+                        this.edgeIndex.get(targetId).push(edge);
+                    }
+                });
+            }
+
             updateStats() {
                 const nodeCount = this.nodes.length;
                 const edgeCount = this.edges.length;
@@ -5470,13 +5514,26 @@
             }
 
             setupSimulation() {
+                const isLargeDataset = this.edges.length > 10000;
+
                 this.simulation = d3.forceSimulation(this.nodes)
                     .force('link', d3.forceLink(this.edges)
                         .id(d => d.id)
                         .distance(80))
-                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('charge', d3.forceManyBody()
+                        .strength(-300)
+                        // 大数据时限制计算范围以提升性能
+                        .theta(isLargeDataset ? 0.9 : 0.81)
+                        .distanceMax(isLargeDataset ? 500 : Infinity))
                     .force('center', d3.forceCenter(this.width / 2, this.height / 2))
                     .force('collision', d3.forceCollide().radius(d => this.getNodeRadius(d) + 5));
+
+                // 大数据时加快收敛
+                if (isLargeDataset) {
+                    this.simulation
+                        .alphaDecay(0.03)      // 加快收敛（默认 0.0228）
+                        .velocityDecay(0.5);   // 增加阻尼（默认 0.4）
+                }
             }
 
             getNodeRadius(d) {
@@ -5723,8 +5780,12 @@
             }
 
             render() {
+                // 检测是否为大数据集
+                const isLargeDataset = this.edges.length > 10000;
+
                 // 创建容器
-                this.container = this.svg.append('g').attr('class', 'graph-container');
+                this.container = this.svg.append('g')
+                    .attr('class', 'graph-container' + (isLargeDataset ? ' large-dataset' : ''));
 
                 // 添加缩放
                 this.zoom = d3.zoom()
@@ -5780,9 +5841,16 @@
                     .text(d => d.label.length > 12 ? d.label.slice(0, 12) + '...' : d.label)
                     .style('opacity', this.showLabels ? 1 : 0);
 
-                // 事件监听
+                // 事件监听（大数据时添加节流优化）
+                this.lastMouseOverTime = 0;
                 this.nodeElements
-                    .on('mouseover', (event, d) => this.handleMouseOver(event, d))
+                    .on('mouseover', (event, d) => {
+                        // 节流：至少间隔 16ms（约 60fps）
+                        const now = Date.now();
+                        if (now - this.lastMouseOverTime < 16) return;
+                        this.lastMouseOverTime = now;
+                        this.handleMouseOver(event, d);
+                    })
                     .on('mouseout', (event, d) => this.handleMouseOut(event, d))
                     .on('click', (event, d) => this.handleClick(event, d));
 
@@ -5897,32 +5965,18 @@
                 this.highlightedNodes.clear();
                 this.highlightedNodes.add(node.id);
 
-                const connectedIds = new Set();
-                this.edges.forEach(edge => {
-                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
-                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                // 使用邻接表索引快速获取邻居（O(1) vs O(E)）
+                const neighbors = this.neighborIndex.get(node.id);
+                if (neighbors) {
+                    neighbors.forEach(id => this.highlightedNodes.add(id));
+                }
 
-                    if (sourceId === node.id) {
-                        connectedIds.add(targetId);
-                        this.highlightedNodes.add(targetId);
-                    }
-                    if (targetId === node.id) {
-                        connectedIds.add(sourceId);
-                        this.highlightedNodes.add(sourceId);
-                    }
-                });
+                // 使用边索引快速标记高亮边
+                const connectedEdgeSet = new Set(this.edgeIndex.get(node.id) || []);
 
                 this.links
-                    .classed('highlighted', d => {
-                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
-                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
-                        return sourceId === node.id || targetId === node.id;
-                    })
-                    .classed('dimmed', d => {
-                        const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
-                        const targetId = typeof d.target === 'object' ? d.target.id : d.target;
-                        return sourceId !== node.id && targetId !== node.id;
-                    });
+                    .classed('highlighted', d => connectedEdgeSet.has(d))
+                    .classed('dimmed', d => !connectedEdgeSet.has(d));
 
                 this.nodeElements.style('opacity', d =>
                     this.highlightedNodes.has(d.id) ? 1 : 0.2
@@ -5936,21 +5990,13 @@
             }
 
             showNodeDetail(node) {
-                // 使用 Set 去重，避免重复好友
-                const connectionSet = new Set();
+                // 使用邻接表索引快速获取邻居（O(1) vs O(E)）
+                const neighborIds = this.neighborIndex.get(node.id) || new Set();
                 const connections = [];
 
-                this.edges.forEach(edge => {
-                    const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
-                    const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
-
-                    if (sourceId === node.id && this.nodeMap.has(targetId) && !connectionSet.has(targetId)) {
-                        connectionSet.add(targetId);
-                        connections.push(this.nodeMap.get(targetId));
-                    }
-                    if (targetId === node.id && this.nodeMap.has(sourceId) && !connectionSet.has(sourceId)) {
-                        connectionSet.add(sourceId);
-                        connections.push(this.nodeMap.get(sourceId));
+                neighborIds.forEach(neighborId => {
+                    if (this.nodeMap.has(neighborId)) {
+                        connections.push(this.nodeMap.get(neighborId));
                     }
                 });
 
@@ -6373,9 +6419,15 @@
                     }
                 });
 
-                // 搜索
+                // 搜索（添加防抖优化）
                 const searchInput = document.getElementById('searchInput');
-                searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+                let searchDebounceTimer = null;
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchDebounceTimer);
+                    searchDebounceTimer = setTimeout(() => {
+                        this.handleSearch(e.target.value);
+                    }, 150);
+                });
 
                 // 力度滑块
                 const forceSlider = document.getElementById('forceSlider');
@@ -6706,6 +6758,8 @@
         });
     </script>
     <!-- Cloudflare Web Analytics - Removed for security -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "61c26e590dae46ef82b69657bca36f58"}'></script>
     <!-- End Cloudflare Web Analytics -->
 </body>
 

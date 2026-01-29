@@ -1764,6 +1764,8 @@
         .color-mode-header svg {
             stroke: var(--accent-primary);
             transition: transform 0.2s ease;
+            flex-shrink: 0;
+            display: block;
         }
 
         .color-mode-header span {
@@ -1772,6 +1774,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             flex: 1;
+            line-height: 14px;
         }
 
         .color-mode-toggle-icon {
@@ -1790,7 +1793,7 @@
         .color-mode-toolbar:not(.collapsed) .color-mode-header {
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 8px;
-            padding-bottom: 8px;
+            padding: 8px;
             border-radius: 6px 6px 0 0;
         }
 
@@ -1828,6 +1831,11 @@
 
         .color-mode-btn svg {
             flex-shrink: 0;
+            display: block;
+        }
+
+        .color-mode-btn span {
+            line-height: 14px;
         }
 
         .color-mode-preview {

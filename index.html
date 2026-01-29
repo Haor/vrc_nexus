@@ -3673,6 +3673,15 @@
             WEIGHT_LIFE_SHARE: 20             // 生命份额
         };
 
+        // 信任等级颜色（VRChat 官方配色）
+        const TRUST_LEVEL_COLORS = {
+            'Visitor': '#cccccc',
+            'New User': '#1778ff',
+            'User': '#2bcf5c',
+            'Known User': '#ff7b42',
+            'Trusted User': '#8143e6'
+        };
+
         // 主可视化类
         class NetworkVisualization {
             constructor() {
@@ -4040,7 +4049,11 @@
                 try {
                     const result = db.exec(`SELECT MAX(created_at) as latest_date FROM gamelog_join_leave`);
                     if (result.length && result[0].values[0][0]) {
-                        return result[0].values[0][0];
+                        const dateStr = result[0].values[0][0];
+                        // 验证日期格式（ISO 8601 或 SQLite datetime 格式）
+                        if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+                            return dateStr;
+                        }
                     }
                 } catch (e) {
                     console.warn('无法获取最新日期:', e);
@@ -4378,11 +4391,20 @@
                 return results;
             }
 
-            // Percentile Rank 归一化（百分位排名）
+            // Percentile Rank 归一化（百分位排名）- 使用二分查找优化
             percentileRank(value, sortedValues) {
                 if (sortedValues.length === 0) return 0;
-                const below = sortedValues.filter(v => v < value).length;
-                return below / sortedValues.length;
+                // 二分查找：找到第一个 >= value 的位置
+                let left = 0, right = sortedValues.length;
+                while (left < right) {
+                    const mid = (left + right) >>> 1;
+                    if (sortedValues[mid] < value) {
+                        left = mid + 1;
+                    } else {
+                        right = mid;
+                    }
+                }
+                return left / sortedValues.length;
             }
 
             // Sigmoid 归一化
@@ -5126,8 +5148,22 @@
             updateStats() {
                 const nodeCount = this.nodes.length;
                 const edgeCount = this.edges.length;
+
+                // 空图边界检查
+                if (nodeCount === 0) {
+                    document.getElementById('nodeCount').textContent = '0';
+                    document.getElementById('edgeCount').textContent = '0';
+                    document.getElementById('avgDegree').textContent = '0';
+                    document.getElementById('density').textContent = '0%';
+                    this.maxConnections = 1;
+                    this.nodeRanks = new Map();
+                    this.strengthRanks = new Map();
+                    this.intimacyRanks = new Map();
+                    return;
+                }
+
                 const totalDegree = this.nodes.reduce((sum, n) => sum + n.connections, 0);
-                const avgDegree = nodeCount > 0 ? (totalDegree / nodeCount).toFixed(1) : '0';
+                const avgDegree = (totalDegree / nodeCount).toFixed(1);
                 const maxPossibleEdges = (nodeCount * (nodeCount - 1)) / 2;
                 const density = maxPossibleEdges > 0 ? (edgeCount / maxPossibleEdges * 100).toFixed(2) : '0';
 
@@ -5139,11 +5175,25 @@
                 // 缓存最大连接数，避免重复计算
                 this.maxConnections = Math.max(...this.nodes.map(n => n.connections), 1);
 
-                // 预计算节点排名
+                // 预计算节点排名（连接数）
                 this.nodeRanks = new Map();
                 const sorted = [...this.nodes].sort((a, b) => b.connections - a.connections);
                 sorted.forEach((node, index) => {
                     this.nodeRanks.set(node.id, index + 1);
+                });
+
+                // 预计算关系强度排名
+                this.strengthRanks = new Map();
+                const sortedByStrength = [...this.nodes].sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0));
+                sortedByStrength.forEach((node, index) => {
+                    this.strengthRanks.set(node.id, index + 1);
+                });
+
+                // 预计算近期亲密度排名
+                this.intimacyRanks = new Map();
+                const sortedByIntimacy = [...this.nodes].sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0));
+                sortedByIntimacy.forEach((node, index) => {
+                    this.intimacyRanks.set(node.id, index + 1);
                 });
 
                 // 构建邻接表（用于聚类系数和社区检测）
@@ -5570,14 +5620,7 @@
             }
 
             getNodeColorByTrust(d) {
-                const trustColors = {
-                    'Visitor': '#cccccc',
-                    'New User': '#1778ff',
-                    'User': '#2bcf5c',
-                    'Known User': '#ff7b42',
-                    'Trusted User': '#8143e6'
-                };
-                return trustColors[d.trustLevel] || '#5e6575';
+                return TRUST_LEVEL_COLORS[d.trustLevel] || '#5e6575';
             }
 
             getNodeColorByStrength(d) {
@@ -5758,13 +5801,16 @@
                 const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
                 const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                try {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
             }
 
             updateDataInfo(params) {
@@ -6034,15 +6080,9 @@
                 // 检查是否有互动数据
                 const hasInteractionData = node.playTime !== undefined && node.playTime > 0;
 
-                // 计算排名（关系强度和近期亲密度）
-                let strengthRank = '?';
-                let intimacyRank = '?';
-                if (this.nodes && this.nodes.length > 0) {
-                    const sortedByStrength = [...this.nodes].sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0));
-                    const sortedByIntimacy = [...this.nodes].sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0));
-                    strengthRank = sortedByStrength.findIndex(n => n.id === node.id) + 1;
-                    intimacyRank = sortedByIntimacy.findIndex(n => n.id === node.id) + 1;
-                }
+                // 使用预计算的排名（关系强度和近期亲密度）
+                const strengthRank = this.strengthRanks?.get(node.id) || '?';
+                const intimacyRank = this.intimacyRanks?.get(node.id) || '?';
 
                 // 构建信任等级徽章
                 const trustBadge = node.trustLevel ? 
@@ -6345,6 +6385,9 @@
 
                 // 更新统计信息
                 this.updateStats();
+
+                // 重建图索引
+                this.buildGraphIndex();
 
                 // 重新渲染图形
                 this.simulation.stop();
@@ -6669,13 +6712,16 @@
                 // 创建 Blob 并下载
                 const blob = new Blob([this.currentGexfContent], { type: 'application/xml' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = exportFileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
+                try {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = exportFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } finally {
+                    URL.revokeObjectURL(url);
+                }
             }
         }
 

@@ -1,447 +1,230 @@
-# VRC Nexus 关系分析算法设计文档
+# 关系分析算法设计
 
-> 版本: 2.1  
-> 最后更新: 2025-12-11  
+> 版本: 2.2
+> 更新: 2025-01-29
 
 ---
 
-## 一、理念与思路
+## 1. 双指标体系
 
-### 1.1 为什么要拆分？
+单一"亲密度"无法同时表达长期深度和近期热度，拆分为两个独立指标：
 
-**"亲密度"不适宜用单一数值同时表达两个不同概念**
+| 指标 | 含义 | 时间范围 | 分值 |
+|------|------|----------|------|
+| 关系强度 | 长期累积的关系深度 | 全历史（带衰减） | 0-100 |
+| 近期亲密度 | 近期互动热度 | 自适应窗口（30-60天） | 0-100 |
 
-| 维度 | 关系强度 | 近期亲密度 |
-|------|----------|------------|
-| **衡量什么** | 长期累积的关系深度 | 近期互动的热度 |
-| **时间范围** | 全部历史（带衰减） | 近 30 天 |
-| **稳定性** | 高（老朋友不会因近期忙碌而骤降） | 低（反映当前状态） |
-| **评分范围** | 0-100% | 0-100 分 |
+---
 
-**现实对应**：
-- 关系强度 = "我们是不是好朋友？"
-- 近期亲密度 = "我们最近联系多吗？"
+## 2. 时间衰减
 
-### 1.2 为什么引入有效时长衰减？
-
-**核心洞察**：关系像一个蓄水池，不维护就会干涸。
+### 2.1 有效时长
 
 ```
-总时长 = 历史上往池子里注入的总水量
-有效时长 = 池子里现在剩多少水（水会蒸发）
+有效时长 = Σ(当日时长 × 2^(-天数差/半衰期))
 ```
 
-**数学公式**：
-$$有效时长 = \sum_{每一天} (当日时长 \times 2^{-\frac{天数差}{半衰期}})$$
-
-**直观理解**：
 - 今天的 1 小时 = 1.0 小时有效
 - 半衰期天前的 1 小时 = 0.5 小时有效
 - 2 个半衰期前的 1 小时 = 0.25 小时有效
 
----
-
-## 二、自适应半衰期设计
-
-### 2.1 设计理念
-
-**核心洞察**：半衰期反映的是"人对关系淡化的主观感受"，这个感受在不同用户之间差异不大（都在3-6个月范围内）。
-
-**关键逻辑**：
-- **活跃用户**（每天上线）：经常在线却不见某个好友 → 这更显著 → **半衰期短**
-- **不活跃用户**（偶尔上线）：本来就不常在线 → 不见某人很正常 → **半衰期长**
-
-### 2.2 半衰期计算公式
+### 2.2 自适应半衰期
 
 ```
 半衰期 = 90 × (2 - 活跃度因子)
-活跃度因子 = 我的活跃天数 / 总观察天数
+活跃度因子 = 用户活跃天数 / 总观察天数
 ```
 
-### 2.3 公式解析
+| 活跃度 | 半衰期 |
+|--------|--------|
+| 1.0 | 90 天 |
+| 0.5 | 135 天 |
+| 0.0 | 180 天 |
 
-#### 基准值 = 90天
-- 这是**最活跃用户**的半衰期下限
-- 对应"3个月不联系就开始明显疏远"的普遍体感
-- 基于多用户测试反馈确定
+活跃用户经常在线却不见某好友，感知更敏锐，半衰期短。不活跃用户本就少上线，半衰期长。
 
-#### 系数 = 2
-- 确保半衰期范围是 90×1 到 90×2 = **90~180天**
-- 当活跃度=1.0时：90 × (2-1) = 90天
-- 当活跃度=0.0时：90 × (2-0) = 180天
-
-#### 活跃度因子
-- **定义**：你在整个数据周期内有多活跃
-- **计算**：`我上线的天数 / 总观察天数`
-- **范围**：0.0（几乎不上线）到 1.0（每天上线）
-- **作用**：线性调整半衰期，每降低10%活跃度，半衰期增加9天
-
-### 2.4 计算示例
-
-**用户 A（非常活跃）**：
-```
-我的活跃天数: 543 天
-总观察天数: 626 天
-活跃度因子: 543 / 626 = 0.87
-
-半衰期 = 90 × (2 - 0.87) = 90 × 1.13 = 102 天
-```
-
-**用户 B（同样活跃）**：
-```
-我的活跃天数: 313 天
-总观察天数: 354 天
-活跃度因子: 313 / 354 = 0.88
-
-半衰期 = 90 × (2 - 0.88) = 90 × 1.12 = 101 天
-```
-
-**用户 C（偶尔上线）**：
-```
-我的活跃天数: 100 天
-总观察天数: 500 天
-活跃度因子: 100 / 500 = 0.20
-
-半衰期 = 90 × (2 - 0.20) = 90 × 1.80 = 162 天
-```
-
-### 2.5 为什么不再使用"典型见面间隔"？
-
-**旧公式的问题**：
-```
-旧: 半衰期 = 典型见面间隔 × (15 + 活跃度 × 10)
-```
-
-- 用户A（间隔4.3天）→ 102天
-- 用户B（间隔6.3天）→ 149天
-
-虽然两人活跃度相近（0.87 vs 0.88），但"典型见面间隔"的差异被放大了约24倍，导致半衰期差异过大。
-
-**实际体感**：两位用户对"多久算疏远"的感受是相似的（都在90-100天），说明半衰期主要取决于人的主观感受，而非见面频率。
-
-### 2.6 范围说明
-
-| 活跃度 | 半衰期 | 含义 |
-|--------|--------|------|
-| 1.0 (每天上线) | 90天 | 经常在但不见你→衰减快 |
-| 0.8 (80%天数) | 108天 | |
-| 0.5 (50%天数) | 135天 | |
-| 0.2 (20%天数) | 162天 | |
-| 0.0 (几乎不上) | 180天 | 很少上，更宽容 |
-
----
-
-## 2.7 自适应近期窗口
-
-### 问题背景
-
-固定30天窗口的问题：
-- 对每天上线的用户：30天足够
-- 对偶尔上线的用户：30天内可能只上线几次，导致近期亲密度大量为0
-
-### 解决方案
+### 2.3 自适应近期窗口
 
 ```
 近期窗口 = 30 + (1 - 活跃度因子) × 30
 ```
 
-### 范围说明
-
-| 活跃度 | 近期窗口 | 含义 |
-|--------|----------|------|
-| 1.0 (每天上线) | 30天 | 活跃用户用短窗口 |
-| 0.8 (80%天数) | 36天 | |
-| 0.5 (50%天数) | 45天 | |
-| 0.2 (20%天数) | 54天 | |
-| 0.0 (几乎不上) | 60天 | 不活跃用户用长窗口 |
-
-### 设计理念
-
-与半衰期设计对称：
-- 半衰期：活跃度低 → 更长（更宽容历史衰减）
-- 近期窗口：活跃度低 → 更长（更宽容近期统计）
+| 活跃度 | 窗口 |
+|--------|------|
+| 1.0 | 30 天 |
+| 0.5 | 45 天 |
+| 0.0 | 60 天 |
 
 ---
 
-## 三、关系强度计算
+## 3. 关系强度
 
-### 3.1 四个维度
+四个维度，总分 100：
 
-| 维度 | 权重 | 指标 | 归一化方式 |
-|------|------|------|------------|
-| **有效陪伴深度** | 40% | 有效时长（带衰减） | Percentile Rank |
-| **互动质量** | 25% | 平均每次互动时长 | Sigmoid |
-| **稳定性** | 20% | 活跃天数覆盖率 | sqrt(x) |
-| **社交羁绊** | 15% | 共同好友数 | Percentile Rank + 隐藏好友保护 |
+| 维度 | 权重 | 指标 | 归一化 |
+|------|------|------|--------|
+| 有效陪伴深度 | 40 | 有效时长 | Percentile Rank |
+| 互动质量 | 25 | 总时长 / 互动事件数 | Sigmoid(k=中位数) |
+| 稳定性 | 20 | 活跃天数 / 总天数 | sqrt(x) |
+| 社交羁绊 | 15 | 共同好友数 | Percentile Rank |
 
-### 3.2 有效陪伴深度 (40%)
+### 3.1 有效陪伴深度 (40分)
 
-**指标**：有效时长（经过时间衰减后的累计时长）
-
-**归一化**：Percentile Rank（百分位排名）
-- 在所有好友中排第几？
-- 自适应：不需要定义"多少小时算多"
-
-```python
-depth_score = percentile_rank(effective_hours) × 40
+```
+depthScore = percentileRank(effectiveHours) × 40
 ```
 
-**为什么用 Percentile Rank？**
-- 对于社交活跃的人，100 小时可能只排 50%
-- 对于独居的人，100 小时可能排 95%
-- **算法自动适应用户的社交规模**
+Percentile Rank 自适应用户社交规模，无需定义"多少小时算多"。
 
-### 3.3 互动质量 (25%)
+### 3.2 互动质量 (25分)
 
-**指标**：平均每次互动时长 = 总时长 / 互动事件数
-
-**说明**：
-- `互动事件数` = 进出房间的事件总数（COUNT(*)）
-- `见面次数` = 去过的不同房间数（COUNT(DISTINCT location)）
-- 互动质量使用互动事件数，因为每次进出都有独立的时长记录
-
-**归一化**：Sigmoid，k 值取所有人的中位数
-
-```python
-quality_score = sigmoid(avg_duration, k=median) × 25
+```
+avgDuration = totalHours / interactionCount
+qualityScore = sigmoid(avgDuration, median) × 25
 ```
 
-**含义**：区分"每次通宵长谈的知己"和"大厅里频繁打招呼的路人"
+区分长时间深度交流和频繁打招呼。
 
-**为什么用 Sigmoid？**
-- 提供平滑的饱和曲线
-- k=中位数 意味着"比一半的人好就能得到一半的分数"
+### 3.3 稳定性 (20分)
 
-### 3.4 稳定性 (20%)
-
-**指标**：活跃天数 / 总观察天数
-
-**归一化**：sqrt(x) - 开方可以平滑分布，避免头部压缩
-
-```python
-stability_score = sqrt(active_days / total_days) × 20
+```
+stabilityScore = sqrt(activeDays / totalDays) × 20
 ```
 
-**含义**：这段关系是细水长流还是昙花一现？
+sqrt 拉伸低端分布，区分度更明显。
 
-**为什么用 sqrt？**
-- 原始比例的分布通常是偏态的（大部分人比例很低）
-- 开方可以拉伸低端，让差异更明显
+### 3.4 社交羁绊 (15分)
 
-### 3.5 社交羁绊 (15%)
-
-**指标**：共同好友数
-
-**归一化**：Percentile Rank
-
-**特殊处理：隐藏好友检测**
-
-```python
-检测条件：共同好友=0 且 (总时长 > P70 或 见面次数 > P70)
-
-处理方式：
-- 正常好友：按共同好友数排名
-- 隐藏好友：用"互动量排名"替代"共同好友排名"
-- 低互动+零共友：给中等分 (50%)
+```
+bondScore = percentileRank(mutualFriends) × 15
 ```
 
-**为什么要检测隐藏好友？**
-- 有些用户会隐藏自己的好友列表
-- 导致共同好友=0，但实际上关系很好
-- 通过"高互动+零共友"的模式来识别
-
-### 3.6 总公式
-
-```python
-关系强度 = 有效陪伴深度(40%) + 互动质量(25%) + 稳定性(20%) + 社交羁绊(15%)
-```
+**隐藏好友处理**：共同好友=0 但 (总时长 > P70 或 见面次数 > P70) 时，判定为隐藏好友，用有效陪伴深度排名替代。
 
 ---
 
-## 四、近期亲密度计算
+## 4. 近期亲密度
 
-### 4.1 三个维度
+三个维度，总分 100：
 
-| 维度 | 权重 | 指标 | 归一化方式 |
-|------|------|------|------------|
-| **近期陪伴** | 40% | 近N天时长 | Percentile Rank |
-| **近期频率** | 30% | 近N天见面次数 | Percentile Rank |
-| **生命份额** | 30% | 近期与好友时长 / 我的近期在线时长 | Sigmoid |
+| 维度 | 权重 | 指标 | 归一化 |
+|------|------|------|--------|
+| 近期陪伴 | 40 | 近N天时长 | Percentile Rank |
+| 近期频率 | 30 | 近N天见面次数 | Percentile Rank |
+| 生命份额 | 30 | 近期与好友时长 / 用户近期总在线时长 | Sigmoid(k=中位数) |
 
-**注**：N = 自适应近期窗口（30-60天），见 2.7 节
+N = 自适应近期窗口。
 
-### 4.2 近期陪伴 (40%)
+### 4.1 近期陪伴 (40分)
 
-**指标**：近 N 天累计时长（N=自适应近期窗口）
-
-**归一化**：Percentile Rank（只在有近期互动的人中排名）
-
-```python
-if recent_hours > 0:
-    recent_time_score = percentile_rank(recent_hours) × 40
-else:
-    recent_time_score = 0
+```
+recentTimeScore = percentileRank(recentHours) × 40
 ```
 
-### 4.3 近期频率 (30%)
+### 4.2 近期频率 (30分)
 
-**指标**：近 30 天见面次数
-
-**归一化**：Percentile Rank
-
-```python
-if recent_meets > 0:
-    recent_freq_score = percentile_rank(recent_meets) × 30
-else:
-    recent_freq_score = 0
+```
+recentFreqScore = percentileRank(recentMeets) × 30
 ```
 
-### 4.4 生命份额 (30%)
+### 4.3 生命份额 (30分)
 
-**核心概念**：你把多少稀缺的时间分给了这个人？
-
-```python
-life_share = 近30天与好友时长 / 我的近30天总在线时长
+```
+lifeShare = recentHoursWithFriend / myRecentOnlineHours
+shareScore = sigmoid(lifeShare, medianShare) × 30
 ```
 
-**归一化**：Sigmoid，k 值取有互动好友的中位数
-
-```python
-share_score = sigmoid(life_share, k=median_share) × 30
-```
-
-**为什么这个维度重要？**
-- 你忙碌时只上了 10 小时，其中 8 小时给 A → A 得到 80% 份额
-- 你空闲时玩了 200 小时，其中 20 小时给 B → B 只得到 10% 份额
-- **A 比 B 更重要**，因为 A 占据了你稀缺的时间
-
-### 4.5 总公式
-
-```python
-近期亲密度 = 近期陪伴(40%) + 近期频率(30%) + 生命份额(30%)
-```
+用户忙碌时只上 10 小时，其中 8 小时给 A，A 获得 80% 份额。用户空闲时玩 200 小时，其中 20 小时给 B，B 只获得 10% 份额。份额反映稀缺时间的分配。
 
 ---
 
-## 五、保留率解读
+## 5. 多窗口近期亲密度
 
-**保留率 = 有效时长 / 总时长**
+除自适应窗口外，额外计算三个固定窗口：
 
-| 保留率 | 含义 | 典型场景 |
-|--------|------|----------|
-| 80-100% | 关系很新鲜 | 近期频繁互动 |
-| 50-80% | 关系正常维护 | 定期见面 |
-| 30-50% | 关系开始淡化 | 见面频率下降 |
-| <30% | 关系已经淡化 | 很久没见了 |
+| 窗口 | 用途 |
+|------|------|
+| 30天 | 短期热度 |
+| 60天 | 中期热度 |
+| 90天 | 长期热度 |
+
+计算方式与自适应窗口相同，但 Percentile Rank 在各窗口独立计算。
 
 ---
 
-## 六、组合解读
+## 6. 保留率
+
+```
+保留率 = 有效时长 / 总时长
+```
+
+| 保留率 | 含义 |
+|--------|------|
+| 80-100% | 关系新鲜，近期频繁互动 |
+| 50-80% | 正常维护 |
+| 30-50% | 开始淡化 |
+| <30% | 已淡化 |
+
+---
+
+## 7. 组合解读
 
 | 关系强度 | 近期亲密度 | 解读 |
 |----------|------------|------|
-| 高 | 高 | **核心圈**：长期深厚关系，近期持续活跃 |
-| 高 | 低 | **老朋友疏远**：曾经很亲密，但近期联系减少 |
-| 低 | 高 | **新朋友升温**：认识不久但近期互动频繁 |
-| 低 | 低 | **普通关系**：认识但不太熟 |
+| 高 | 高 | 核心圈 |
+| 高 | 低 | 老朋友疏远 |
+| 低 | 高 | 新朋友升温 |
+| 低 | 低 | 普通关系 |
 
 ---
 
-## 七、与旧算法对比
-
-| 问题 | 旧算法 | 新算法 |
-|------|--------|--------|
-| **概念混淆** | 单一"亲密度" | 拆分为两个独立指标 |
-| **近期影响过大** | 老朋友不联系就排名骤降 | 关系强度不受近期影响 |
-| **固定常数** | k=200 等固定值 | Percentile Rank 自适应 |
-| **极值依赖** | 极值一动全员受影响 | 分位数归一化 |
-| **隐藏好友** | 暴力判 0 | 动态检测补偿 |
-| **时间衰减** | 无/硬截断 | 指数衰减（半衰期自适应） |
-
----
-
-## 八、命令行使用
+## 8. 命令行
 
 ```bash
-# 基本使用
-python analyze_relationships.py --db VRCX.sqlite3
-
-# 指定半衰期
-python analyze_relationships.py --db VRCX.sqlite3 --halflife 180
-
-# 自适应半衰期
-python analyze_relationships.py --db VRCX.sqlite3 --halflife auto
-
-# 输出排名csv
-python analyze_relationships.py --db VRCX.sqlite3 -r
-
-# Windows 默认路径
-python analyze_relationships.py --win
+python analyze_relationships.py --db VRCX.sqlite3              # 默认半衰期 120 天
+python analyze_relationships.py --db VRCX.sqlite3 --halflife auto  # 自适应半衰期
+python analyze_relationships.py --db VRCX.sqlite3 -r           # 输出 CSV 排名
+python analyze_relationships.py --win                          # Windows 默认路径
 ```
 
-### 半衰期选项说明
-
-| 选项 | 含义 | 适用场景 |
-|------|------|----------|
-| `--halflife 90` | 90天半衰期 | 强调近期互动 |
-| `--halflife 120` | 120天半衰期（默认） | 平衡历史和近期 |
-| `--halflife 180` | 180天半衰期 | 更看重历史 |
-| `--halflife 365` | 365天半衰期 | 几乎不衰减 |
-| `--halflife auto` | 自适应计算 | 推荐，公式: 90×(2-活跃度) |
+| 选项 | 半衰期 |
+|------|--------|
+| `--halflife 90` | 90 天 |
+| `--halflife 120` | 120 天（默认） |
+| `--halflife 180` | 180 天 |
+| `--halflife auto` | 90×(2-活跃度) |
 
 ---
 
-## 九、算法伪代码
+## 9. 算法伪代码
 
 ```python
 def analyze():
-    # 1. 加载好友列表（从 friend_log_current）
-    friend_ids = load_friend_list()
-    
-    # 2. 计算自适应半衰期
-    # 公式: 半衰期 = 90 × (2 - activity_factor)
-    halflife = calculate_adaptive_halflife()
-    
-    # 3. 获取每日互动数据
-    daily_interactions = get_daily_interactions()
-    
-    # 4. 计算有效时长（带衰减）
+    # 1. 计算自适应参数
+    activity = my_active_days / total_days
+    halflife = 90 * (2 - activity)
+    recent_window = 30 + (1 - activity) * 30
+
+    # 2. 计算有效时长
     for friend in friends:
-        effective_hours = 0
-        for day in friend.interactions:
-            days_ago = today - day
-            weight = 2 ** (-days_ago / halflife)
-            effective_hours += day.hours * weight
-        friend.effective_hours = effective_hours
-        friend.retention_rate = effective_hours / friend.total_hours
-    
-    # 5. 计算关系强度（权重：40/25/20/15）
+        effective = sum(day.hours * 2**(-days_ago/halflife) for day in interactions)
+        retention = effective / total_hours
+
+    # 3. 关系强度
     for friend in friends:
-        depth_score = percentile_rank(friend.effective_hours) * 40
-        quality_score = sigmoid(friend.avg_duration, k=median) * 25
-        stability_score = sqrt(friend.active_days / total_days) * 20
-        bond_score = calculate_bond_score(friend) * 15  # 含隐藏好友检测
-        friend.relationship_strength = depth_score + quality_score + stability_score + bond_score
-    
-    # 6. 计算近期亲密度
+        depth = percentile_rank(effective_hours) * 40
+        quality = sigmoid(avg_duration, median) * 25
+        stability = sqrt(active_days / total_days) * 20
+        bond = percentile_rank(mutual_friends) * 15  # 含隐藏好友检测
+        relationship_strength = depth + quality + stability + bond
+
+    # 4. 近期亲密度
     for friend in friends:
-        if friend.recent_hours > 0:
-            time_score = percentile_rank(friend.recent_hours) * 40
-            freq_score = percentile_rank(friend.recent_meets) * 30
-            share_score = sigmoid(friend.life_share, k=median_share) * 30
-            friend.recent_intimacy = time_score + freq_score + share_score
+        if recent_hours > 0:
+            time_score = percentile_rank(recent_hours) * 40
+            freq_score = percentile_rank(recent_meets) * 30
+            share_score = sigmoid(life_share, median_share) * 30
+            recent_intimacy = time_score + freq_score + share_score
         else:
-            friend.recent_intimacy = 0
-    
-    # 7. 生成报告
-    generate_report(friends)
+            recent_intimacy = 0
 ```
-
----
-
-## 十、参考文献
-
-1. **Dunbar's Number** - 人的社交关系天然分层（5/15/50/150）
-2. **Granovetter's Weak Ties** - 弱关系的重要性
-3. **Ebbinghaus Forgetting Curve** - 记忆衰减理论
-4. **Homans' Social Exchange Theory** - 社交互动的经济学视角

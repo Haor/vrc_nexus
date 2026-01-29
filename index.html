@@ -1375,7 +1375,7 @@
         .raw-data-value {
             font-family: 'Orbitron', sans-serif;
             font-size: 16px;
-            color: var(--text-primary);
+            color: var(--accent-primary);
             margin-bottom: 2px;
         }
 
@@ -1655,6 +1655,26 @@
         .legend-label {
             font-size: 12px;
             color: var(--text-secondary);
+        }
+
+        /* 渐变图例样式 */
+        .legend-gradient-container {
+            width: 100%;
+            min-width: 120px;
+        }
+
+        .legend-gradient-bar {
+            height: 12px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+        }
+
+        .legend-gradient-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 10px;
+            color: var(--text-muted);
         }
 
         /* 缩放控制 */
@@ -5485,11 +5505,9 @@
             }
 
             getNodeColorByConnections(d) {
-                const ratio = d.connections / (this.maxConnections || 1);
-                if (ratio < 0.25) return '#5e6575';
-                else if (ratio < 0.5) return '#8f7585';
-                else if (ratio < 0.75) return '#c75a80';
-                else return '#ea2864';
+                const ratio = Math.min(d.connections / (this.maxConnections || 1), 1);
+                // 无极渐变：灰紫 → 粉红，使用 LAB 颜色空间
+                return d3.interpolateLab('#5e6575', '#ea2864')(ratio);
             }
 
             getNodeColorByTrust(d) {
@@ -5518,13 +5536,9 @@
                 if (!this.maxPlaytime) {
                     this.maxPlaytime = Math.max(...this.nodes.map(n => n.playTime || 0), 1);
                 }
-                const ratio = (d.playTime || 0) / this.maxPlaytime;
-                // 青蓝渐变 - 主色的对比色系，表达时间沉淀/陪伴能量
-                // 从深青到亮青，时间由少到多
-                if (ratio < 0.25) return '#2d4a5a';     // 深青灰 - 短时游玩
-                else if (ratio < 0.5) return '#3d7a8a'; // 青蓝 - 中等时长
-                else if (ratio < 0.75) return '#4db6ac';// 青绿 - 长时游玩
-                else return '#64ffda';                   // 亮青 - 深度陪伴
+                const ratio = Math.min((d.playTime || 0) / this.maxPlaytime, 1);
+                // 无极渐变：深青 → 亮青，使用 LAB 颜色空间获得更均匀的感知过渡
+                return d3.interpolateLab('#1a3a4a', '#64ffda')(ratio);
             }
 
             getNodeColorByCommunity(d) {
@@ -5567,13 +5581,17 @@
                         ];
                         break;
                     case 'playtime':
-                        items = [
-                            { color: '#2d4a5a', label: texts.legendPlaytimeLow },
-                            { color: '#3d7a8a', label: texts.legendPlaytimeMid },
-                            { color: '#4db6ac', label: texts.legendPlaytimeHigh },
-                            { color: '#64ffda', label: texts.legendPlaytimeTop }
-                        ];
-                        break;
+                        // 使用渐变条代替离散色块
+                        legend.innerHTML = `
+                            <div class="legend-gradient-container">
+                                <div class="legend-gradient-bar" style="background: linear-gradient(to right, #1a3a4a, #64ffda);"></div>
+                                <div class="legend-gradient-labels">
+                                    <span>${texts.legendPlaytimeLow}</span>
+                                    <span>${texts.legendPlaytimeTop}</span>
+                                </div>
+                            </div>
+                        `;
+                        return; // 提前返回，跳过后面的通用渲染
                     case 'community':
                         // 动态生成社区图例（显示前4个社区）
                         if (this.communityColors && this.communityCount) {
@@ -5587,12 +5605,17 @@
                         }
                         break;
                     default:
-                        items = [
-                            { color: '#5e6575', label: texts.legendLow },
-                            { color: '#8f7585', label: texts.legendMid },
-                            { color: '#c75a80', label: texts.legendHigh },
-                            { color: '#ea2864', label: texts.legendTop }
-                        ];
+                        // 共同好友 - 使用渐变条
+                        legend.innerHTML = `
+                            <div class="legend-gradient-container">
+                                <div class="legend-gradient-bar" style="background: linear-gradient(to right, #5e6575, #ea2864);"></div>
+                                <div class="legend-gradient-labels">
+                                    <span>${texts.legendLow}</span>
+                                    <span>${texts.legendTop}</span>
+                                </div>
+                            </div>
+                        `;
+                        return;
                 }
                 legend.innerHTML = items.map(i => `
                     <div class="legend-item">
@@ -5768,6 +5791,9 @@
 
                 // 重新启动模拟以确保动画效果
                 this.simulation.alpha(1).restart();
+
+                // 初始化图例（确保使用渐变条）
+                this.updateLegendColors();
             }
 
             tick() {

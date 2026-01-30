@@ -442,6 +442,230 @@
             stroke: currentColor;
         }
 
+        /* 合并文件按钮 */
+        .merge-btn-group {
+            margin-top: 8px;
+        }
+
+        .file-btn-merge {
+            width: 100%;
+            background: rgba(100, 200, 100, 0.08);
+            border-color: rgba(100, 200, 100, 0.3);
+        }
+
+        .file-btn-merge:hover {
+            background: rgba(100, 200, 100, 0.15);
+            border-color: #64c864;
+            color: #64c864;
+        }
+
+        /* 已合并文件列表 */
+        .merged-files-list {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .merged-file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .merged-file-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .merged-file-name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+        }
+
+        .merged-file-name span:last-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .merged-file-tag {
+            font-size: 9px;
+            padding: 2px 5px;
+            background: var(--accent-secondary);
+            border-radius: 3px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .merged-file-tag.primary {
+            background: rgba(234, 40, 100, 0.2);
+            color: var(--accent-primary);
+        }
+
+        .merged-file-remove {
+            width: 18px;
+            height: 18px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .merged-file-item:hover .merged-file-remove {
+            opacity: 1;
+        }
+
+        .merged-file-remove:hover {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        /* 合并预览对话框 */
+        .merge-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .merge-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .merge-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .merge-modal-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .merge-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .merge-stat {
+            text-align: center;
+            padding: 16px 12px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+
+        .merge-stat .stat-value {
+            font-size: 24px;
+            font-family: 'Orbitron', monospace;
+            color: var(--accent-primary);
+            margin-bottom: 4px;
+        }
+
+        .merge-stat .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .merge-stat.overlap .stat-value {
+            color: #f0ad4e;
+        }
+
+        .merge-options {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .merge-options label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .merge-options select {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .merge-options select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .merge-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .merge-actions button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: var(--border-color);
+        }
+
+        .btn-confirm {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: #d61e56;
+        }
+
         /* 搜索框 */
         .search-section {
             padding: 20px 24px;
@@ -2749,6 +2973,8 @@
                     style="display: none;">
                 <input type="file" id="dbFileInput"
                     accept=".sqlite3,.db,.sqlite,application/x-sqlite3,application/octet-stream" style="display: none;">
+                <input type="file" id="mergeFileInput"
+                    accept=".gexf,.xml,.sqlite3,.db,.sqlite,application/octet-stream" style="display: none;">
                 <div class="file-btn-group">
                     <button class="file-btn" id="btnLoadFile">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -2768,6 +2994,16 @@
                         <span data-i18n="loadVrcx">选择 VRCX</span>
                     </button>
                 </div>
+                <div class="merge-btn-group" id="mergeBtnGroup" style="display: none;">
+                    <button class="file-btn file-btn-merge" id="btnMergeFile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span data-i18n="mergeFile">合并文件</span>
+                    </button>
+                </div>
                 <div class="file-info">
                     <span class="file-name" id="fileName" data-i18n="selectFile">请选择文件</span>
                     <button class="export-btn" id="btnExportGexf" style="display: none;" title="导出为 GEXF 文件">
@@ -2779,6 +3015,7 @@
                         </svg>
                     </button>
                 </div>
+                <div class="merged-files-list" id="mergedFilesList" style="display: none;"></div>
             </div>
 
             <div class="search-section">
@@ -3140,6 +3377,20 @@
                 subtitle: '共同好友网络分析',
                 loadGexf: '选择 GEXF',
                 loadVrcx: '选择 VRCX',
+                mergeFile: '合并文件',
+                mergePreview: '合并预览',
+                newNodes: '新增节点',
+                overlapNodes: '重叠节点',
+                newEdges: '新增边',
+                mergeStrategy: '属性冲突策略',
+                strategyMax: '取最大值',
+                strategySum: '求和（累计时长）',
+                strategyLatest: '取最新文件',
+                confirmMerge: '确认合并',
+                cancelMerge: '取消',
+                mainSource: '主',
+                mergedSource: '已合并',
+                removeSource: '移除此数据源',
                 selectFile: '请选择文件',
                 currentFile: '当前',
                 search: '搜索好友...',
@@ -3256,6 +3507,20 @@
                 subtitle: 'Mutual Friends Network',
                 loadGexf: 'Load GEXF',
                 loadVrcx: 'Load VRCX',
+                mergeFile: 'Merge File',
+                mergePreview: 'Merge Preview',
+                newNodes: 'New Nodes',
+                overlapNodes: 'Overlap',
+                newEdges: 'New Edges',
+                mergeStrategy: 'Attribute Conflict Strategy',
+                strategyMax: 'Maximum Value',
+                strategySum: 'Sum (Cumulative)',
+                strategyLatest: 'Latest File',
+                confirmMerge: 'Confirm',
+                cancelMerge: 'Cancel',
+                mainSource: 'Main',
+                mergedSource: 'Merged',
+                removeSource: 'Remove this source',
                 selectFile: 'Select a file',
                 currentFile: 'Current',
                 search: 'Search friends...',
@@ -3372,6 +3637,20 @@
                 subtitle: '共通フレンドネットワーク',
                 loadGexf: 'GEXF選択',
                 loadVrcx: 'VRCX選択',
+                mergeFile: 'ファイル統合',
+                mergePreview: '統合プレビュー',
+                newNodes: '新規ノード',
+                overlapNodes: '重複ノード',
+                newEdges: '新規エッジ',
+                mergeStrategy: '属性競合戦略',
+                strategyMax: '最大値',
+                strategySum: '合計（累計時間）',
+                strategyLatest: '最新ファイル',
+                confirmMerge: '統合確認',
+                cancelMerge: 'キャンセル',
+                mainSource: 'メイン',
+                mergedSource: '統合済み',
+                removeSource: 'このソースを削除',
                 selectFile: 'ファイルを選択',
                 currentFile: '現在',
                 search: 'フレンド検索...',
@@ -3545,6 +3824,156 @@
                 } else {
                     window.networkViz.showRankingList();
                 }
+            }
+        }
+
+        // 图合并器
+        class GraphMerger {
+            constructor(options = {}) {
+                this.strategy = options.strategy || 'max';
+                this.trustLevelOrder = ['Visitor', 'New User', 'User', 'Known User', 'Trusted User'];
+            }
+
+            setStrategy(strategy) {
+                this.strategy = strategy;
+            }
+
+            /**
+             * 合并两个图数据
+             * @param {Object} base - 基础图 {nodes, edges}
+             * @param {Object} incoming - 待合并图 {nodes, edges}
+             * @param {number} sourceIndex - 来源索引
+             * @returns {Object} 合并后的图 {nodes, edges, stats}
+             */
+            merge(base, incoming, sourceIndex) {
+                const stats = {
+                    newNodes: 0,
+                    overlapNodes: 0,
+                    newEdges: 0
+                };
+
+                // 1. 构建基础图的索引
+                const baseNodeMap = new Map();
+                base.nodes.forEach(n => baseNodeMap.set(n.id, { ...n }));
+
+                const baseEdgeSet = new Set();
+                base.edges.forEach(e => {
+                    const key = this.edgeKey(e.source, e.target);
+                    baseEdgeSet.add(key);
+                });
+
+                // 2. 处理 incoming 节点
+                incoming.nodes.forEach(node => {
+                    if (baseNodeMap.has(node.id)) {
+                        // 节点已存在: 合并属性
+                        const existing = baseNodeMap.get(node.id);
+                        const merged = this.mergeNode(existing, node, sourceIndex);
+                        baseNodeMap.set(node.id, merged);
+                        stats.overlapNodes++;
+                    } else {
+                        // 新节点
+                        const newNode = { ...node, _sources: [sourceIndex] };
+                        baseNodeMap.set(node.id, newNode);
+                        stats.newNodes++;
+                    }
+                });
+
+                // 3. 处理 incoming 边（保守策略: 只添加确认存在的边）
+                incoming.edges.forEach(edge => {
+                    const s = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                    const t = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                    const key = this.edgeKey(s, t);
+
+                    if (!baseEdgeSet.has(key)) {
+                        // 只有两端节点都存在时才添加边
+                        if (baseNodeMap.has(s) && baseNodeMap.has(t)) {
+                            baseEdgeSet.add(key);
+                            stats.newEdges++;
+                        }
+                    }
+                });
+
+                // 4. 输出结果
+                return {
+                    nodes: Array.from(baseNodeMap.values()),
+                    edges: this.edgeSetToArray(baseEdgeSet),
+                    stats
+                };
+            }
+
+            /**
+             * 合并单个节点的属性
+             */
+            mergeNode(existing, incoming, sourceIndex) {
+                const merged = { ...existing };
+
+                // 更新来源追踪
+                merged._sources = [...new Set([...(existing._sources || [0]), sourceIndex])];
+
+                // 累计属性：求和
+                const sumFields = ['playTime', 'effectiveHours', 'meetCount'];
+                sumFields.forEach(field => {
+                    if (this.strategy === 'sum') {
+                        merged[field] = (existing[field] || 0) + (incoming[field] || 0);
+                    } else {
+                        merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
+                    }
+                });
+
+                // 近期数据：取最大值（窗口可能重叠）
+                const recentFields = [
+                    'meetCount7d', 'meetCount30d',
+                    'playTime7d', 'playTime30d'
+                ];
+                recentFields.forEach(field => {
+                    merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
+                });
+
+                // 认识天数：取最大值（最早认识时间）
+                merged.daysKnown = Math.max(existing.daysKnown || 0, incoming.daysKnown || 0);
+
+                // 分数/比率属性: 取最大值
+                const scoreFields = [
+                    'relationshipStrength', 'recentIntimacy',
+                    'recentIntimacy30d', 'recentIntimacy60d', 'recentIntimacy90d',
+                    'retentionRate', 'lifeShare'
+                ];
+                scoreFields.forEach(field => {
+                    merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
+                });
+
+                // Trust Level: 取最高等级
+                merged.trustLevel = this.mergeTrustLevel(existing.trustLevel, incoming.trustLevel);
+
+                // 布尔值: OR
+                if (existing.isHiddenFriend || incoming.isHiddenFriend) {
+                    merged.isHiddenFriend = true;
+                }
+
+                // connections 需要重新计算（在合并完成后统一重算）
+
+                return merged;
+            }
+
+            mergeTrustLevel(a, b) {
+                const orderA = this.trustLevelOrder.indexOf(a);
+                const orderB = this.trustLevelOrder.indexOf(b);
+                if (orderA === -1) return b || 'User';
+                if (orderB === -1) return a || 'User';
+                return orderA >= orderB ? a : b;
+            }
+
+            edgeKey(source, target) {
+                const s = typeof source === 'object' ? source.id : source;
+                const t = typeof target === 'object' ? target.id : target;
+                return s < t ? `${s}|${t}` : `${t}|${s}`;
+            }
+
+            edgeSetToArray(edgeSet) {
+                return Array.from(edgeSet).map(key => {
+                    const [source, target] = key.split('|');
+                    return { source, target };
+                });
             }
         }
 
@@ -3732,6 +4161,11 @@
                 this.communityAlgorithm = 'leiden'; // 社区检测算法（louvain/leiden）
                 this.dataParams = null;          // 数据库参数信息
 
+                // 合并相关状态
+                this.mergedSources = [];         // [{fileName, type, nodeCount, edgeCount, isPrimary}]
+                this.sourceDataCache = new Map(); // sourceIndex -> {nodes, edges} 原始数据缓存
+                this.graphMerger = new GraphMerger();
+
                 // 缓存常用 DOM 元素引用
                 this.domCache = {
                     loading: document.getElementById('loading'),
@@ -3775,6 +4209,410 @@
                 this.domCache.zoomControls.style.display = 'flex';
                 this.domCache.colorModeToolbar.classList.add('visible');
             }
+
+            // ========== 多文件合并功能 ==========
+
+            initMergeState() {
+                this.mergedSources = [];
+                this.sourceDataCache.clear();
+            }
+
+            async handleMergeFile(file) {
+                const texts = i18n[currentLang];
+                try {
+                    let incomingData;
+                    const isDatabase = file.name.endsWith('.sqlite3') || file.name.endsWith('.db') || file.name.endsWith('.sqlite');
+
+                    if (isDatabase) {
+                        incomingData = await this.parseVRCXForMerge(file);
+                    } else {
+                        const content = await this.loadFromFile(file);
+                        incomingData = GEXFParser.parse(content);
+                    }
+
+                    if (!incomingData || incomingData.nodes.length === 0) {
+                        alert('所选文件不包含任何节点数据');
+                        return;
+                    }
+
+                    // 检查是否重复合并
+                    const alreadyMerged = this.mergedSources.some(s => s.fileName === file.name);
+                    if (alreadyMerged) {
+                        if (!confirm('此文件已被合并，是否重复合并？')) {
+                            return;
+                        }
+                    }
+
+                    // 计算合并预览统计
+                    const preview = this.previewMerge(incomingData);
+
+                    // 性能警告
+                    if (preview.totalNodesAfter > 2000) {
+                        if (!confirm(`合并后节点数将达到 ${preview.totalNodesAfter}，可能影响渲染性能。是否继续？`)) {
+                            return;
+                        }
+                    }
+
+                    // 显示预览对话框
+                    const result = await this.showMergePreviewDialog(preview, file.name);
+
+                    if (result) {
+                        await this.executeMerge(incomingData, file.name, isDatabase ? 'vrcx' : 'gexf', result.strategy);
+                    }
+                } catch (error) {
+                    console.error('合并文件失败:', error);
+                    alert('合并文件失败: ' + error.message);
+                }
+            }
+
+            async parseVRCXForMerge(file) {
+                // 简化版数据库解析，只提取节点和边
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                });
+
+                const arrayBuffer = await file.arrayBuffer();
+                const db = new SQL.Database(new Uint8Array(arrayBuffer));
+
+                try {
+                    // 检测前缀
+                    const prefixes = this.detectAllVRCXPrefixes(db);
+                    if (prefixes.length === 0) {
+                        throw new Error('未找到 VRCX 数据');
+                    }
+
+                    let selectedPrefix = prefixes[0];
+                    if (prefixes.length > 1) {
+                        selectedPrefix = await this.showAccountSelector(prefixes);
+                        if (!selectedPrefix) return null;
+                    }
+
+                    // 加载数据
+                    const friendIds = this.loadVRCXFriendIds(db, selectedPrefix);
+                    const edges = this.loadVRCXEdges(db, selectedPrefix);
+                    const friendInfo = this.loadVRCXDisplayNames(db, selectedPrefix);
+
+                    // 构建节点
+                    const nodes = friendIds.map(id => {
+                        const info = friendInfo.get(id) || {};
+                        return {
+                            id,
+                            label: info.displayName || id,
+                            type: 'friend',
+                            trustLevel: info.trustLevel || 'User',
+                            connections: 0,
+                            meetCount: 0,
+                            playTime: 0,
+                            daysKnown: 0
+                        };
+                    });
+
+                    db.close();
+                    return { nodes, edges };
+                } catch (error) {
+                    db.close();
+                    throw error;
+                }
+            }
+
+            previewMerge(incomingData) {
+                const existingNodeIds = new Set(this.nodes.map(n => n.id));
+                const existingEdgeKeys = new Set();
+                this.edges.forEach(e => {
+                    const key = this.graphMerger.edgeKey(e.source, e.target);
+                    existingEdgeKeys.add(key);
+                });
+
+                let newNodes = 0, overlapNodes = 0, newEdges = 0;
+
+                incomingData.nodes.forEach(n => {
+                    if (existingNodeIds.has(n.id)) {
+                        overlapNodes++;
+                    } else {
+                        newNodes++;
+                    }
+                });
+
+                incomingData.edges.forEach(e => {
+                    const key = this.graphMerger.edgeKey(e.source, e.target);
+                    if (!existingEdgeKeys.has(key)) {
+                        newEdges++;
+                    }
+                });
+
+                return {
+                    newNodes,
+                    overlapNodes,
+                    newEdges,
+                    totalNodesAfter: this.nodes.length + newNodes,
+                    totalEdgesAfter: this.edges.length + newEdges
+                };
+            }
+
+            showMergePreviewDialog(preview, fileName) {
+                return new Promise((resolve) => {
+                    const texts = i18n[currentLang];
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'merge-modal-overlay';
+                    overlay.innerHTML = `
+                        <div class="merge-modal">
+                            <div class="merge-modal-title">${texts.mergePreview}</div>
+                            <div class="merge-modal-desc">${fileName}</div>
+                            <div class="merge-stats">
+                                <div class="merge-stat">
+                                    <div class="stat-value">${preview.newNodes}</div>
+                                    <div class="stat-label">${texts.newNodes}</div>
+                                </div>
+                                <div class="merge-stat overlap">
+                                    <div class="stat-value">${preview.overlapNodes}</div>
+                                    <div class="stat-label">${texts.overlapNodes}</div>
+                                </div>
+                                <div class="merge-stat">
+                                    <div class="stat-value">${preview.newEdges}</div>
+                                    <div class="stat-label">${texts.newEdges}</div>
+                                </div>
+                            </div>
+                            <div class="merge-options">
+                                <label>${texts.mergeStrategy}</label>
+                                <select id="mergeStrategySelect">
+                                    <option value="max">${texts.strategyMax}</option>
+                                    <option value="sum">${texts.strategySum}</option>
+                                    <option value="latest">${texts.strategyLatest}</option>
+                                </select>
+                            </div>
+                            <div class="merge-actions">
+                                <button class="btn-cancel">${texts.cancelMerge}</button>
+                                <button class="btn-confirm">${texts.confirmMerge}</button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(overlay);
+
+                    overlay.querySelector('.btn-cancel').addEventListener('click', () => {
+                        overlay.remove();
+                        resolve(null);
+                    });
+
+                    overlay.querySelector('.btn-confirm').addEventListener('click', () => {
+                        const strategy = overlay.querySelector('#mergeStrategySelect').value;
+                        overlay.remove();
+                        resolve({ strategy });
+                    });
+
+                    // 点击背景关闭
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.remove();
+                            resolve(null);
+                        }
+                    });
+                });
+            }
+
+            async executeMerge(incomingData, fileName, type, strategy) {
+                const loading = this.domCache.loading;
+                loading.style.display = 'flex';
+                document.querySelector('.loading-text').textContent = '正在合并数据...';
+
+                try {
+                    // 设置合并策略
+                    this.graphMerger.setStrategy(strategy);
+
+                    const sourceIndex = this.mergedSources.length;
+
+                    // 缓存原始数据
+                    this.sourceDataCache.set(sourceIndex, {
+                        nodes: JSON.parse(JSON.stringify(incomingData.nodes)),
+                        edges: JSON.parse(JSON.stringify(incomingData.edges))
+                    });
+
+                    // 执行合并算法
+                    const mergeResult = this.graphMerger.merge(
+                        { nodes: this.nodes, edges: this.edges },
+                        incomingData,
+                        sourceIndex
+                    );
+
+                    // 更新图数据
+                    this.nodes = mergeResult.nodes;
+                    this.edges = mergeResult.edges;
+
+                    // 记录数据来源
+                    this.mergedSources.push({
+                        fileName,
+                        type,
+                        nodeCount: incomingData.nodes.length,
+                        edgeCount: incomingData.edges.length,
+                        timestamp: Date.now(),
+                        isPrimary: false
+                    });
+
+                    // 重建索引
+                    this.nodeMap.clear();
+                    this.nodes.forEach(n => this.nodeMap.set(n.id, n));
+                    this.buildGraphIndex();
+
+                    // 重新计算连接数
+                    this.recalculateConnections();
+
+                    // 更新统计
+                    this.updateStats();
+
+                    // 重新检测社区
+                    this.detectCommunities();
+
+                    // 重新渲染
+                    this.setupSimulation();
+                    this.render();
+
+                    // 更新 UI
+                    this.updateMergedFilesList();
+                    this.showRankingList();
+
+                    // 更新文件名显示
+                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.mergedSources.length - 1})`;
+
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            recalculateConnections() {
+                this.nodes.forEach(node => {
+                    const neighbors = this.neighborIndex.get(node.id);
+                    node.connections = neighbors ? neighbors.size : 0;
+                });
+            }
+
+            updateMergedFilesList() {
+                const container = document.getElementById('mergedFilesList');
+                const mergeBtnGroup = document.getElementById('mergeBtnGroup');
+                const texts = i18n[currentLang];
+
+                if (this.mergedSources.length <= 1) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'block';
+
+                // 显示所有数据源（第一个是主数据源）
+                container.innerHTML = this.mergedSources.map((source, idx) => `
+                    <div class="merged-file-item" data-index="${idx}">
+                        <div class="merged-file-name">
+                            <span class="merged-file-tag ${source.isPrimary ? 'primary' : ''}">${source.isPrimary ? texts.mainSource : texts.mergedSource}</span>
+                            <span title="${source.fileName}">${source.fileName}</span>
+                        </div>
+                        ${!source.isPrimary ? `<button class="merged-file-remove" title="${texts.removeSource}">×</button>` : ''}
+                    </div>
+                `).join('');
+
+                // 绑定移除事件
+                container.querySelectorAll('.merged-file-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(e.target.closest('.merged-file-item').dataset.index);
+                        this.removeMergedSource(idx);
+                    });
+                });
+            }
+
+            async removeMergedSource(index) {
+                if (index === 0) {
+                    // 移除主数据源，需要确认
+                    if (!confirm('移除主数据源将清空所有数据，是否继续？')) {
+                        return;
+                    }
+                    this.initMergeState();
+                    this.nodes = [];
+                    this.edges = [];
+                    this.showWelcome();
+                    return;
+                }
+
+                const loading = this.domCache.loading;
+                loading.style.display = 'flex';
+                document.querySelector('.loading-text').textContent = '正在重建数据...';
+
+                try {
+                    // 从缓存重建
+                    await this.rebuildFromCache(index);
+                } finally {
+                    this.hideLoading();
+                }
+            }
+
+            async rebuildFromCache(excludeIndex) {
+                // 获取主数据源
+                const primaryData = this.sourceDataCache.get(0);
+                if (!primaryData) return;
+
+                // 从主数据源开始重建
+                this.nodes = JSON.parse(JSON.stringify(primaryData.nodes));
+                this.edges = JSON.parse(JSON.stringify(primaryData.edges));
+
+                // 移除指定的数据源
+                this.mergedSources.splice(excludeIndex, 1);
+                this.sourceDataCache.delete(excludeIndex);
+
+                // 重新合并剩余的数据源
+                const remainingSources = [];
+                this.mergedSources.forEach((source, idx) => {
+                    if (idx > 0) { // 跳过主数据源
+                        const cachedData = this.sourceDataCache.get(idx);
+                        if (cachedData) {
+                            remainingSources.push({ idx, source, data: cachedData });
+                        }
+                    }
+                });
+
+                // 重建 sourceDataCache 和 mergedSources 的索引
+                const newSourceDataCache = new Map();
+                const newMergedSources = [this.mergedSources[0]]; // 保留主数据源
+                newSourceDataCache.set(0, primaryData);
+
+                let newIndex = 1;
+                for (const { source, data } of remainingSources) {
+                    const mergeResult = this.graphMerger.merge(
+                        { nodes: this.nodes, edges: this.edges },
+                        data,
+                        newIndex
+                    );
+                    this.nodes = mergeResult.nodes;
+                    this.edges = mergeResult.edges;
+
+                    newMergedSources.push(source);
+                    newSourceDataCache.set(newIndex, data);
+                    newIndex++;
+                }
+
+                this.mergedSources = newMergedSources;
+                this.sourceDataCache = newSourceDataCache;
+
+                // 重建索引
+                this.nodeMap.clear();
+                this.nodes.forEach(n => this.nodeMap.set(n.id, n));
+                this.buildGraphIndex();
+                this.recalculateConnections();
+
+                // 更新统计和渲染
+                this.updateStats();
+                this.detectCommunities();
+                this.setupSimulation();
+                this.render();
+                this.updateMergedFilesList();
+                this.showRankingList();
+
+                // 更新文件名显示
+                if (this.mergedSources.length > 1) {
+                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.mergedSources.length - 1})`;
+                } else {
+                    this.domCache.fileName.textContent = this.currentFileName;
+                }
+            }
+
+            // ========== 结束合并功能 ==========
 
             updateDimensions() {
                 const container = document.querySelector('.graph-area');
@@ -4930,8 +5768,29 @@
                 this.currentGexfContent = fileContent;
                 this.currentFileName = fileName;
 
+                // 初始化合并状态（每次加载新的主文件时重置）
+                this.initMergeState();
+
                 // 加载新数据
                 await this.loadData(fileContent);
+
+                // 缓存主数据源
+                this.sourceDataCache.set(0, {
+                    nodes: JSON.parse(JSON.stringify(this.nodes)),
+                    edges: JSON.parse(JSON.stringify(this.edges))
+                });
+                this.mergedSources = [{
+                    fileName,
+                    type: isFromDatabase ? 'vrcx' : 'gexf',
+                    nodeCount: this.nodes.length,
+                    edgeCount: this.edges.length,
+                    timestamp: Date.now(),
+                    isPrimary: true
+                }];
+
+                // 显示合并按钮
+                document.getElementById('mergeBtnGroup').style.display = 'block';
+                document.getElementById('mergedFilesList').style.display = 'none';
 
                 // 重新设置模拟和渲染
                 this.setupSimulation();
@@ -6769,6 +7628,22 @@
                     }
                     dbFileInput.value = '';
                 });
+
+                // 合并文件选择
+                const mergeFileInput = document.getElementById('mergeFileInput');
+                const btnMergeFile = document.getElementById('btnMergeFile');
+
+                if (btnMergeFile && mergeFileInput) {
+                    btnMergeFile.addEventListener('click', () => mergeFileInput.click());
+
+                    mergeFileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            await this.handleMergeFile(file);
+                        }
+                        mergeFileInput.value = '';
+                    });
+                }
 
                 // 导出 GEXF 按钮
                 const btnExportGexf = this.domCache.exportGexfBtn;

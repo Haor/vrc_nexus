@@ -1,6 +1,6 @@
 # 关系分析算法设计
 
-> 版本: 2.2 | 更新: 2025-01-29
+> 版本: 2.4 | 更新: 2025-01-30
 
 ---
 
@@ -271,3 +271,169 @@ def analyze():
 | Dunbar's Number | 社交关系分层（5/15/50/150） |
 | Ebbinghaus Forgetting Curve | 指数衰减模型 |
 | Social Exchange Theory | 生命份额设计 |
+
+---
+
+## 11. 社区检测
+
+### 11.1 算法选择
+
+支持两种社区检测算法：
+
+| 算法 | 特点 | 默认 |
+|------|------|------|
+| **Leiden** | Louvain 改进版，保证社区内部连通 | ✓ |
+| Louvain | 经典模块度优化算法 | |
+
+**Leiden 改进**：基于 Traag et al. 2019 论文完整实现，核心改进包括：
+
+1. **单例分区初始化**：Refinement 阶段从每个节点独立开始
+2. **概率性合并**：使用随机性参数 θ = 0.01，`prob = exp(ΔQ / θ)`
+3. **γ-连通性约束**：只合并模块度增益 > 0 且有边连接的节点
+4. **连通性保证**：最终 BFS 检查确保每个社区内部连通
+
+```
+Louvain:  Phase1(局部移动) → Phase2(聚合) → 循环
+Leiden:   Phase1(快速移动) → Refinement(概率性精炼) → Phase3(聚合) → 循环
+```
+
+### 11.2 Leiden Refinement 阶段
+
+```python
+def leiden_refinement(graph, phase1_communities, resolution, theta=0.01):
+    # 1. 初始化为单例分区（每个节点独立）
+    refined_comm = {node: node for node in graph.nodes}
+
+    # 2. 对每个 Phase1 社区单独进行 Refinement
+    for phase1_comm in phase1_communities:
+        nodes_in_comm = get_nodes(phase1_comm)
+        shuffle(nodes_in_comm)
+
+        for node in nodes_in_comm:
+            # 计算所有候选社区的模块度增益
+            candidates = []
+            for target_comm in neighbor_communities(node):
+                delta_q = modularity_gain(node, target_comm)
+                if delta_q > 0:  # γ-连通性约束
+                    candidates.append((target_comm, delta_q))
+
+            # 概率性选择（Leiden 核心改进）
+            probs = [exp(delta / theta) for _, delta in candidates]
+            selected = random_choice(candidates, weights=probs)
+            refined_comm[node] = selected
+
+    # 3. 连通性检查（BFS 拆分不连通社区）
+    return ensure_connectivity(refined_comm)
+```
+
+### 11.3 自适应 Resolution
+
+Resolution 参数控制社区粒度：值越高产生越多小社区，值越低产生越少大社区。
+
+**自适应公式**：
+
+```
+resolution = 1.0 + log₁₀(avgDegree + 1) × 0.4 + density × 0.5
+```
+
+其中：
+- `avgDegree = 2m / n`（平均度数）
+- `density = m / (n(n-1)/2)`（网络密度）
+
+**设计依据**：
+
+| 因素 | 作用 | 权重 |
+|------|------|------|
+| 平均度数（对数） | 捕捉局部连接密度 | 0.4 |
+| 网络密度 | 考虑网络规模影响 | 0.5 |
+
+**实际数据表现**：
+
+| 网络规模 | 平均度数 | 密度 | Resolution |
+|----------|----------|------|------------|
+| 200 节点, 3758 边 | 37.6 | 0.189 | 1.73 |
+| 514 节点, 5119 边 | 19.9 | 0.039 | 1.55 |
+| 984 节点, 51242 边 | 104.2 | 0.106 | 1.86 |
+
+### 11.4 孤立节点处理
+
+共同好友数为 0 的节点（通常是隐藏好友列表的用户）不参与社区检测：
+
+- 社区检测时排除孤立节点
+- 孤立节点 `community = null`
+- 在社区着色模式下显示为灰色
+
+### 11.5 算法流程
+
+```python
+def detect_communities():
+    # 1. 计算自适应 resolution
+    avg_degree = 2 * edges / nodes
+    density = edges / max_edges
+    resolution = 1.0 + log10(avg_degree + 1) * 0.4 + density * 0.5
+
+    # 2. 排除孤立节点
+    connected_nodes = [n for n in nodes if degree(n) > 0]
+
+    # 3. 运行 Leiden/Louvain 3次，取模块度最高结果
+    best_result = None
+    for run in range(3):
+        result = leiden_one_run(connected_nodes, resolution)
+        if result.modularity > best_modularity:
+            best_result = result
+
+    # 4. 应用结果
+    for node in nodes:
+        if node in best_result.communities:
+            node.community = best_result.communities[node]
+        else:
+            node.community = None  # 孤立节点
+```
+
+### 11.6 实测对比
+
+在多个 VRC 社交网络数据集上的测试结果：
+
+| 数据集 | 节点 | 边 | Louvain 时间 | Leiden 时间 | Louvain 社区 | Leiden 社区 | 不连通社区 |
+|--------|------|-----|-------------|------------|-------------|------------|-----------|
+| 样本 A | 200 | 3758 | 2.5ms | 4.7ms | 13 | 19 | 0 / 0 |
+| 样本 B | 514 | 5119 | 2.8ms | 7.2ms | 42 | 71 | 0 / 0 |
+| 样本 C | 242 | 3046 | 0.5ms | 1.5ms | 18 | 21 | 0 / 0 |
+| 样本 D | 984 | 51242 | 12.1ms | 24.9ms | 32 | 35 | 0 / 0 |
+
+**结论**：
+
+| 对比项 | 结果 |
+|--------|------|
+| 性能 | Louvain 快 2-3 倍 |
+| 社区数量 | Leiden 产生更多细粒度社区 |
+| 不连通社区 | **两者均未产生** |
+
+**分析**：
+
+VRC 好友网络属于**中高密度社交网络**（平均度数 20-100），在这类网络上：
+
+1. Louvain 产生不连通社区的概率本身较低
+2. Leiden 的 Refinement 阶段几乎不会拆分社区
+3. 两者的连通性表现实际相同
+
+**选择建议**：
+
+| 场景 | 推荐算法 |
+|------|----------|
+| 追求社区质量保证 | Leiden（默认） |
+| 追求计算性能 | Louvain |
+| 大规模网络（>5000节点） | Louvain |
+
+默认使用 Leiden，因为：
+- 理论上保证社区连通性
+- VRC 数据规模下性能差异可接受（<25ms）
+- 产生更细粒度的社区划分
+
+### 11.7 理论参考
+
+| 论文 | 贡献 |
+|------|------|
+| Blondel et al. (2008) | Louvain 算法原始论文 |
+| Traag et al. (2019) | Leiden 算法，解决 Louvain 的不连通社区问题 |
+| Newman (2006) | 模块度定义与优化 |

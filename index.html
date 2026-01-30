@@ -1953,6 +1953,43 @@
             opacity: 0.6;
         }
 
+        .algorithm-toggle {
+            display: flex;
+            justify-content: center;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .algorithm-switch {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-secondary);
+            padding: 2px;
+            border-radius: 6px;
+        }
+
+        .algorithm-btn {
+            padding: 4px 8px;
+            font-size: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .algorithm-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .algorithm-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
         /* 导出按钮 */
         .export-csv-dropdown {
             position: relative;
@@ -3074,6 +3111,12 @@
                         <span data-i18n="resolutionAuto">自动</span>
                         <span data-i18n="resolutionFine">精细</span>
                     </div>
+                    <div class="algorithm-toggle">
+                        <div class="algorithm-switch" id="algorithmSwitch">
+                            <button class="algorithm-btn active" data-algo="leiden">Leiden</button>
+                            <button class="algorithm-btn" data-algo="louvain">Louvain</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -3686,6 +3729,7 @@
                 this.isDragging = false;         // 是否正在拖动节点
                 this.colorMode = 'connections';  // 着色模式
                 this.userResolution = null;      // 用户设置的社区粒度（null=自动）
+                this.communityAlgorithm = 'leiden'; // 社区检测算法（louvain/leiden）
                 this.dataParams = null;          // 数据库参数信息
 
                 // 缓存常用 DOM 元素引用
@@ -5233,9 +5277,9 @@
             }
 
             detectCommunities() {
-                // 完整 Louvain 算法 - 基于模块度优化的社区检测
-                // 包含：自适应/手动 resolution、多次运行取最优、两阶段迭代
-                
+                // 社区检测 - 支持 Louvain 和 Leiden 算法
+                // Leiden 在 Louvain 基础上添加 Refinement 阶段，保证社区内部连通
+
                 if (this.nodes.length === 0) {
                     this.communityCount = 0;
                     this.communityColors = [];
@@ -5256,12 +5300,18 @@
                 if (this.userResolution !== null && this.userResolution !== undefined) {
                     resolution = this.userResolution;
                 } else {
-                    // 自适应：根据网络密度计算
+                    // 自适应：综合考虑平均度数和网络密度
                     const n = this.nodes.length;
-                    const maxEdges = (n * (n - 1)) / 2;
-                    const density = m / maxEdges;
-                    resolution = 1.0 + density * 2.0;
+                    const avgDegree = (2 * m) / n;
+                    const density = m / (n * (n - 1) / 2);
+                    resolution = 1.0 + Math.log10(avgDegree + 1) * 0.4 + density * 0.5;
                 }
+
+                // 选择算法
+                const algorithm = this.communityAlgorithm || 'louvain';
+                const runFunction = algorithm === 'leiden'
+                    ? this.leidenOneRun.bind(this)
+                    : this.louvainOneRun.bind(this);
 
                 // 多次运行取最优结果
                 const numRuns = 3;
@@ -5269,7 +5319,7 @@
                 let bestModularity = -Infinity;
 
                 for (let run = 0; run < numRuns; run++) {
-                    const result = this.louvainOneRun(resolution);
+                    const result = runFunction(resolution);
                     if (result.modularity > bestModularity) {
                         bestModularity = result.modularity;
                         bestResult = result;
@@ -5509,6 +5559,270 @@
                 });
 
                 return newGraph;
+            }
+
+            // =============== Leiden 算法 ===============
+            // 完整实现基于 Traag et al. 2019 论文
+            // 核心改进：Refinement 阶段使用单例初始化 + 概率性合并 + γ-连通性约束
+
+            leidenOneRun(resolution) {
+                // 构建工作图
+                const tempAdj = new Map();
+                this.nodes.forEach(n => tempAdj.set(n.id, new Map()));
+                this.edges.forEach(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    if (s === t) return;
+                    if (tempAdj.has(s)) tempAdj.get(s).set(t, (tempAdj.get(s).get(t) || 0) + 1);
+                    if (tempAdj.has(t)) tempAdj.get(t).set(s, (tempAdj.get(t).get(s) || 0) + 1);
+                });
+
+                // 排除孤立节点
+                const connectedNodes = this.nodes.filter(n => tempAdj.get(n.id).size > 0).map(n => n.id);
+
+                let graph = {
+                    nodes: connectedNodes,
+                    adj: new Map(),
+                    degree: new Map(),
+                    nodeWeight: new Map()
+                };
+
+                graph.nodes.forEach(nid => {
+                    graph.adj.set(nid, tempAdj.get(nid));
+                    graph.nodeWeight.set(nid, 0);
+                });
+                graph.nodes.forEach(nid => {
+                    let deg = 0;
+                    graph.adj.get(nid).forEach(w => { deg += w; });
+                    graph.degree.set(nid, deg);
+                });
+
+                let nodeToFinalComm = new Map();
+                graph.nodes.forEach(nid => nodeToFinalComm.set(nid, nid));
+
+                let totalM = this.edges.length;
+                let level = 0;
+                const maxLevels = 10;
+
+                while (level < maxLevels) {
+                    // 第一阶段：快速局部移动（与 Louvain 相同）
+                    const phaseResult = this.louvainPhase1(graph, resolution, totalM);
+
+                    if (!phaseResult.improved) break;
+
+                    // Leiden 特有：Refinement 阶段
+                    // 从单例分区开始，在每个社区内部进行概率性合并
+                    const refinedNodeToComm = this.leidenRefinement(graph, phaseResult.nodeToComm, resolution, totalM);
+
+                    // 更新原始节点到社区的映射
+                    const newMapping = new Map();
+                    nodeToFinalComm.forEach((currentComm, origNode) => {
+                        newMapping.set(origNode, refinedNodeToComm.get(currentComm));
+                    });
+                    nodeToFinalComm = newMapping;
+
+                    // 第三阶段：社区聚合为超节点
+                    graph = this.louvainPhase2(graph, refinedNodeToComm);
+
+                    if (graph.nodes.length <= 1) break;
+                    level++;
+                }
+
+                // 重新编号社区
+                const uniqueComms = [...new Set(nodeToFinalComm.values())];
+                const commRemap = new Map();
+                uniqueComms.forEach((c, i) => commRemap.set(c, i));
+
+                const communities = new Map();
+                nodeToFinalComm.forEach((comm, nid) => {
+                    communities.set(nid, commRemap.get(comm));
+                });
+
+                const modularity = this.calculateModularity(communities, resolution);
+
+                return {
+                    communities,
+                    communityCount: uniqueComms.length,
+                    modularity
+                };
+            }
+
+            leidenRefinement(graph, nodeToComm, resolution, totalM) {
+                // Leiden Refinement 阶段 - 基于 Traag et al. 2019
+                // 1. 初始化为单例分区（每个节点独立）
+                // 2. 在每个 Phase1 社区内部，使用概率性合并
+                // 3. 只合并满足 γ-连通性约束的节点
+
+                const theta = 0.01; // 随机性参数
+                const m2 = totalM * 2;
+
+                // 获取 Phase1 的社区划分
+                const phase1Communities = [...new Set(nodeToComm.values())];
+
+                // 初始化：单例分区（每个节点是自己的社区）
+                const refinedComm = new Map();
+                let nextCommId = 0;
+                graph.nodes.forEach(nid => {
+                    refinedComm.set(nid, nextCommId++);
+                });
+
+                // 对每个 Phase1 社区单独进行 Refinement
+                phase1Communities.forEach(phase1Comm => {
+                    // 获取该社区内的节点
+                    const nodesInComm = graph.nodes.filter(nid => nodeToComm.get(nid) === phase1Comm);
+                    if (nodesInComm.length <= 1) return;
+
+                    // 构建子图的邻接信息
+                    const nodeSet = new Set(nodesInComm);
+
+                    // 计算社区内每个精炼社区的统计信息
+                    const commTotalDegree = new Map(); // 社区总度数
+                    const commNodes = new Map();       // 社区包含的节点
+
+                    nodesInComm.forEach(nid => {
+                        const comm = refinedComm.get(nid);
+                        if (!commNodes.has(comm)) {
+                            commNodes.set(comm, new Set());
+                            commTotalDegree.set(comm, 0);
+                        }
+                        commNodes.get(comm).add(nid);
+                        commTotalDegree.set(comm, commTotalDegree.get(comm) + graph.degree.get(nid) + 2 * graph.nodeWeight.get(nid));
+                    });
+
+                    // 随机顺序处理节点
+                    const shuffled = [...nodesInComm].sort(() => Math.random() - 0.5);
+
+                    shuffled.forEach(nid => {
+                        const currentComm = refinedComm.get(nid);
+                        const ki = graph.degree.get(nid) + 2 * graph.nodeWeight.get(nid);
+
+                        // 只考虑同一 Phase1 社区内的邻居
+                        const neighbors = graph.adj.get(nid);
+                        if (!neighbors || neighbors.size === 0) return;
+
+                        // 统计到各精炼社区的边权重
+                        const commEdgeWeight = new Map();
+                        neighbors.forEach((weight, neighborId) => {
+                            if (!nodeSet.has(neighborId)) return; // 只考虑同社区邻居
+                            const neighborComm = refinedComm.get(neighborId);
+                            commEdgeWeight.set(neighborComm, (commEdgeWeight.get(neighborComm) || 0) + weight);
+                        });
+
+                        // 从当前社区临时移除
+                        commNodes.get(currentComm).delete(nid);
+                        commTotalDegree.set(currentComm, commTotalDegree.get(currentComm) - ki);
+
+                        // 计算所有候选社区的模块度增益
+                        const candidates = [];
+                        const candidateComms = new Set([currentComm]);
+                        neighbors.forEach((_, neighborId) => {
+                            if (nodeSet.has(neighborId)) {
+                                candidateComms.add(refinedComm.get(neighborId));
+                            }
+                        });
+
+                        candidateComms.forEach(targetComm => {
+                            if (!commNodes.has(targetComm) || commNodes.get(targetComm).size === 0) {
+                                if (targetComm !== currentComm) return;
+                            }
+
+                            const kiIn = commEdgeWeight.get(targetComm) || 0;
+                            const sigmaTot = commTotalDegree.get(targetComm) || 0;
+
+                            // 模块度增益
+                            const deltaQ = kiIn - resolution * ki * sigmaTot / m2;
+
+                            // γ-连通性约束检查
+                            // 只有当增益为正，且与目标社区有边连接时才考虑
+                            if (deltaQ > 0 || targetComm === currentComm) {
+                                candidates.push({ comm: targetComm, delta: deltaQ });
+                            }
+                        });
+
+                        if (candidates.length === 0) {
+                            // 保持当前社区
+                            commNodes.get(currentComm).add(nid);
+                            commTotalDegree.set(currentComm, commTotalDegree.get(currentComm) + ki);
+                            return;
+                        }
+
+                        // 概率性选择目标社区（Leiden 核心改进）
+                        // 转换增益为概率：exp(deltaQ / theta)
+                        let totalProb = 0;
+                        const probs = candidates.map(c => {
+                            const prob = Math.exp(c.delta / theta);
+                            totalProb += prob;
+                            return { comm: c.comm, prob };
+                        });
+
+                        // 累积概率选择
+                        const r = Math.random() * totalProb;
+                        let cumProb = 0;
+                        let selectedComm = currentComm;
+
+                        for (const p of probs) {
+                            cumProb += p.prob;
+                            if (r <= cumProb) {
+                                selectedComm = p.comm;
+                                break;
+                            }
+                        }
+
+                        // 应用选择
+                        refinedComm.set(nid, selectedComm);
+                        if (!commNodes.has(selectedComm)) {
+                            commNodes.set(selectedComm, new Set());
+                            commTotalDegree.set(selectedComm, 0);
+                        }
+                        commNodes.get(selectedComm).add(nid);
+                        commTotalDegree.set(selectedComm, commTotalDegree.get(selectedComm) + ki);
+                    });
+                });
+
+                // 最后：连通性检查（确保每个社区内部连通）
+                const finalComm = new Map();
+                const allComms = [...new Set(refinedComm.values())];
+                let finalNextId = 0;
+
+                allComms.forEach(commId => {
+                    const nodesInComm = graph.nodes.filter(nid => refinedComm.get(nid) === commId);
+                    if (nodesInComm.length <= 1) {
+                        nodesInComm.forEach(nid => finalComm.set(nid, finalNextId++));
+                        return;
+                    }
+
+                    // BFS 检测连通分量
+                    const visited = new Set();
+                    const nodeSet = new Set(nodesInComm);
+
+                    nodesInComm.forEach(startNode => {
+                        if (visited.has(startNode)) return;
+
+                        const component = [];
+                        const queue = [startNode];
+                        visited.add(startNode);
+
+                        while (queue.length > 0) {
+                            const current = queue.shift();
+                            component.push(current);
+
+                            const neighbors = graph.adj.get(current);
+                            if (neighbors) {
+                                neighbors.forEach((_, neighborId) => {
+                                    if (nodeSet.has(neighborId) && !visited.has(neighborId)) {
+                                        visited.add(neighborId);
+                                        queue.push(neighborId);
+                                    }
+                                });
+                            }
+                        }
+
+                        const assignedId = finalNextId++;
+                        component.forEach(nid => finalComm.set(nid, assignedId));
+                    });
+                });
+
+                return finalComm;
             }
 
             calculateModularity(communities, resolution) {
@@ -6616,6 +6930,30 @@
                             this.showNodeDetail(this.selectedNode);
                         }
                     }
+                });
+
+                // 算法切换按钮
+                document.querySelectorAll('#algorithmSwitch .algorithm-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // 更新按钮状态
+                        document.querySelectorAll('#algorithmSwitch .algorithm-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        // 切换算法
+                        this.communityAlgorithm = btn.dataset.algo;
+
+                        // 重新计算社区
+                        if (this.nodes && this.nodes.length > 0) {
+                            this.detectCommunities();
+                            if (this.colorMode === 'community') {
+                                this.updateNodeColors();
+                            }
+                            document.getElementById('communityCount').textContent = this.communityCount || '--';
+                            if (this.selectedNode) {
+                                this.showNodeDetail(this.selectedNode);
+                            }
+                        }
+                    });
                 });
 
                 // 着色模式工具栏折叠

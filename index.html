@@ -466,49 +466,72 @@
             border-top: 1px solid var(--border-color);
         }
 
-        .merged-file-item {
+        /* Ego 选择器列表 */
+        .ego-selector-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ego-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 6px 8px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        .merged-file-item:hover {
+            padding: 8px 10px;
             background: var(--bg-secondary);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .merged-file-name {
+        .ego-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-color);
+        }
+
+        .ego-item.selected {
+            background: rgba(234, 40, 100, 0.1);
+            border-color: var(--accent-primary);
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(234, 40, 100, 0.2);
+        }
+
+        .ego-item-content {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             overflow: hidden;
         }
 
-        .merged-file-name span:last-child {
+        .ego-index {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 6px;
+            background: var(--accent-secondary);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .ego-item.selected .ego-index {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .ego-filename {
+            font-size: 11px;
+            color: var(--text-secondary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .merged-file-tag {
-            font-size: 9px;
-            padding: 2px 5px;
-            background: var(--accent-secondary);
-            border-radius: 3px;
-            color: var(--text-muted);
-            flex-shrink: 0;
+        .ego-item.selected .ego-filename {
+            color: var(--text-primary);
         }
 
-        .merged-file-tag.primary {
-            background: rgba(234, 40, 100, 0.2);
-            color: var(--accent-primary);
-        }
-
-        .merged-file-remove {
+        .ego-remove {
             width: 18px;
             height: 18px;
             border: none;
@@ -522,13 +545,14 @@
             justify-content: center;
             border-radius: 4px;
             flex-shrink: 0;
+            font-size: 14px;
         }
 
-        .merged-file-item:hover .merged-file-remove {
+        .ego-item:hover .ego-remove {
             opacity: 1;
         }
 
-        .merged-file-remove:hover {
+        .ego-remove:hover {
             color: #ff6b6b;
             background: rgba(255, 107, 107, 0.1);
         }
@@ -664,6 +688,33 @@
 
         .btn-confirm:hover {
             background: #d61e56;
+        }
+
+        /* Ego 选择器 */
+        .ego-selector {
+            margin: 12px 0;
+            padding: 0 4px;
+        }
+
+        .ego-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .ego-select:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .ego-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
         }
 
         /* 搜索框 */
@@ -918,11 +969,34 @@
             stroke: var(--accent-primary);
         }
 
+        .ranking-ego-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 10px;
+            margin-left: 4px;
+        }
+
         .ranking-sub-label {
             font-size: 12px;
             color: var(--text-muted);
             font-weight: 400;
             margin-left: 4px;
+        }
+
+        .ego-warning {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 6px;
+            color: #ffc107;
+            font-size: 12px;
+            margin-bottom: 12px;
         }
 
         .ranking-desc {
@@ -3035,7 +3109,7 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="nodeCount">--</div>
-                        <div class="stat-label" data-i18n="totalFriends">好友总数</div>
+                        <div class="stat-label" data-i18n="totalNodes">节点总数</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="edgeCount">--</div>
@@ -3400,7 +3474,7 @@
                 resetView: '重置视图',
                 freezeLayout: '冻结',
                 networkStats: '网络统计',
-                totalFriends: '好友总数',
+                totalNodes: '节点总数',
                 totalConnections: '连接总数',
                 avgConnections: '平均连接',
                 networkDensity: '网络密度',
@@ -3530,7 +3604,7 @@
                 resetView: 'Reset View',
                 freezeLayout: 'Freeze',
                 networkStats: 'Network Stats',
-                totalFriends: 'Total Friends',
+                totalNodes: 'Total Nodes',
                 totalConnections: 'Connections',
                 avgConnections: 'Avg Connections',
                 networkDensity: 'Density',
@@ -3660,7 +3734,7 @@
                 resetView: 'リセット',
                 freezeLayout: 'フリーズ',
                 networkStats: 'ネットワーク統計',
-                totalFriends: 'フレンド数',
+                totalNodes: 'ノード数',
                 totalConnections: '接続数',
                 avgConnections: '平均接続',
                 networkDensity: 'ネットワーク密度',
@@ -3827,155 +3901,13 @@
             }
         }
 
-        // 图合并器
-        class GraphMerger {
-            constructor(options = {}) {
-                this.strategy = options.strategy || 'max';
-                this.trustLevelOrder = ['Visitor', 'New User', 'User', 'Known User', 'Trusted User'];
-            }
-
-            setStrategy(strategy) {
-                this.strategy = strategy;
-            }
-
-            /**
-             * 合并两个图数据
-             * @param {Object} base - 基础图 {nodes, edges}
-             * @param {Object} incoming - 待合并图 {nodes, edges}
-             * @param {number} sourceIndex - 来源索引
-             * @returns {Object} 合并后的图 {nodes, edges, stats}
-             */
-            merge(base, incoming, sourceIndex) {
-                const stats = {
-                    newNodes: 0,
-                    overlapNodes: 0,
-                    newEdges: 0
-                };
-
-                // 1. 构建基础图的索引
-                const baseNodeMap = new Map();
-                base.nodes.forEach(n => baseNodeMap.set(n.id, { ...n }));
-
-                const baseEdgeSet = new Set();
-                base.edges.forEach(e => {
-                    const key = this.edgeKey(e.source, e.target);
-                    baseEdgeSet.add(key);
-                });
-
-                // 2. 处理 incoming 节点
-                incoming.nodes.forEach(node => {
-                    if (baseNodeMap.has(node.id)) {
-                        // 节点已存在: 合并属性
-                        const existing = baseNodeMap.get(node.id);
-                        const merged = this.mergeNode(existing, node, sourceIndex);
-                        baseNodeMap.set(node.id, merged);
-                        stats.overlapNodes++;
-                    } else {
-                        // 新节点
-                        const newNode = { ...node, _sources: [sourceIndex] };
-                        baseNodeMap.set(node.id, newNode);
-                        stats.newNodes++;
-                    }
-                });
-
-                // 3. 处理 incoming 边（保守策略: 只添加确认存在的边）
-                incoming.edges.forEach(edge => {
-                    const s = typeof edge.source === 'object' ? edge.source.id : edge.source;
-                    const t = typeof edge.target === 'object' ? edge.target.id : edge.target;
-                    const key = this.edgeKey(s, t);
-
-                    if (!baseEdgeSet.has(key)) {
-                        // 只有两端节点都存在时才添加边
-                        if (baseNodeMap.has(s) && baseNodeMap.has(t)) {
-                            baseEdgeSet.add(key);
-                            stats.newEdges++;
-                        }
-                    }
-                });
-
-                // 4. 输出结果
-                return {
-                    nodes: Array.from(baseNodeMap.values()),
-                    edges: this.edgeSetToArray(baseEdgeSet),
-                    stats
-                };
-            }
-
-            /**
-             * 合并单个节点的属性
-             */
-            mergeNode(existing, incoming, sourceIndex) {
-                const merged = { ...existing };
-
-                // 更新来源追踪
-                merged._sources = [...new Set([...(existing._sources || [0]), sourceIndex])];
-
-                // 累计属性：求和
-                const sumFields = ['playTime', 'effectiveHours', 'meetCount'];
-                sumFields.forEach(field => {
-                    if (this.strategy === 'sum') {
-                        merged[field] = (existing[field] || 0) + (incoming[field] || 0);
-                    } else {
-                        merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
-                    }
-                });
-
-                // 近期数据：取最大值（窗口可能重叠）
-                const recentFields = [
-                    'meetCount7d', 'meetCount30d',
-                    'playTime7d', 'playTime30d'
-                ];
-                recentFields.forEach(field => {
-                    merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
-                });
-
-                // 认识天数：取最大值（最早认识时间）
-                merged.daysKnown = Math.max(existing.daysKnown || 0, incoming.daysKnown || 0);
-
-                // 分数/比率属性: 取最大值
-                const scoreFields = [
-                    'relationshipStrength', 'recentIntimacy',
-                    'recentIntimacy30d', 'recentIntimacy60d', 'recentIntimacy90d',
-                    'retentionRate', 'lifeShare'
-                ];
-                scoreFields.forEach(field => {
-                    merged[field] = Math.max(existing[field] || 0, incoming[field] || 0);
-                });
-
-                // Trust Level: 取最高等级
-                merged.trustLevel = this.mergeTrustLevel(existing.trustLevel, incoming.trustLevel);
-
-                // 布尔值: OR
-                if (existing.isHiddenFriend || incoming.isHiddenFriend) {
-                    merged.isHiddenFriend = true;
-                }
-
-                // connections 需要重新计算（在合并完成后统一重算）
-
-                return merged;
-            }
-
-            mergeTrustLevel(a, b) {
-                const orderA = this.trustLevelOrder.indexOf(a);
-                const orderB = this.trustLevelOrder.indexOf(b);
-                if (orderA === -1) return b || 'User';
-                if (orderB === -1) return a || 'User';
-                return orderA >= orderB ? a : b;
-            }
-
-            edgeKey(source, target) {
-                const s = typeof source === 'object' ? source.id : source;
-                const t = typeof target === 'object' ? target.id : target;
-                return s < t ? `${s}|${t}` : `${t}|${s}`;
-            }
-
-            edgeSetToArray(edgeSet) {
-                return Array.from(edgeSet).map(key => {
-                    const [source, target] = key.split('|');
-                    return { source, target };
-                });
-            }
+        // HTML 转义（防 XSS）
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
+
 
         // GEXF 解析器
         class GEXFParser {
@@ -4085,12 +4017,19 @@
                     nodeMap.set(id, nodeData);
                 });
 
-                // 解析边
+                // 解析边（去重：无向图中 A-B 和 B-A 视为同一条边）
+                const edgeSet = new Set();
                 const edgeElements = xml.querySelectorAll('edge');
                 edgeElements.forEach(edge => {
                     const source = edge.getAttribute('source');
                     const target = edge.getAttribute('target');
-                    edges.push({ source, target });
+                    if (source && target && source !== target) {
+                        const key = source < target ? `${source}|${target}` : `${target}|${source}`;
+                        if (!edgeSet.has(key)) {
+                            edgeSet.add(key);
+                            edges.push({ source, target });
+                        }
+                    }
                 });
 
                 // 正确计算每个节点的连接数（使用 Set 去重）
@@ -4161,10 +4100,10 @@
                 this.communityAlgorithm = 'leiden'; // 社区检测算法（louvain/leiden）
                 this.dataParams = null;          // 数据库参数信息
 
-                // 合并相关状态
-                this.mergedSources = [];         // [{fileName, type, nodeCount, edgeCount, isPrimary}]
-                this.sourceDataCache = new Map(); // sourceIndex -> {nodes, edges} 原始数据缓存
-                this.graphMerger = new GraphMerger();
+                // Multi-Ego 架构：每个 Ego 独立存储完整数据
+                this.egoNetworks = [];           // [{nodes, edges, nodeMap, fileName, type, isPrimary}]
+                this.currentEgoIndex = 0;        // 当前选中的 Ego 索引（用于排行榜）
+                // this.nodes 和 this.edges 用于可视化（合并后的数据）
 
                 // 缓存常用 DOM 元素引用
                 this.domCache = {
@@ -4213,38 +4152,51 @@
             // ========== 多文件合并功能 ==========
 
             initMergeState() {
-                this.mergedSources = [];
-                this.sourceDataCache.clear();
+                this.egoNetworks = [];
+                this.currentEgoIndex = 0;
             }
 
             async handleMergeFile(file) {
                 const texts = i18n[currentLang];
+                const loading = this.domCache.loading;
+
                 try {
-                    let incomingData;
+                    loading.style.display = 'flex';
+                    document.querySelector('.loading-text').textContent = '正在解析文件...';
+
                     const isDatabase = file.name.endsWith('.sqlite3') || file.name.endsWith('.db') || file.name.endsWith('.sqlite');
 
-                    if (isDatabase) {
-                        incomingData = await this.parseVRCXForMerge(file);
-                    } else {
-                        const content = await this.loadFromFile(file);
-                        incomingData = GEXFParser.parse(content);
+                    // 检查是否重复合并
+                    const alreadyMerged = this.egoNetworks.some(e => e.fileName === file.name);
+                    if (alreadyMerged) {
+                        this.hideLoading();
+                        if (!confirm('此文件已被合并，是否重复合并？')) {
+                            return;
+                        }
+                        loading.style.display = 'flex';
                     }
 
-                    if (!incomingData || incomingData.nodes.length === 0) {
+                    let egoData;
+                    if (isDatabase) {
+                        // 走完整的 VRCX 加载流程
+                        egoData = await this.loadVRCXAsEgo(file);
+                    } else {
+                        // GEXF 文件
+                        const content = await this.loadFromFile(file);
+                        const parsed = GEXFParser.parse(content);
+                        egoData = this.buildEgoFromGEXF(parsed, file.name);
+                    }
+
+                    if (!egoData || egoData.nodes.length === 0) {
+                        this.hideLoading();
                         alert('所选文件不包含任何节点数据');
                         return;
                     }
 
-                    // 检查是否重复合并
-                    const alreadyMerged = this.mergedSources.some(s => s.fileName === file.name);
-                    if (alreadyMerged) {
-                        if (!confirm('此文件已被合并，是否重复合并？')) {
-                            return;
-                        }
-                    }
-
                     // 计算合并预览统计
-                    const preview = this.previewMerge(incomingData);
+                    const preview = this.previewMerge(egoData);
+
+                    this.hideLoading();
 
                     // 性能警告
                     if (preview.totalNodesAfter > 2000) {
@@ -4254,21 +4206,24 @@
                     }
 
                     // 显示预览对话框
-                    const result = await this.showMergePreviewDialog(preview, file.name);
+                    const confirmed = await this.showMergePreviewDialog(preview, file.name);
 
-                    if (result) {
-                        await this.executeMerge(incomingData, file.name, isDatabase ? 'vrcx' : 'gexf', result.strategy);
+                    if (confirmed) {
+                        await this.executeMerge(egoData);
                     }
                 } catch (error) {
+                    this.hideLoading();
                     console.error('合并文件失败:', error);
                     alert('合并文件失败: ' + error.message);
                 }
             }
 
-            async parseVRCXForMerge(file) {
-                // 简化版数据库解析，只提取节点和边
+            /**
+             * 完整加载 VRCX 数据库作为一个 Ego
+             */
+            async loadVRCXAsEgo(file) {
                 const SQL = await initSqlJs({
-                    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+                    locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}`
                 });
 
                 const arrayBuffer = await file.arrayBuffer();
@@ -4283,49 +4238,125 @@
 
                     let selectedPrefix = prefixes[0];
                     if (prefixes.length > 1) {
-                        selectedPrefix = await this.showAccountSelector(prefixes);
-                        if (!selectedPrefix) return null;
+                        const savedCredentials = this.loadSavedCredentials(db);
+                        const accounts = prefixes.map(p => this.getAccountInfo(db, p, savedCredentials));
+                        selectedPrefix = await this.showAccountSelector(accounts);
+                        if (!selectedPrefix) {
+                            db.close();
+                            return null;
+                        }
                     }
 
-                    // 加载数据
+                    document.querySelector('.loading-text').textContent = '正在加载好友数据...';
+
+                    // 获取最新日期
+                    const latestDate = this.getVRCXLatestDate(db);
+
+                    // 加载完整数据
                     const friendIds = this.loadVRCXFriendIds(db, selectedPrefix);
                     const edges = this.loadVRCXEdges(db, selectedPrefix);
                     const friendInfo = this.loadVRCXDisplayNames(db, selectedPrefix);
+                    const playData = this.loadVRCXPlayData(db, latestDate);
+                    const daysKnown = this.loadVRCXDaysKnown(db, selectedPrefix, latestDate);
+
+                    document.querySelector('.loading-text').textContent = '正在计算关系指标...';
+
+                    // 执行关系分析
+                    const { metrics: relationshipMetrics } =
+                        await this.analyzeRelationships(db, selectedPrefix, latestDate, friendIds);
+
+                    db.close();
+
+                    // 计算 connections
+                    const friendIdSet = new Set(friendIds);
+                    const connectionCount = new Map();
+                    edges.forEach(edge => {
+                        const s = edge.source;
+                        const t = edge.target;
+                        if (friendIdSet.has(s) && friendIdSet.has(t)) {
+                            connectionCount.set(s, (connectionCount.get(s) || 0) + 1);
+                            connectionCount.set(t, (connectionCount.get(t) || 0) + 1);
+                        }
+                    });
 
                     // 构建节点
                     const nodes = friendIds.map(id => {
                         const info = friendInfo.get(id) || {};
+                        const play = playData.get(id) || {};
+                        const metrics = relationshipMetrics?.get(id);
+
                         return {
                             id,
                             label: info.displayName || id,
                             type: 'friend',
                             trustLevel: info.trustLevel || 'User',
-                            connections: 0,
-                            meetCount: 0,
-                            playTime: 0,
-                            daysKnown: 0
+                            connections: connectionCount.get(id) || 0,
+                            meetCount: play.meetCount || 0,
+                            meetCount7d: play.meetCount7d || 0,
+                            meetCount30d: play.meetCount30d || 0,
+                            playTime: play.playTime || 0,
+                            playTime7d: play.playTime7d || 0,
+                            playTime30d: play.playTime30d || 0,
+                            daysKnown: daysKnown.get(id) || 0,
+                            effectiveHours: metrics?.effectiveHours || 0,
+                            relationshipStrength: metrics?.relationshipStrength || 0,
+                            recentIntimacy: metrics?.recentIntimacy || 0,
+                            recentIntimacy30d: metrics?.recentIntimacy30d || 0,
+                            recentIntimacy60d: metrics?.recentIntimacy60d || 0,
+                            recentIntimacy90d: metrics?.recentIntimacy90d || 0,
+                            retentionRate: metrics?.retentionRate || 0,
+                            lifeShare: metrics?.lifeShare || 0,
+                            isHiddenFriend: metrics?.isHiddenFriend || false
                         };
                     });
 
-                    db.close();
-                    return { nodes, edges };
+                    // 构建 nodeMap
+                    const nodeMap = new Map();
+                    nodes.forEach(n => nodeMap.set(n.id, n));
+
+                    return {
+                        nodes,
+                        edges,
+                        nodeMap,
+                        fileName: file.name,
+                        type: 'vrcx',
+                        isPrimary: false
+                    };
                 } catch (error) {
                     db.close();
                     throw error;
                 }
             }
 
-            previewMerge(incomingData) {
+            /**
+             * 从 GEXF 解析结果构建 Ego 数据
+             */
+            buildEgoFromGEXF(parsed, fileName) {
+                const nodeMap = new Map();
+                parsed.nodes.forEach(n => nodeMap.set(n.id, n));
+
+                return {
+                    nodes: parsed.nodes,
+                    edges: parsed.edges,
+                    nodeMap,
+                    fileName,
+                    type: 'gexf',
+                    isPrimary: false
+                };
+            }
+
+            previewMerge(incomingEgo) {
                 const existingNodeIds = new Set(this.nodes.map(n => n.id));
                 const existingEdgeKeys = new Set();
                 this.edges.forEach(e => {
-                    const key = this.graphMerger.edgeKey(e.source, e.target);
-                    existingEdgeKeys.add(key);
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    existingEdgeKeys.add(s < t ? `${s}|${t}` : `${t}|${s}`);
                 });
 
                 let newNodes = 0, overlapNodes = 0, newEdges = 0;
 
-                incomingData.nodes.forEach(n => {
+                incomingEgo.nodes.forEach(n => {
                     if (existingNodeIds.has(n.id)) {
                         overlapNodes++;
                     } else {
@@ -4333,8 +4364,10 @@
                     }
                 });
 
-                incomingData.edges.forEach(e => {
-                    const key = this.graphMerger.edgeKey(e.source, e.target);
+                incomingEgo.edges.forEach(e => {
+                    const s = e.source;
+                    const t = e.target;
+                    const key = s < t ? `${s}|${t}` : `${t}|${s}`;
                     if (!existingEdgeKeys.has(key)) {
                         newEdges++;
                     }
@@ -4358,7 +4391,7 @@
                     overlay.innerHTML = `
                         <div class="merge-modal">
                             <div class="merge-modal-title">${texts.mergePreview}</div>
-                            <div class="merge-modal-desc">${fileName}</div>
+                            <div class="merge-modal-desc">${escapeHtml(fileName)}</div>
                             <div class="merge-stats">
                                 <div class="merge-stat">
                                     <div class="stat-value">${preview.newNodes}</div>
@@ -4373,14 +4406,6 @@
                                     <div class="stat-label">${texts.newEdges}</div>
                                 </div>
                             </div>
-                            <div class="merge-options">
-                                <label>${texts.mergeStrategy}</label>
-                                <select id="mergeStrategySelect">
-                                    <option value="max">${texts.strategyMax}</option>
-                                    <option value="sum">${texts.strategySum}</option>
-                                    <option value="latest">${texts.strategyLatest}</option>
-                                </select>
-                            </div>
                             <div class="merge-actions">
                                 <button class="btn-cancel">${texts.cancelMerge}</button>
                                 <button class="btn-confirm">${texts.confirmMerge}</button>
@@ -4392,78 +4417,56 @@
 
                     overlay.querySelector('.btn-cancel').addEventListener('click', () => {
                         overlay.remove();
-                        resolve(null);
+                        resolve(false);
                     });
 
                     overlay.querySelector('.btn-confirm').addEventListener('click', () => {
-                        const strategy = overlay.querySelector('#mergeStrategySelect').value;
                         overlay.remove();
-                        resolve({ strategy });
+                        resolve(true);
                     });
 
-                    // 点击背景关闭
                     overlay.addEventListener('click', (e) => {
                         if (e.target === overlay) {
                             overlay.remove();
-                            resolve(null);
+                            resolve(false);
                         }
                     });
                 });
             }
 
-            async executeMerge(incomingData, fileName, type, strategy) {
+            async executeMerge(incomingEgo) {
                 const loading = this.domCache.loading;
                 loading.style.display = 'flex';
                 document.querySelector('.loading-text').textContent = '正在合并数据...';
 
                 try {
-                    // 设置合并策略
-                    this.graphMerger.setStrategy(strategy);
+                    // 停止旧的模拟并清除图形
+                    if (this.simulation) {
+                        this.simulation.stop();
+                    }
+                    if (this.container) {
+                        this.container.selectAll('*').remove();
+                    }
 
-                    const sourceIndex = this.mergedSources.length;
+                    // 添加到 egoNetworks
+                    this.egoNetworks.push(incomingEgo);
 
-                    // 缓存原始数据
-                    this.sourceDataCache.set(sourceIndex, {
-                        nodes: JSON.parse(JSON.stringify(incomingData.nodes)),
-                        edges: JSON.parse(JSON.stringify(incomingData.edges))
-                    });
-
-                    // 执行合并算法
-                    const mergeResult = this.graphMerger.merge(
-                        { nodes: this.nodes, edges: this.edges },
-                        incomingData,
-                        sourceIndex
-                    );
-
-                    // 更新图数据
-                    this.nodes = mergeResult.nodes;
-                    this.edges = mergeResult.edges;
-
-                    // 记录数据来源
-                    this.mergedSources.push({
-                        fileName,
-                        type,
-                        nodeCount: incomingData.nodes.length,
-                        edgeCount: incomingData.edges.length,
-                        timestamp: Date.now(),
-                        isPrimary: false
-                    });
+                    // 合并可视化数据（节点取并集，边取并集）
+                    this.mergeVisualizationData(incomingEgo);
 
                     // 重建索引
                     this.nodeMap.clear();
                     this.nodes.forEach(n => this.nodeMap.set(n.id, n));
                     this.buildGraphIndex();
 
-                    // 重新计算连接数
+                    // 清理悬空边（引用不存在节点的边）
+                    this.cleanupDanglingEdges();
+
+                    // 更新全局 connections（用于节点大小）
                     this.recalculateConnections();
 
-                    // 更新统计
+                    // 更新统计和渲染（updateStats 内部已包含 detectCommunities）
                     this.updateStats();
-
-                    // 重新检测社区
-                    this.detectCommunities();
-
-                    // 重新渲染
                     this.setupSimulation();
                     this.render();
 
@@ -4472,56 +4475,205 @@
                     this.showRankingList();
 
                     // 更新文件名显示
-                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.mergedSources.length - 1})`;
+                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.egoNetworks.length - 1})`;
 
                 } finally {
                     this.hideLoading();
                 }
             }
 
+            /**
+             * 合并可视化数据（节点和边取并集）
+             */
+            mergeVisualizationData(incomingEgo) {
+                const existingNodeIds = new Set(this.nodes.map(n => n.id));
+                const existingEdgeKeys = new Set();
+                this.edges.forEach(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    existingEdgeKeys.add(s < t ? `${s}|${t}` : `${t}|${s}`);
+                });
+
+                // 添加新节点
+                incomingEgo.nodes.forEach(n => {
+                    if (!existingNodeIds.has(n.id)) {
+                        this.nodes.push({ ...n });
+                        existingNodeIds.add(n.id);  // 更新集合
+                    }
+                });
+
+                // 添加新边（只添加两端节点都存在的边）
+                incomingEgo.edges.forEach(e => {
+                    const s = e.source;
+                    const t = e.target;
+                    // 确保两端节点都存在
+                    if (!existingNodeIds.has(s) || !existingNodeIds.has(t)) {
+                        return;  // 跳过悬空边
+                    }
+                    const key = s < t ? `${s}|${t}` : `${t}|${s}`;
+                    if (!existingEdgeKeys.has(key)) {
+                        this.edges.push({ source: s, target: t });
+                        existingEdgeKeys.add(key);
+                    }
+                });
+            }
+
             recalculateConnections() {
+                // 更新全局 connections（用于节点大小和着色）
                 this.nodes.forEach(node => {
                     const neighbors = this.neighborIndex.get(node.id);
                     node.connections = neighbors ? neighbors.size : 0;
                 });
             }
 
+            /**
+             * 清理悬空边（引用不存在节点的边）
+             */
+            cleanupDanglingEdges() {
+                const nodeIdSet = new Set(this.nodes.map(n => n.id));
+                const originalCount = this.edges.length;
+                this.edges = this.edges.filter(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    return nodeIdSet.has(s) && nodeIdSet.has(t);
+                });
+                const removed = originalCount - this.edges.length;
+                if (removed > 0) {
+                    console.log(`[合并] 清理了 ${removed} 条悬空边`);
+                }
+            }
+
             updateMergedFilesList() {
                 const container = document.getElementById('mergedFilesList');
-                const mergeBtnGroup = document.getElementById('mergeBtnGroup');
                 const texts = i18n[currentLang];
 
-                if (this.mergedSources.length <= 1) {
+                if (this.egoNetworks.length <= 1) {
                     container.style.display = 'none';
                     return;
                 }
 
                 container.style.display = 'block';
 
-                // 显示所有数据源（第一个是主数据源）
-                container.innerHTML = this.mergedSources.map((source, idx) => `
-                    <div class="merged-file-item" data-index="${idx}">
-                        <div class="merged-file-name">
-                            <span class="merged-file-tag ${source.isPrimary ? 'primary' : ''}">${source.isPrimary ? texts.mainSource : texts.mergedSource}</span>
-                            <span title="${source.fileName}">${source.fileName}</span>
-                        </div>
-                        ${!source.isPrimary ? `<button class="merged-file-remove" title="${texts.removeSource}">×</button>` : ''}
+                // Ego 选择器样式（点击切换，选中高亮）
+                container.innerHTML = `
+                    <div class="ego-selector-list">
+                        ${this.egoNetworks.map((ego, idx) => `
+                            <div class="ego-item ${idx === this.currentEgoIndex ? 'selected' : ''}" data-index="${idx}">
+                                <div class="ego-item-content">
+                                    <span class="ego-index">Ego ${idx + 1}</span>
+                                    <span class="ego-filename" title="${escapeHtml(ego.fileName)}">${escapeHtml(this.truncateFileName(ego.fileName))}</span>
+                                </div>
+                                <button class="ego-remove" title="${texts.removeSource}">×</button>
+                            </div>
+                        `).join('')}
                     </div>
-                `).join('');
+                `;
 
-                // 绑定移除事件
-                container.querySelectorAll('.merged-file-remove').forEach(btn => {
+                // 点击切换 Ego
+                container.querySelectorAll('.ego-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('ego-remove')) return;
+                        const idx = parseInt(item.dataset.index);
+                        this.switchEgo(idx);
+                    });
+                });
+
+                // 移除按钮
+                container.querySelectorAll('.ego-remove').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        const idx = parseInt(e.target.closest('.merged-file-item').dataset.index);
+                        e.stopPropagation();
+                        const idx = parseInt(e.target.closest('.ego-item').dataset.index);
                         this.removeMergedSource(idx);
                     });
                 });
             }
 
+            truncateFileName(name) {
+                if (name.length <= 20) return name;
+                return name.slice(0, 17) + '...';
+            }
+
+            switchEgo(idx) {
+                if (idx === this.currentEgoIndex) return;
+                this.currentEgoIndex = idx;
+
+                // 重新计算当前 Ego 视角的排名
+                this.recalculateEgoRanks();
+
+                // 更新 UI
+                this.updateMergedFilesList();
+                this.showRankingList(this.currentRankingDimension, this.currentRankingTimeRange);
+
+                // 更新节点半径（基于当前 Ego 的连接数）
+                if (this.nodeElements) {
+                    this.nodeElements.select('.node-circle')
+                        .attr('r', d => this.getNodeRadius(d));
+                    this.nodeElements.select('.node-glow')
+                        .attr('r', d => this.getNodeRadius(d) + 6);
+                    this.nodeElements.select('.node-label')
+                        .attr('dy', d => this.getNodeRadius(d) + 14);
+                }
+
+                // 更新着色和边
+                this.maxPlaytime = null;
+                this.updateNodeColors();
+                this.updateLinkColors();
+            }
+
+            // 根据当前 Ego 视角重新计算排名
+            recalculateEgoRanks() {
+                const currentEgo = this.egoNetworks[this.currentEgoIndex];
+
+                // 如果 egoNetworks 还没初始化，使用全局 this.nodes 的属性
+                const getEgoValue = currentEgo
+                    ? (node, attr) => {
+                        const egoNode = currentEgo.nodeMap.get(node.id);
+                        return egoNode ? (egoNode[attr] || 0) : 0;
+                    }
+                    : (node, attr) => node[attr] || 0;
+
+                // 只对当前 Ego 的好友进行排名（避免非好友节点占位导致排名膨胀）
+                const rankNodes = currentEgo
+                    ? this.nodes.filter(n => currentEgo.nodeMap.has(n.id))
+                    : this.nodes;
+
+                // 重新计算连接数排名
+                this.nodeRanks = new Map();
+                const sortedByConnections = [...rankNodes].sort((a, b) =>
+                    getEgoValue(b, 'connections') - getEgoValue(a, 'connections')
+                );
+                sortedByConnections.forEach((node, index) => {
+                    this.nodeRanks.set(node.id, index + 1);
+                });
+
+                // 重新计算关系强度排名
+                this.strengthRanks = new Map();
+                const sortedByStrength = [...rankNodes].sort((a, b) =>
+                    getEgoValue(b, 'relationshipStrength') - getEgoValue(a, 'relationshipStrength')
+                );
+                sortedByStrength.forEach((node, index) => {
+                    this.strengthRanks.set(node.id, index + 1);
+                });
+
+                // 重新计算近期亲密度排名
+                this.intimacyRanks = new Map();
+                const sortedByIntimacy = [...rankNodes].sort((a, b) =>
+                    getEgoValue(b, 'recentIntimacy') - getEgoValue(a, 'recentIntimacy')
+                );
+                sortedByIntimacy.forEach((node, index) => {
+                    this.intimacyRanks.set(node.id, index + 1);
+                });
+
+                // 更新 maxConnections 缓存
+                this.maxConnections = Math.max(
+                    ...rankNodes.map(n => getEgoValue(n, 'connections')),
+                    1
+                );
+            }
+
             async removeMergedSource(index) {
-                if (index === 0) {
-                    // 移除主数据源，需要确认
-                    if (!confirm('移除主数据源将清空所有数据，是否继续？')) {
+                if (this.egoNetworks.length <= 1) {
+                    if (!confirm('移除最后一个数据源将清空所有数据，是否继续？')) {
                         return;
                     }
                     this.initMergeState();
@@ -4536,59 +4688,38 @@
                 document.querySelector('.loading-text').textContent = '正在重建数据...';
 
                 try {
-                    // 从缓存重建
-                    await this.rebuildFromCache(index);
+                    await this.rebuildFromEgoNetworks(index);
                 } finally {
                     this.hideLoading();
                 }
             }
 
-            async rebuildFromCache(excludeIndex) {
-                // 获取主数据源
-                const primaryData = this.sourceDataCache.get(0);
-                if (!primaryData) return;
-
-                // 从主数据源开始重建
-                this.nodes = JSON.parse(JSON.stringify(primaryData.nodes));
-                this.edges = JSON.parse(JSON.stringify(primaryData.edges));
-
-                // 移除指定的数据源
-                this.mergedSources.splice(excludeIndex, 1);
-                this.sourceDataCache.delete(excludeIndex);
-
-                // 重新合并剩余的数据源
-                const remainingSources = [];
-                this.mergedSources.forEach((source, idx) => {
-                    if (idx > 0) { // 跳过主数据源
-                        const cachedData = this.sourceDataCache.get(idx);
-                        if (cachedData) {
-                            remainingSources.push({ idx, source, data: cachedData });
-                        }
-                    }
-                });
-
-                // 重建 sourceDataCache 和 mergedSources 的索引
-                const newSourceDataCache = new Map();
-                const newMergedSources = [this.mergedSources[0]]; // 保留主数据源
-                newSourceDataCache.set(0, primaryData);
-
-                let newIndex = 1;
-                for (const { source, data } of remainingSources) {
-                    const mergeResult = this.graphMerger.merge(
-                        { nodes: this.nodes, edges: this.edges },
-                        data,
-                        newIndex
-                    );
-                    this.nodes = mergeResult.nodes;
-                    this.edges = mergeResult.edges;
-
-                    newMergedSources.push(source);
-                    newSourceDataCache.set(newIndex, data);
-                    newIndex++;
+            async rebuildFromEgoNetworks(excludeIndex) {
+                // 停止旧的模拟
+                if (this.simulation) {
+                    this.simulation.stop();
+                }
+                if (this.container) {
+                    this.container.selectAll('*').remove();
                 }
 
-                this.mergedSources = newMergedSources;
-                this.sourceDataCache = newSourceDataCache;
+                // 移除指定的 Ego
+                this.egoNetworks.splice(excludeIndex, 1);
+
+                // 重置 Ego 索引
+                if (this.currentEgoIndex >= this.egoNetworks.length) {
+                    this.currentEgoIndex = 0;
+                }
+
+                // 从主 Ego 开始重建可视化数据
+                const primary = this.egoNetworks[0];
+                this.nodes = JSON.parse(JSON.stringify(primary.nodes));
+                this.edges = JSON.parse(JSON.stringify(primary.edges));
+
+                // 合并其他 Ego
+                for (let i = 1; i < this.egoNetworks.length; i++) {
+                    this.mergeVisualizationData(this.egoNetworks[i]);
+                }
 
                 // 重建索引
                 this.nodeMap.clear();
@@ -4596,17 +4727,17 @@
                 this.buildGraphIndex();
                 this.recalculateConnections();
 
-                // 更新统计和渲染
+                // 更新和渲染（updateStats 内部已包含 detectCommunities）
                 this.updateStats();
-                this.detectCommunities();
                 this.setupSimulation();
                 this.render();
                 this.updateMergedFilesList();
                 this.showRankingList();
 
-                // 更新文件名显示
-                if (this.mergedSources.length > 1) {
-                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.mergedSources.length - 1})`;
+                // 更新文件名（基于新的主 Ego）
+                this.currentFileName = this.egoNetworks[0].fileName;
+                if (this.egoNetworks.length > 1) {
+                    this.domCache.fileName.textContent = `${this.currentFileName} (+${this.egoNetworks.length - 1})`;
                 } else {
                     this.domCache.fileName.textContent = this.currentFileName;
                 }
@@ -4704,7 +4835,12 @@
                         // 获取每个账号的信息
                         const accounts = allPrefixes.map(p => this.getAccountInfo(db, p, savedCredentials));
                         prefix = await this.showAccountSelector(accounts);
-                        
+                        if (!prefix) {
+                            db.close();
+                            this.hideLoading();
+                            return;
+                        }
+
                         // 重新显示加载动画
                         loading.style.display = 'flex';
                         document.querySelector('.loading-text').textContent = '正在加载数据...';
@@ -4847,7 +4983,7 @@
                                     <div class="account-item" data-prefix="${acc.prefix}">
                                         <div class="account-item-icon">${acc.displayName ? acc.displayName.charAt(0).toUpperCase() : (idx + 1)}</div>
                                         <div class="account-item-info">
-                                            <div class="account-item-name">${acc.displayName || `Account ${idx + 1}`}</div>
+                                            <div class="account-item-name">${escapeHtml(acc.displayName || `Account ${idx + 1}`)}</div>
                                             <div class="account-item-id">${acc.userId} (${acc.friendCount} ${texts.friendCount})</div>
                                         </div>
                                     </div>
@@ -4864,6 +5000,14 @@
                             overlay.remove();
                             resolve(prefix);
                         });
+                    });
+
+                    // 点击外部区域取消
+                    overlay.addEventListener('click', (e) => {
+                        if (e.target === overlay) {
+                            overlay.remove();
+                            resolve(null);
+                        }
                     });
                 });
             }
@@ -4900,30 +5044,35 @@
                 const result = db.exec(`SELECT friend_id, mutual_id FROM ${prefix}_mutual_graph_links`);
                 if (!result.length) return [];
 
-                return result[0].values
-                    .filter(([friendId, mutualId]) =>
-                        friendId && mutualId &&
-                        !excludedIds.has(friendId) &&
-                        !excludedIds.has(mutualId)
-                    )
-                    .map(([friendId, mutualId]) => ({ source: friendId, target: mutualId }));
+                // 去重：mutual_graph_links 表通常有成对记录 (A→B, B→A)
+                const edgeSet = new Set();
+                const edges = [];
+                result[0].values.forEach(([friendId, mutualId]) => {
+                    if (!friendId || !mutualId || friendId === mutualId) return;
+                    if (excludedIds.has(friendId) || excludedIds.has(mutualId)) return;
+                    const key = friendId < mutualId ? `${friendId}|${mutualId}` : `${mutualId}|${friendId}`;
+                    if (!edgeSet.has(key)) {
+                        edgeSet.add(key);
+                        edges.push({ source: friendId, target: mutualId });
+                    }
+                });
+                return edges;
             }
 
-            // Get the latest date from gamelog_join_leave as time reference
+            // 获取 VRCX 数据库最新日期（始终返回 YYYY-MM-DD 格式）
             getVRCXLatestDate(db) {
                 try {
                     const result = db.exec(`SELECT MAX(created_at) as latest_date FROM gamelog_join_leave`);
                     if (result.length && result[0].values[0][0]) {
                         const dateStr = result[0].values[0][0];
-                        // 验证日期格式（ISO 8601 或 SQLite datetime 格式）
                         if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-                            return dateStr;
+                            return dateStr.split('T')[0];
                         }
                     }
                 } catch (e) {
                     console.warn('无法获取最新日期:', e);
                 }
-                return new Date().toISOString();
+                return new Date().toISOString().split('T')[0];
             }
 
             // Load play data (meetCount, playTime) for all friends
@@ -5498,7 +5647,7 @@
                         recentIntimacy30d,
                         recentIntimacy60d,
                         recentIntimacy90d,
-                        effectiveHours: eff.effectiveHours,
+                        effectiveHours: eff.effectiveHours * 3600,  // 小时→秒，统一内部单位为秒
                         totalHours: eff.totalHours,
                         retentionRate: eff.retentionRate,
                         recentHours: recent.recentHours,
@@ -5709,7 +5858,7 @@
           <attvalue for="9" value="${safeNum(node.daysKnown)}" />
           <attvalue for="10" value="${safeNum(node.relationshipStrength).toFixed(2)}" />
           <attvalue for="11" value="${safeNum(node.recentIntimacy).toFixed(2)}" />
-          <attvalue for="12" value="${safeNum(node.effectiveHours * 3600).toFixed(2)}" />
+          <attvalue for="12" value="${safeNum(node.effectiveHours).toFixed(2)}" />
           <attvalue for="13" value="${safeNum(node.retentionRate).toFixed(4)}" />
           <attvalue for="14" value="${safeNum(node.lifeShare).toFixed(4)}" />
           <attvalue for="15" value="${node.isHiddenFriend || false}" />
@@ -5774,17 +5923,18 @@
                 // 加载新数据
                 await this.loadData(fileContent);
 
-                // 缓存主数据源
-                this.sourceDataCache.set(0, {
-                    nodes: JSON.parse(JSON.stringify(this.nodes)),
-                    edges: JSON.parse(JSON.stringify(this.edges))
-                });
-                this.mergedSources = [{
+                // 初始化主 Ego 到 egoNetworks（深拷贝后从副本构建 nodeMap）
+                const deepNodes = JSON.parse(JSON.stringify(this.nodes));
+                const deepEdges = JSON.parse(JSON.stringify(this.edges));
+                const primaryNodeMap = new Map();
+                deepNodes.forEach(n => primaryNodeMap.set(n.id, n));
+
+                this.egoNetworks = [{
+                    nodes: deepNodes,
+                    edges: deepEdges,
+                    nodeMap: primaryNodeMap,
                     fileName,
                     type: isFromDatabase ? 'vrcx' : 'gexf',
-                    nodeCount: this.nodes.length,
-                    edgeCount: this.edges.length,
-                    timestamp: Date.now(),
                     isPrimary: true
                 }];
 
@@ -5829,36 +5979,50 @@
                 this.currentRankingDimension = dimension;
                 this.currentRankingTimeRange = timeRange;
                 const texts = i18n[currentLang];
+                const currentEgo = this.currentEgoIndex;
+                const hasMultipleEgos = this.egoNetworks.length > 1;
+
+                // 获取当前 Ego 的节点数据
+                const currentEgoNetwork = this.egoNetworks[currentEgo];
+                if (!currentEgoNetwork) return;
+
+                // 直接使用当前 Ego 的节点列表
+                const egoFriends = currentEgoNetwork.nodes;
+
+                // 辅助函数：从当前 Ego 的 nodeMap 获取属性值
+                const getEgoValue = (node, attrName) => {
+                    const egoNode = currentEgoNetwork.nodeMap.get(node.id);
+                    return egoNode ? (egoNode[attrName] || 0) : 0;
+                };
 
                 // 根据维度和时间范围获取排序字段和格式化函数
                 const getDimensionConfig = () => {
                     switch (dimension) {
                         case 'strength':
                             return {
-                                getValue: n => n.relationshipStrength || 0,
+                                getValue: n => getEgoValue(n, 'relationshipStrength'),
                                 format: v => v.toFixed(1),
                                 showHint: true
                             };
                         case 'intimacy':
-                            // 近期亲密度：30d/60d/90d 使用对应字段
-                            const intimacyField = timeRange === '60d' ? 'recentIntimacy60d' : 
+                            const intimacyField = timeRange === '60d' ? 'recentIntimacy60d' :
                                                   timeRange === '90d' ? 'recentIntimacy90d' : 'recentIntimacy30d';
                             return {
-                                getValue: n => n[intimacyField] || 0,
+                                getValue: n => getEgoValue(n, intimacyField),
                                 format: v => v.toFixed(1),
                                 showHint: true
                             };
                         case 'playtime':
-                            const field = timeRange === '7d' ? 'playTime7d' : 
+                            const field = timeRange === '7d' ? 'playTime7d' :
                                           timeRange === '30d' ? 'playTime30d' : 'playTime';
                             return {
-                                getValue: n => n[field] || 0,
+                                getValue: n => getEgoValue(n, field),
                                 format: v => (v / 3600).toFixed(1) + 'h',
                                 showHint: true
                             };
-                        default: // mutual
+                        default: // mutual (共同好友数)
                             return {
-                                getValue: n => n.connections,
+                                getValue: n => getEgoValue(n, 'connections'),
                                 format: v => v.toString(),
                                 showHint: false
                             };
@@ -5866,7 +6030,7 @@
                 };
 
                 const config = getDimensionConfig();
-                const sortedNodes = [...this.nodes].sort((a, b) => config.getValue(b) - config.getValue(a));
+                const sortedNodes = [...egoFriends].sort((a, b) => config.getValue(b) - config.getValue(a));
 
                 const detailSection = this.domCache.detailSection;
                 detailSection.innerHTML = `
@@ -5877,6 +6041,7 @@
                                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"></path>
                                 </svg>
                                 <span>${texts.rankingTitle}</span>
+                                ${hasMultipleEgos ? `<span class="ranking-ego-badge">Ego ${currentEgo + 1}</span>` : ''}
                             </div>
                             <div class="export-csv-dropdown">
                                 <button class="export-csv-btn">
@@ -6058,29 +6223,8 @@
                 document.getElementById('avgDegree').textContent = avgDegree;
                 document.getElementById('density').textContent = density + '%';
 
-                // 缓存最大连接数，避免重复计算
-                this.maxConnections = Math.max(...this.nodes.map(n => n.connections), 1);
-
-                // 预计算节点排名（连接数）
-                this.nodeRanks = new Map();
-                const sorted = [...this.nodes].sort((a, b) => b.connections - a.connections);
-                sorted.forEach((node, index) => {
-                    this.nodeRanks.set(node.id, index + 1);
-                });
-
-                // 预计算关系强度排名
-                this.strengthRanks = new Map();
-                const sortedByStrength = [...this.nodes].sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0));
-                sortedByStrength.forEach((node, index) => {
-                    this.strengthRanks.set(node.id, index + 1);
-                });
-
-                // 预计算近期亲密度排名
-                this.intimacyRanks = new Map();
-                const sortedByIntimacy = [...this.nodes].sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0));
-                sortedByIntimacy.forEach((node, index) => {
-                    this.intimacyRanks.set(node.id, index + 1);
-                });
+                // 使用 Ego 感知的方式计算排名和最大连接数
+                this.recalculateEgoRanks();
 
                 // 构建邻接表（用于聚类系数和社区检测）
                 this.adjacencyMap = new Map();
@@ -6737,8 +6881,16 @@
             setupSimulation() {
                 const isLargeDataset = this.edges.length > 10000;
 
+                // 过滤掉引用不存在节点的边（防止 D3 报错）
+                const nodeIdSet = new Set(this.nodes.map(n => n.id));
+                const validEdges = this.edges.filter(e => {
+                    const s = typeof e.source === 'object' ? e.source.id : e.source;
+                    const t = typeof e.target === 'object' ? e.target.id : e.target;
+                    return nodeIdSet.has(s) && nodeIdSet.has(t);
+                });
+
                 this.simulation = d3.forceSimulation(this.nodes)
-                    .force('link', d3.forceLink(this.edges)
+                    .force('link', d3.forceLink(validEdges)
                         .id(d => d.id)
                         .distance(80))
                     .force('charge', d3.forceManyBody()
@@ -6764,7 +6916,8 @@
                 const scale = d3.scaleLog()
                     .domain([1, maxConn])
                     .range([minRadius, maxRadius]);
-                return scale(d.connections || 1);
+                const connections = this.getEgoAttribute(d, 'connections') || d.connections || 1;
+                return scale(connections);
             }
 
             getNodeColor(d) {
@@ -6782,19 +6935,92 @@
                 }
             }
 
+            // 获取节点在当前 Ego 下的属性值
+            getEgoAttribute(node, attrName) {
+                const egoIndex = this.currentEgoIndex;
+                const currentEgoNetwork = this.egoNetworks[egoIndex];
+                if (currentEgoNetwork) {
+                    const egoNode = currentEgoNetwork.nodeMap.get(node.id);
+                    if (egoNode) {
+                        return egoNode[attrName];
+                    }
+                }
+                // 回退到节点直接属性（兼容单 Ego 模式或主 Ego 数据）
+                return node[attrName];
+            }
+
+            // 检查节点是否属于当前 Ego 的好友
+            isCurrentEgoFriend(node) {
+                if (this.egoNetworks.length <= 1) return true;
+                const currentEgoNetwork = this.egoNetworks[this.currentEgoIndex];
+                return currentEgoNetwork && currentEgoNetwork.nodeMap.has(node.id);
+            }
+
+            /**
+             * 获取边的颜色
+             * Multi-Ego 模式：两端都不属于当前 Ego 的边显示更淡
+             */
+            getLinkColor(edge) {
+                if (this.egoNetworks.length <= 1) return '#3d4f6f';
+
+                const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                const sourceNode = this.nodeMap.get(sourceId);
+                const targetNode = this.nodeMap.get(targetId);
+
+                const sourceIsEgo = sourceNode && this.isCurrentEgoFriend(sourceNode);
+                const targetIsEgo = targetNode && this.isCurrentEgoFriend(targetNode);
+
+                if (!sourceIsEgo && !targetIsEgo) {
+                    return '#2a2a35';  // 两端都不属于当前 Ego，更暗
+                } else if (sourceIsEgo && targetIsEgo) {
+                    return '#3d4f6f';  // 两端都属于当前 Ego，正常
+                } else {
+                    return '#3a3a4a';  // 一端属于当前 Ego，中等
+                }
+            }
+
+            /**
+             * 获取边的透明度
+             */
+            getLinkOpacity(edge) {
+                if (this.egoNetworks.length <= 1) return 1;
+
+                const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+                const sourceNode = this.nodeMap.get(sourceId);
+                const targetNode = this.nodeMap.get(targetId);
+
+                const sourceIsEgo = sourceNode && this.isCurrentEgoFriend(sourceNode);
+                const targetIsEgo = targetNode && this.isCurrentEgoFriend(targetNode);
+
+                if (!sourceIsEgo && !targetIsEgo) {
+                    return 0.3;  // 两端都不属于当前 Ego
+                }
+                return 1;
+            }
+
             getNodeColorByConnections(d) {
-                const ratio = Math.min(d.connections / (this.maxConnections || 1), 1);
+                // Multi-Ego 模式：非当前 Ego 好友显示灰色
+                if (this.egoNetworks.length > 1 && !this.isCurrentEgoFriend(d)) {
+                    return '#3a3a4a';
+                }
+                const connections = this.getEgoAttribute(d, 'connections') || d.connections || 0;
+                const ratio = Math.min(connections / (this.maxConnections || 1), 1);
                 // 无极渐变：灰紫 → 粉红，使用 LAB 颜色空间
                 return d3.interpolateLab('#5e6575', '#ea2864')(ratio);
             }
 
             getNodeColorByTrust(d) {
+                // 信任等级不区分 Ego，直接显示
                 return TRUST_LEVEL_COLORS[d.trustLevel] || '#5e6575';
             }
 
             getNodeColorByStrength(d) {
+                // 非当前 Ego 好友显示灰色
+                if (!this.isCurrentEgoFriend(d)) return '#3a3a4a';
                 // 基于绝对分数着色（关系强度已是0-100分）
-                const score = d.relationshipStrength || 0;
+                const score = this.getEgoAttribute(d, 'relationshipStrength') || 0;
                 // 紫红渐变 - 与主色 #ea2864 相邻色系，表达情感羁绊深度
                 // 从冷紫灰到暖玫红，情感由浅入深
                 if (score < 25) return '#4a4a5c';       // 暗紫灰 - 浅层关系
@@ -6804,10 +7030,16 @@
             }
 
             getNodeColorByPlaytime(d) {
+                // 非当前 Ego 好友显示灰色
+                if (!this.isCurrentEgoFriend(d)) return '#3a3a4a';
                 if (!this.maxPlaytime) {
-                    this.maxPlaytime = Math.max(...this.nodes.map(n => n.playTime || 0), 1);
+                    // 只计算当前 Ego 好友的最大值
+                    this.maxPlaytime = Math.max(...this.nodes
+                        .filter(n => this.isCurrentEgoFriend(n))
+                        .map(n => this.getEgoAttribute(n, 'playTime') || 0), 1);
                 }
-                const ratio = Math.min((d.playTime || 0) / this.maxPlaytime, 1);
+                const playTime = this.getEgoAttribute(d, 'playTime') || 0;
+                const ratio = Math.min(playTime / this.maxPlaytime, 1);
                 // 无极渐变：深青 → 亮青，使用 LAB 颜色空间获得更均匀的感知过渡
                 return d3.interpolateLab('#1a3a4a', '#64ffda')(ratio);
             }
@@ -6828,6 +7060,14 @@
                     .transition().duration(300)
                     .attr('fill', d => this.getNodeColor(d));
                 this.updateLegendColors();
+            }
+
+            updateLinkColors() {
+                if (!this.links) return;
+                this.links
+                    .transition().duration(300)
+                    .attr('stroke', e => this.getLinkColor(e))
+                    .attr('stroke-opacity', e => this.getLinkOpacity(e));
             }
 
             updateLegendColors() {
@@ -6900,71 +7140,74 @@
             exportCSV(type) {
                 const texts = i18n[currentLang];
                 let filename, headers, rows;
-                
+
                 const formatHours = (s) => s ? (s / 3600).toFixed(2) : '0';
                 const formatPercent = (v) => v ? (v * 100).toFixed(2) : '0';
-                
+
+                // 使用当前 Ego 的数据
+                const getAttr = (n, attr) => this.getEgoAttribute(n, attr);
+
                 switch (type) {
                     case 'strength':
                         filename = 'relationship_strength_ranking.csv';
                         headers = ['Rank', 'Name', 'UserID', 'RelationshipStrength', 'TotalHours', 'EffectiveHours', 'RetentionRate', 'MeetCount', 'Connections'];
                         rows = [...this.nodes]
-                            .sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0))
+                            .sort((a, b) => (getAttr(b, 'relationshipStrength') || 0) - (getAttr(a, 'relationshipStrength') || 0))
                             .map((n, i) => [
                                 i + 1,
                                 `"${(n.label || '').replace(/"/g, '""')}"`,
                                 n.id,
-                                (n.relationshipStrength || 0).toFixed(2),
-                                formatHours(n.playTime),
-                                formatHours(n.effectiveHours),
-                                formatPercent(n.retentionRate),
-                                n.meetCount || 0,
-                                n.connections || 0
+                                (getAttr(n, 'relationshipStrength') || 0).toFixed(2),
+                                formatHours(getAttr(n, 'playTime')),
+                                formatHours(getAttr(n, 'effectiveHours')),
+                                formatPercent(getAttr(n, 'retentionRate')),
+                                getAttr(n, 'meetCount') || 0,
+                                getAttr(n, 'connections') || 0
                             ]);
                         break;
                     case 'intimacy':
                         filename = 'recent_intimacy_ranking.csv';
                         headers = ['Rank', 'Name', 'UserID', 'RecentIntimacy', 'RecentHours30d', 'LifeShare', 'MeetCount30d'];
                         rows = [...this.nodes]
-                            .sort((a, b) => (b.recentIntimacy || 0) - (a.recentIntimacy || 0))
+                            .sort((a, b) => (getAttr(b, 'recentIntimacy') || 0) - (getAttr(a, 'recentIntimacy') || 0))
                             .map((n, i) => [
                                 i + 1,
                                 `"${(n.label || '').replace(/"/g, '""')}"`,
                                 n.id,
-                                (n.recentIntimacy || 0).toFixed(2),
-                                formatHours(n.playTime30d),
-                                formatPercent(n.lifeShare),
-                                n.meetCount30d || 0
+                                (getAttr(n, 'recentIntimacy') || 0).toFixed(2),
+                                formatHours(getAttr(n, 'playTime30d')),
+                                formatPercent(getAttr(n, 'lifeShare')),
+                                getAttr(n, 'meetCount30d') || 0
                             ]);
                         break;
                     default: // full
                         filename = 'full_relationship_data.csv';
-                        headers = ['Rank', 'Name', 'UserID', 'TrustLevel', 'Connections', 'TotalHours', 'EffectiveHours', 'RetentionRate', 
-                                   'MeetCount', 'RecentHours30d', 'MeetCount30d', 'LifeShare', 
-                                   'RelationshipStrength', 'RecentIntimacy', 'RecentIntimacy30d', 'RecentIntimacy60d', 'RecentIntimacy90d', 
+                        headers = ['Rank', 'Name', 'UserID', 'TrustLevel', 'Connections', 'TotalHours', 'EffectiveHours', 'RetentionRate',
+                                   'MeetCount', 'RecentHours30d', 'MeetCount30d', 'LifeShare',
+                                   'RelationshipStrength', 'RecentIntimacy', 'RecentIntimacy30d', 'RecentIntimacy60d', 'RecentIntimacy90d',
                                    'DaysKnown', 'IsHiddenFriend'];
                         rows = [...this.nodes]
-                            .sort((a, b) => (b.relationshipStrength || 0) - (a.relationshipStrength || 0))
+                            .sort((a, b) => (getAttr(b, 'relationshipStrength') || 0) - (getAttr(a, 'relationshipStrength') || 0))
                             .map((n, i) => [
                                 i + 1,
                                 `"${(n.label || '').replace(/"/g, '""')}"`,
                                 n.id,
                                 `"${n.trustLevel || ''}"`,
-                                n.connections || 0,
-                                formatHours(n.playTime),
-                                formatHours(n.effectiveHours),
-                                formatPercent(n.retentionRate),
-                                n.meetCount || 0,
-                                formatHours(n.playTime30d),
-                                n.meetCount30d || 0,
-                                formatPercent(n.lifeShare),
-                                (n.relationshipStrength || 0).toFixed(2),
-                                (n.recentIntimacy || 0).toFixed(2),
-                                (n.recentIntimacy30d || 0).toFixed(2),
-                                (n.recentIntimacy60d || 0).toFixed(2),
-                                (n.recentIntimacy90d || 0).toFixed(2),
-                                n.daysKnown || 0,
-                                n.isHiddenFriend ? 'true' : 'false'
+                                getAttr(n, 'connections') || 0,
+                                formatHours(getAttr(n, 'playTime')),
+                                formatHours(getAttr(n, 'effectiveHours')),
+                                formatPercent(getAttr(n, 'retentionRate')),
+                                getAttr(n, 'meetCount') || 0,
+                                formatHours(getAttr(n, 'playTime30d')),
+                                getAttr(n, 'meetCount30d') || 0,
+                                formatPercent(getAttr(n, 'lifeShare')),
+                                (getAttr(n, 'relationshipStrength') || 0).toFixed(2),
+                                (getAttr(n, 'recentIntimacy') || 0).toFixed(2),
+                                (getAttr(n, 'recentIntimacy30d') || 0).toFixed(2),
+                                (getAttr(n, 'recentIntimacy60d') || 0).toFixed(2),
+                                (getAttr(n, 'recentIntimacy90d') || 0).toFixed(2),
+                                getAttr(n, 'daysKnown') || 0,
+                                getAttr(n, 'isHiddenFriend') ? 'true' : 'false'
                             ]);
                 }
                 
@@ -7024,8 +7267,9 @@
                     .enter()
                     .append('line')
                     .attr('class', 'link')
-                    .attr('stroke', '#3d4f6f')
-                    .attr('stroke-width', 1);
+                    .attr('stroke', e => this.getLinkColor(e))
+                    .attr('stroke-width', 1)
+                    .attr('stroke-opacity', e => this.getLinkOpacity(e));
 
                 // 渲染节点
                 this.nodeGroup = this.container.append('g').attr('class', 'nodes');
@@ -7142,11 +7386,20 @@
                 const tooltip = document.getElementById('tooltip');
                 tooltip.querySelector('.tooltip-name').textContent = d.label;
 
-                // 使用预计算的排名
-                const rank = this.nodeRanks ? this.nodeRanks.get(d.id) : '?';
+                // 检查是否属于当前 Ego 的好友
+                const isEgoFriend = this.isCurrentEgoFriend(d);
 
-                tooltip.querySelector('.tooltip-info').textContent =
-                    `共同好友: ${d.connections} | 排名: #${rank}`;
+                if (isEgoFriend || this.egoNetworks.length <= 1) {
+                    // 使用当前 Ego 视角的数据
+                    const connections = this.getEgoAttribute(d, 'connections') || d.connections || 0;
+                    // 使用预计算的排名
+                    const rank = this.nodeRanks ? this.nodeRanks.get(d.id) : '?';
+                    tooltip.querySelector('.tooltip-info').textContent =
+                        `共同好友: ${connections} | 排名: #${rank}`;
+                } else {
+                    // 非当前 Ego 好友时隐藏数据
+                    tooltip.querySelector('.tooltip-info').textContent = '(非当前Ego好友)';
+                }
 
                 tooltip.style.left = (event.pageX + 15) + 'px';
                 tooltip.style.top = (event.pageY - 10) + 'px';
@@ -7208,6 +7461,17 @@
             }
 
             showNodeDetail(node) {
+                // 获取当前 Ego 视角下的节点数据
+                const getAttr = (attr) => this.getEgoAttribute(node, attr);
+                const isEgoFriend = this.isCurrentEgoFriend(node);
+
+                // 获取当前 Ego 的节点数（用于显示"共 xxx 人"）
+                const currentEgoNetwork = this.egoNetworks[this.currentEgoIndex];
+                const egoNodeCount = currentEgoNetwork ? currentEgoNetwork.nodes.length : this.nodes.length;
+
+                // 使用当前 Ego 的共同好友数
+                const egoConnections = getAttr('connections') || 0;
+
                 // 使用邻接表索引快速获取邻居（O(1) vs O(E)）
                 const neighborIds = this.neighborIndex.get(node.id) || new Set();
                 const connections = [];
@@ -7218,8 +7482,8 @@
                     }
                 });
 
-                // 按连接数排序
-                connections.sort((a, b) => b.connections - a.connections);
+                // 按连接数排序（使用当前 Ego 的数据）
+                connections.sort((a, b) => (this.getEgoAttribute(b, 'connections') || b.connections) - (this.getEgoAttribute(a, 'connections') || a.connections));
 
                 // 使用预计算的排名
                 const rank = this.nodeRanks ? this.nodeRanks.get(node.id) : '?';
@@ -7247,24 +7511,39 @@
                     return normalized;
                 };
 
+                // 使用当前 Ego 的数据
+                const playTime = getAttr('playTime');
+                const relationshipStrength = getAttr('relationshipStrength') || 0;
+                const recentIntimacy = getAttr('recentIntimacy') || 0;
+                const effectiveHours = getAttr('effectiveHours');
+                const retentionRate = getAttr('retentionRate');
+                const meetCount = getAttr('meetCount');
+                const playTime30d = getAttr('playTime30d');
+                const lifeShare = getAttr('lifeShare');
+                const isHiddenFriend = getAttr('isHiddenFriend');
+
                 // 检查是否有互动数据
-                const hasInteractionData = node.playTime !== undefined && node.playTime > 0;
+                const hasInteractionData = playTime !== undefined && playTime > 0;
 
                 // 使用预计算的排名（关系强度和近期亲密度）
                 const strengthRank = this.strengthRanks?.get(node.id) || '?';
                 const intimacyRank = this.intimacyRanks?.get(node.id) || '?';
 
-                // 构建信任等级徽章
-                const trustBadge = node.trustLevel ? 
+                // 构建信任等级徽章（信任等级是全局属性，不分 Ego）
+                const trustBadge = node.trustLevel ?
                     `<span class="trust-level-badge ${getTrustLevelClass(node.trustLevel)}">${node.trustLevel}</span>` : '';
 
-                // 构建隐藏好友标记（只显示锁图标，hover 显示提示）
-                const hiddenBadge = node.isHiddenFriend ? 
+                // 构建隐藏好友标记
+                const hiddenBadge = isHiddenFriend ?
                     `<span class="hidden-friend-icon" title="${texts.hiddenFriendHint}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>` : '';
+
+                // Multi-Ego 提示
+                const egoHint = (this.egoNetworks.length > 1 && !isEgoFriend) ?
+                    `<div class="ego-warning"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> 此节点不属于当前 Ego</div>` : '';
 
                 // 构建关系指标区块
                 let metricsSection = '';
-                if (hasInteractionData && (node.relationshipStrength > 0 || node.recentIntimacy > 0)) {
+                if (hasInteractionData && (relationshipStrength > 0 || recentIntimacy > 0)) {
                     metricsSection = `
                         <div class="detail-metrics">
                             <div class="detail-metrics-title">
@@ -7275,11 +7554,11 @@
                             </div>
                             <div class="metric-row">
                                 <span class="metric-label"><span class="metric-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span>${texts.relationshipStrength}</span>
-                                <span class="metric-value">${(node.relationshipStrength || 0).toFixed(1)}%<span class="metric-rank">#${strengthRank}</span></span>
+                                <span class="metric-value">${relationshipStrength.toFixed(1)}%<span class="metric-rank">#${strengthRank}</span></span>
                             </div>
                             <div class="metric-row">
                                 <span class="metric-label"><span class="metric-label-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg></span>${texts.recentIntimacy}</span>
-                                <span class="metric-value">${(node.recentIntimacy || 0).toFixed(1)}<span class="metric-rank">#${intimacyRank}</span></span>
+                                <span class="metric-value">${recentIntimacy.toFixed(1)}<span class="metric-rank">#${intimacyRank}</span></span>
                             </div>
                         </div>
                     `;
@@ -7288,12 +7567,12 @@
                 // 构建原始数据区块
                 let rawDataSection = '';
                 if (hasInteractionData) {
-                    const playTimeHours = formatHours(node.playTime);
-                    const effectiveHours = node.effectiveHours !== undefined ? (node.effectiveHours / 3600).toFixed(1) : 'N/A';
-                    const retentionStr = formatPercent(node.retentionRate);
-                    const meetCount = node.meetCount !== undefined ? node.meetCount.toLocaleString() : 'N/A';
-                    const recentHours = node.playTime30d !== undefined ? formatHours(node.playTime30d) : 'N/A';
-                    const lifeShareStr = node.lifeShare !== undefined ? formatPercent(node.lifeShare) : 'N/A';
+                    const playTimeHours = formatHours(playTime);
+                    const effectiveHoursStr = effectiveHours !== undefined ? (effectiveHours / 3600).toFixed(1) : 'N/A';
+                    const retentionStr = formatPercent(retentionRate);
+                    const meetCountStr = meetCount !== undefined ? meetCount.toLocaleString() : 'N/A';
+                    const recentHours = playTime30d !== undefined ? formatHours(playTime30d) : 'N/A';
+                    const lifeShareStr = lifeShare !== undefined ? formatPercent(lifeShare) : 'N/A';
 
                     rawDataSection = `
                         <div class="detail-raw-data">
@@ -7311,12 +7590,12 @@
                                     <div class="raw-data-label">${texts.totalPlaytime}</div>
                                 </div>
                                 <div class="raw-data-item">
-                                    <div class="raw-data-value">${effectiveHours}${texts.hour}</div>
+                                    <div class="raw-data-value">${effectiveHoursStr}${texts.hour}</div>
                                     <div class="raw-data-label">${texts.effectivePlaytime}</div>
                                     <div class="raw-data-sub">${texts.retentionRate} ${retentionStr}</div>
                                 </div>
                                 <div class="raw-data-item">
-                                    <div class="raw-data-value">${meetCount}${texts.times}</div>
+                                    <div class="raw-data-value">${meetCountStr}${texts.times}</div>
                                     <div class="raw-data-label">${texts.meetCount}</div>
                                 </div>
                                 <div class="raw-data-item">
@@ -7342,14 +7621,14 @@
 
                 // 构建得分明细折叠面板
                 let scoreBreakdownSection = '';
-                if (hasInteractionData && (node.depthScore !== undefined || node.relationshipStrength > 0)) {
-                    const depthScore = node.depthScore !== undefined ? node.depthScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.4).toFixed(1);
-                    const qualityScore = node.qualityScore !== undefined ? node.qualityScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.25).toFixed(1);
-                    const stabilityScore = node.stabilityScore !== undefined ? node.stabilityScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.2).toFixed(1);
-                    const bondScore = node.bondScore !== undefined ? node.bondScore.toFixed(1) : ((node.relationshipStrength || 0) * 0.15).toFixed(1);
-                    const recentTimeScore = node.recentTimeScore !== undefined ? node.recentTimeScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.4).toFixed(1);
-                    const recentFreqScore = node.recentFreqScore !== undefined ? node.recentFreqScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.3).toFixed(1);
-                    const shareScore = node.shareScore !== undefined ? node.shareScore.toFixed(1) : ((node.recentIntimacy || 0) * 0.3).toFixed(1);
+                if (hasInteractionData && (getAttr('depthScore') !== undefined || relationshipStrength > 0)) {
+                    const depthScore = getAttr('depthScore') !== undefined ? getAttr('depthScore').toFixed(1) : (relationshipStrength * 0.4).toFixed(1);
+                    const qualityScore = getAttr('qualityScore') !== undefined ? getAttr('qualityScore').toFixed(1) : (relationshipStrength * 0.25).toFixed(1);
+                    const stabilityScore = getAttr('stabilityScore') !== undefined ? getAttr('stabilityScore').toFixed(1) : (relationshipStrength * 0.2).toFixed(1);
+                    const bondScore = getAttr('bondScore') !== undefined ? getAttr('bondScore').toFixed(1) : (relationshipStrength * 0.15).toFixed(1);
+                    const recentTimeScore = getAttr('recentTimeScore') !== undefined ? getAttr('recentTimeScore').toFixed(1) : (recentIntimacy * 0.4).toFixed(1);
+                    const recentFreqScore = getAttr('recentFreqScore') !== undefined ? getAttr('recentFreqScore').toFixed(1) : (recentIntimacy * 0.3).toFixed(1);
+                    const shareScore = getAttr('shareScore') !== undefined ? getAttr('shareScore').toFixed(1) : (recentIntimacy * 0.3).toFixed(1);
 
                     scoreBreakdownSection = `
                         <div class="detail-score-breakdown">
@@ -7406,6 +7685,7 @@
 
                 detailSection.innerHTML = `
                     <div class="detail-card">
+                        ${egoHint}
                         <div class="detail-header-row">
                             <div class="detail-name">${node.label}${trustBadge}${hiddenBadge}</div>
                             <button class="close-detail-btn" title="${texts.closeDetail}">
@@ -7415,14 +7695,15 @@
                                 </svg>
                             </button>
                         </div>
+                        ${isEgoFriend ? `
                         <div class="detail-rank">
                             <span class="rank-badge">${texts.rank} #${rank}</span>
-                            <span class="rank-desc">${texts.total} ${this.nodes.length} ${texts.people}</span>
+                            <span class="rank-desc">${texts.total} ${egoNodeCount} ${texts.people}</span>
                         </div>
-                        
+
                         <div class="detail-stats">
                             <div class="detail-stat">
-                                <div class="detail-stat-value">${connections.length}</div>
+                                <div class="detail-stat-value">${egoConnections}</div>
                                 <div class="detail-stat-label">${texts.mutualCount}</div>
                             </div>
                             <div class="detail-stat">
@@ -7434,11 +7715,13 @@
                                 <div class="detail-stat-label">${texts.community || '社区'}</div>
                             </div>
                         </div>
-                        
+                        ` : ''}
+
                         ${metricsSection}
                         ${rawDataSection}
                         ${scoreBreakdownSection}
-                        
+
+                        ${isEgoFriend ? `
                         <div class="connections-list">
                             <div class="connections-title">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -7447,18 +7730,19 @@
                                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                 </svg>
-                                ${texts.mutualList} (${connections.length})
+                                ${texts.mutualList} (${egoConnections})
                             </div>
                             <div class="connections-container">
                                 ${connections.map(c => `
                                     <div class="connection-item" data-id="${c.id}">
                                         <div class="connection-dot" style="background: ${this.getNodeColor(c)}"></div>
                                         <span class="connection-name">${c.label}</span>
-                                        <span class="connection-count">${c.connections}</span>
+                                        <span class="connection-count">${this.getEgoAttribute(c, 'connections') || c.connections || 0}</span>
                                     </div>
                                 `).join('')}
                             </div>
                         </div>
+                        ` : ''}
                         <button class="remove-node-btn" data-id="${node.id}">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M3 6h18"></path>
